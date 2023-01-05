@@ -57,7 +57,10 @@ for b in diningroom_bulbs:
 
 
 async def main():
-    playsound.playsound(sound_effect, False)
+    try:
+        playsound.playsound(sound_effect, True)
+    except:
+        print(f"likely need to make {sound_effect}")
     for light_bulb in office_bulb_objs:
         dim = 255 - int(random.random() * 20)
         speed = 10 + int(random.random() * 180)

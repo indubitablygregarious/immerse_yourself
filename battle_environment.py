@@ -51,7 +51,10 @@ for b in world_bulbs:
 
 
 async def main():
-    playsound.playsound(sound_effect, False)
+    try:
+        playsound.playsound(sound_effect, True)
+    except:
+        print(f"likely need to make {sound_effect}")
     for light_bulb in light_bulbs:
         dim = 255 - int(random.random() * 181)
         await light_bulb.turn_on(PilotBuilder(rgb=(255, blue, green), brightness=dim))

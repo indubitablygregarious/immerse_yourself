@@ -69,7 +69,6 @@ async def main():
         if sun == False:
             sun = True
             await light_bulb.turn_on(PilotBuilder(scene=12, brightness=255))
-            time.sleep(cycletime * 2)
         else:
             dim = 255 - int(random.random() * 30)
             delta1 = int(random.random() * 50)
@@ -82,17 +81,21 @@ async def main():
     while True:
         print("start")
         random.shuffle(office_bulb_objs)
-        for light_bulb in office_bulb_objs:
-            dim = 255 - int(random.random() * 20)
-            speed = 10 + int(random.random() * 180)
-            await light_bulb.turn_on(PilotBuilder(scene=7, speed=speed, brightness=dim))
-            time.sleep(cycletime / len(office_bulb_objs))
+        if int(random.random() * 100) > 95:
+            for light_bulb in office_bulb_objs:
+                dim = 255 - int(random.random() * 20)
+                speed = 10 + int(random.random() * 180)
+                await light_bulb.turn_on(
+                    PilotBuilder(scene=7, speed=speed, brightness=dim)
+                )
+                time.sleep(cycletime / len(office_bulb_objs))
         sun = False
         random.shuffle(diningroom_bulb_objs)
         for light_bulb in diningroom_bulb_objs:
             if sun == False:
                 sun = True
                 await light_bulb.turn_on(PilotBuilder(scene=12, brightness=255))
+                time.sleep(cycletime * int(random.random() * 6))
             else:
                 dim = 255 - int(random.random() * 30)
                 delta1 = int(random.random() * 50)
@@ -102,6 +105,7 @@ async def main():
                         rgb=(58 + delta1, 58 + delta2, 158 + delta1), brightness=dim
                     )
                 )
+                time.sleep(cycletime / len(diningroom_bulb_objs))
 
 
 loop = asyncio.get_event_loop()

@@ -69,7 +69,7 @@ async def main():
         if sun == False:
             sun = True
             await light_bulb.turn_on(PilotBuilder(scene=12, brightness=255))
-            time.sleep(1)
+            time.sleep(cycletime * 2)
         else:
             dim = 255 - int(random.random() * 30)
             delta1 = int(random.random() * 50)

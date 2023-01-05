@@ -15,7 +15,7 @@ cycletime = 2
 flash_variance = 25
 scope = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming"
 playlist = "spotify:playlist:2q6tU7SrOYgtSPw2x1cGt0"
-sound_effect = "chill.wav"
+sound_effect = "win.wav"
 config = configparser.ConfigParser()
 config.read(".spotify.ini")
 username = config["DEFAULT"]["username"]
@@ -56,7 +56,7 @@ for b in diningroom_bulbs:
 
 
 async def main():
-    playsound.playsound(sound_effect, True)
+    playsound.playsound(sound_effect, False)
     spotify.start_playback(context_uri=playlist)
     for light_bulb in office_bulb_objs:
         dim = 255 - int(random.random() * 60)

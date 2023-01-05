@@ -11,7 +11,7 @@ from pywizlight import wizlight, PilotBuilder, discovery
 
 green = 15
 blue = 15
-cycletime = 1
+cycletime = 3
 flash_variance = 25
 scope = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming"
 playlist = "spotify:playlist:6FohP6m1ipvNjgllOH4HLt"

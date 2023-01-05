@@ -56,8 +56,8 @@ for b in diningroom_bulbs:
 
 
 async def main():
-    playsound.playsound(sound_effect, True)
     spotify.start_playback(context_uri=playlist)
+    playsound.playsound(sound_effect, False)
     for light_bulb in office_bulb_objs:
         dim = 255 - int(random.random() * 60)
         speed = 10 + int(random.random() * 180)

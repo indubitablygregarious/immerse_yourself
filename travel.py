@@ -65,9 +65,11 @@ async def main():
     sun = False
     random.shuffle(diningroom_bulb_objs)
     for light_bulb in diningroom_bulb_objs:
+        # be the sun
         if sun == False:
             sun = True
             await light_bulb.turn_on(PilotBuilder(scene=12, brightness=255))
+            time.sleep(1)
         else:
             dim = 255 - int(random.random() * 30)
             delta1 = int(random.random() * 50)

@@ -67,9 +67,8 @@ async def main():
         print("start")
         random.shuffle(diningroom_bulb_objs)
         for light_bulb in diningroom_bulb_objs:
-            await light_bulb.turn_on(
-                PilotBuilder(rgb=(1, 1, 1), brightness=int(random.random() * 3))
-            )
+            scene = random.choice(torch_scenes)
+            await light_bulb.turn_on(PilotBuilder(scene=scene, brightness=10))
             time.sleep(cycletime / len(diningroom_bulb_objs))
 
 

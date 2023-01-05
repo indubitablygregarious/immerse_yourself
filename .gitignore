@@ -1,2 +1,4 @@
 .spotify*
 .cache
+*wav
+*opus

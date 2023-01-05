@@ -43,6 +43,7 @@ diningroom_bulbs = [
 ]
 # ['Ocean', 'Romance', 'Sunset', 'Party', 'Fireplace', 'Cozy', 'Forest', 'Pastel Colors', 'Wake up', 'Bedtime', 'Warm White', 'Daylight', 'Cool white', 'Night light', 'Focus', 'Relax', 'True colors', 'TV time', 'Plantgrowth', 'Spring', 'Summer', 'Fall', 'Deepdive', 'Jungle', 'Mojito', 'Club', 'Christmas', 'Halloween', 'Candlelight', 'Golden white', 'Pulse', 'Steampunk', 'Rhythm']
 
+torch_scenes = [5, 28, 31]
 
 office_bulb_objs = []
 for b in office_bulbs:
@@ -68,7 +69,8 @@ async def main():
     for light_bulb in diningroom_bulb_objs:
         dim = 255 - int(random.random() * 60)
         speed = 10 + int(random.random() * 180)
-        await light_bulb.turn_on(PilotBuilder(scene=5, speed=speed, brightness=dim))
+        scene = random.choice(torch_scenes)
+        await light_bulb.turn_on(PilotBuilder(scene=scene, speed=speed, brightness=dim))
     while True:
         print("start")
         random.shuffle(office_bulb_objs)
@@ -93,7 +95,10 @@ async def main():
         for light_bulb in diningroom_bulb_objs:
             dim = 255 - int(random.random() * 60)
             speed = 10 + int(random.random() * 180)
-            await light_bulb.turn_on(PilotBuilder(scene=5, speed=speed, brightness=dim))
+            scene = random.choice(torch_scenes)
+            await light_bulb.turn_on(
+                PilotBuilder(scene=scene, speed=speed, brightness=dim)
+            )
             time.sleep(cycletime / len(diningroom_bulb_objs))
 
 

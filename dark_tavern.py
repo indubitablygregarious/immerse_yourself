@@ -62,7 +62,7 @@ async def main():
     for light_bulb in office_bulb_objs:
         await light_bulb.turn_off()
     for light_bulb in diningroom_bulb_objs:
-        dim = 55 - int(random.random() * 60)
+        dim = int(random.random() * 60)
         speed = 10 + int(random.random() * 180)
         scene = random.choice(torch_scenes)
         await light_bulb.turn_on(PilotBuilder(scene=scene, speed=speed, brightness=dim))
@@ -70,7 +70,7 @@ async def main():
         print("start")
         random.shuffle(diningroom_bulb_objs)
         for light_bulb in diningroom_bulb_objs:
-            dim = 55 - int(random.random() * 60)
+            dim = int(random.random() * 60)
             speed = 10 + int(random.random() * 180)
             scene = random.choice(torch_scenes)
             await light_bulb.turn_on(

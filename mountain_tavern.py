@@ -14,7 +14,7 @@ blue = 15
 cycletime = 12
 flash_variance = 25
 scope = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming"
-playlist = "spotify:playlist:5Q8DWZnPe7o7GA96SARmOK"
+playlist = "spotify:playlist:2q6tU7SrOYgtSPw2x1cGt0"
 sound_effect = "dooropen.wav"
 config = configparser.ConfigParser()
 config.read(".spotify.ini")
@@ -62,19 +62,13 @@ async def main():
     for light_bulb in office_bulb_objs:
         await light_bulb.turn_off()
     for light_bulb in diningroom_bulb_objs:
-        dim = int(random.random() * 60)
-        speed = 10 + int(random.random() * 180)
-        scene = random.choice(torch_scenes)
-        await light_bulb.turn_on(PilotBuilder(scene=scene, speed=speed, brightness=dim))
+        await light_bulb.turn_on(PilotBuilder(rgb=(1, 1, 1), brightness=1))
     while True:
         print("start")
         random.shuffle(diningroom_bulb_objs)
         for light_bulb in diningroom_bulb_objs:
-            dim = int(random.random() * 60)
-            speed = 10 + int(random.random() * 180)
-            scene = random.choice(torch_scenes)
             await light_bulb.turn_on(
-                PilotBuilder(scene=scene, speed=speed, brightness=dim)
+                PilotBuilder(rgb=(1, 1, 1), brightness=int(random.random() * 3))
             )
             time.sleep(cycletime / len(diningroom_bulb_objs))
 

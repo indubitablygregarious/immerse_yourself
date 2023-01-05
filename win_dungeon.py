@@ -56,10 +56,10 @@ for b in diningroom_bulbs:
 
 
 async def main():
-    playsound.playsound(sound_effect, False)
     spotify.start_playback(context_uri=playlist)
+    playsound.playsound(sound_effect, False)
     for light_bulb in office_bulb_objs:
-        dim = 255 - int(random.random() * 60)
+        dim = 128 - int(random.random() * 60)
         speed = 10 + int(random.random() * 180)
         scene = random.choice(torch_scenes)
         await light_bulb.turn_on(PilotBuilder(scene=scene, speed=speed, brightness=dim))
@@ -76,7 +76,7 @@ async def main():
         random.shuffle(office_bulb_objs)
         if int(random.random() * 100) > 98:
             for light_bulb in office_bulb_objs:
-                dim = 255 - int(random.random() * 60)
+                dim = 128 - int(random.random() * 60)
                 speed = 10 + int(random.random() * 180)
                 scene = random.choice(torch_scenes)
                 await light_bulb.turn_on(
@@ -85,7 +85,7 @@ async def main():
                 time.sleep(cycletime / len(office_bulb_objs))
         random.shuffle(diningroom_bulb_objs)
         for light_bulb in diningroom_bulb_objs:
-            dim = 64 + int(random.random() * 20)
+            dim = 32 + int(random.random() * 20)
             delta1 = int(random.random() * 30)
             delta2 = int(random.random() * 30)
             delta3 = int(random.random() * 30)

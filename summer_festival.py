@@ -33,7 +33,7 @@ oauth_object = spotipy.SpotifyOAuth(
 token_dict = oauth_object.get_access_token()
 token = token_dict["access_token"]
 spotify = spotipy.Spotify(auth=token)
-# spotify.start_playback(context_uri=playlist)
+spotify.start_playback(context_uri=playlist)
 
 # wiz bulb configuration
 config = configparser.ConfigParser()

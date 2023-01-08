@@ -35,15 +35,11 @@ spotify.start_playback(context_uri=playlist)
 
 backdrop_bulbs = ["192.168.1.165", "192.168.1.159", "192.168.1.160"]
 
-overhead_bulbs = [
-    "192.168.1.156",
-    "192.168.1.155",
-    "192.168.1.154",
-    "192.168.1.158",
-    "192.168.1.167",
-]
-# ['Ocean', 'Romance', 'Sunset', 'Party', 'Fireplace', 'Cozy', 'Forest', 'Pastel Colors', 'Wake up', 'Bedtime', 'Warm White', 'Daylight', 'Cool white', 'Night light', 'Focus', 'Relax', 'True colors', 'TV time', 'Plantgrowth', 'Spring', 'Summer', 'Fall', 'Deepdive', 'Jungle', 'Mojito', 'Club', 'Christmas', 'Halloween', 'Candlelight', 'Golden white', 'Pulse', 'Steampunk', 'Rhythm']
-
+# wiz bulb configuration
+config = configparser.ConfigParser()
+config.read(".wizbulb.ini")
+backdrop_bulbs = config["DEFAULT"]["backdrop_bulbs"].split(" ")
+overhead_bulbs = config["DEFAULT"]["overhead_bulbs"].split(" ")
 
 backdrop_bulb_objs = []
 for b in backdrop_bulbs:

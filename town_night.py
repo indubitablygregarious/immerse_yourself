@@ -16,6 +16,8 @@ flash_variance = 25
 scope = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming"
 playlist = "spotify:playlist:4Hhe4kDZSKZNBQjpUZABpK"
 sound_effect = "dooropen.wav"
+
+# spotify configuration
 config = configparser.ConfigParser()
 config.read(".spotify.ini")
 username = config["DEFAULT"]["username"]
@@ -34,16 +36,11 @@ spotify = spotipy.Spotify(auth=token)
 torch_scenes = [5, 28, 31]
 moon = False
 
-backdrop_bulbs = ["192.168.1.165", "192.168.1.159", "192.168.1.160"]
-
-overhead_bulbs = [
-    "192.168.1.156",
-    "192.168.1.155",
-    "192.168.1.154",
-    "192.168.1.158",
-    "192.168.1.167",
-]
-# ['Ocean', 'Romance', 'Sunset', 'Party', 'Fireplace', 'Cozy', 'Forest', 'Pastel Colors', 'Wake up', 'Bedtime', 'Warm White', 'Daylight', 'Cool white', 'Night light', 'Focus', 'Relax', 'True colors', 'TV time', 'Plantgrowth', 'Spring', 'Summer', 'Fall', 'Deepdive', 'Jungle', 'Mojito', 'Club', 'Christmas', 'Halloween', 'Candlelight', 'Golden white', 'Pulse', 'Steampunk', 'Rhythm']
+# wiz bulb configuration
+config = configparser.ConfigParser()
+config.read(".wizbulb.ini")
+backdrop_bulbs = config["DEFAULT"]["backdrop_bulbs"].split(" ")
+overhead_bulbs = config["DEFAULT"]["overhead_bulbs"].split(" ")
 
 
 backdrop_bulb_objs = []

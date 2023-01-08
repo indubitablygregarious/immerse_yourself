@@ -33,15 +33,11 @@ token = token_dict["access_token"]
 spotify = spotipy.Spotify(auth=token)
 spotify.start_playback(context_uri=playlist)
 
-backdrop_bulbs = ["192.168.1.165", "192.168.1.159", "192.168.1.160"]
-
-overhead_bulbs = [
-    "192.168.1.156",
-    "192.168.1.155",
-    "192.168.1.154",
-    "192.168.1.158",
-    "192.168.1.167",
-]
+# wiz bulb configuration
+config = configparser.ConfigParser()
+config.read(".wizbulb.ini")
+backdrop_bulbs = config["DEFAULT"]["backdrop_bulbs"].split(" ")
+overhead_bulbs = config["DEFAULT"]["overhead_bulbs"].split(" ")
 
 world_bulbs = backdrop_bulbs + overhead_bulbs
 light_bulbs = []

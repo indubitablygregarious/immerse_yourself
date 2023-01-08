@@ -1,4 +1,5 @@
 .spotify*
+.wizbulb*
 .cache
 *wav
 *opus

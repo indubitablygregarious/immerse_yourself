@@ -10,7 +10,9 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from pywizlight import wizlight, PilotBuilder, discovery
 
 green = 15
+red = 255
 blue = 15
+color_variance = 10
 cycletime = 3
 flash_variance = 25
 scope = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming"
@@ -33,9 +35,9 @@ token = token_dict["access_token"]
 spotify = spotipy.Spotify(auth=token)
 spotify.start_playback(context_uri=playlist)
 
-office_bulbs = ["192.168.1.165", "192.168.1.159", "192.168.1.160"]
+backdrop_bulbs = ["192.168.1.165", "192.168.1.159", "192.168.1.160"]
 
-diningroom_bulbs = [
+overhead_bulbs = [
     "192.168.1.156",
     "192.168.1.155",
     "192.168.1.154",
@@ -43,7 +45,7 @@ diningroom_bulbs = [
     "192.168.1.167",
 ]
 
-world_bulbs = office_bulbs + diningroom_bulbs
+world_bulbs = backdrop_bulbs + overhead_bulbs
 light_bulbs = []
 for b in world_bulbs:
     bulb = wizlight(b)
@@ -57,7 +59,9 @@ async def main():
         print(f"likely need to make {sound_effect}")
     for light_bulb in light_bulbs:
         dim = 255 - int(random.random() * 181)
-        await light_bulb.turn_on(PilotBuilder(rgb=(255, blue, green), brightness=dim))
+        b = blue + int(random.random() * color_variance)
+        g = green + int(random.random() * color_variance)
+        await light_bulb.turn_on(PilotBuilder(rgb=(red, g, b), brightness=dim))
     while True:
         print("start")
         random.shuffle(light_bulbs)
@@ -71,9 +75,9 @@ async def main():
                 )
                 time.sleep(1)
             dim = 255 - int(random.random() * 181)
-            await light_bulb.turn_on(
-                PilotBuilder(rgb=(255, blue, green), brightness=dim)
-            )
+            b = blue + int(random.random() * color_variance)
+            g = green + int(random.random() * color_variance)
+            await light_bulb.turn_on(PilotBuilder(rgb=(red, g, b), brightness=dim))
             time.sleep(cycletime / len(light_bulbs))
 
 

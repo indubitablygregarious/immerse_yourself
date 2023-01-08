@@ -14,8 +14,8 @@ blue = 15
 cycletime = 2
 flash_variance = 25
 scope = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming"
-playlist = "spotify:playlist:2q6tU7SrOYgtSPw2x1cGt0"
-sound_effect = "chill.wav"
+playlist = "spotify:playlist:6FohP6m1ipvNjgllOH4HLt"
+sound_effect = "danger.opus"
 config = configparser.ConfigParser()
 config.read(".spotify.ini")
 username = config["DEFAULT"]["username"]
@@ -60,7 +60,7 @@ world_bulbs = backdrop_bulb_objs + overhead_bulb_objs
 async def main():
     spotify.start_playback(context_uri=playlist)
     try:
-        playsound.playsound(sound_effect, True)
+        playsound.playsound(sound_effect, False)
     except:
         print(f"likely need to make {sound_effect}")
     for light_bulb in backdrop_bulb_objs:
@@ -80,6 +80,9 @@ async def main():
         print("start")
         random.shuffle(world_bulbs)
         for light_bulb in world_bulbs:
+            if int(random.random() * 100) > 75:
+                await light_bulb.turn_on(PilotBuilder(rgb=(255, 0, 0), brightness=255))
+                time.sleep(1)
             if light_bulb in backdrop_bulb_objs:
                 dim = 128 - int(random.random() * 60)
                 speed = 10 + int(random.random() * 180)

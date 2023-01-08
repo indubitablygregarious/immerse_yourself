@@ -10,11 +10,13 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from pywizlight import wizlight, PilotBuilder, discovery
 
 green = 15
+red = 255
 blue = 15
-cycletime = 60
+color_variance = 10
+cycletime = 6
 flash_variance = 25
 scope = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming"
-playlist = "spotify:playlist:0vvXsWCC9xrXsKd4FyS8kM"
+playlist = "spotify:playlist:5Q8DWZnPe7o7GA96SARmOK"
 sound_effect = "chill.wav"
 config = configparser.ConfigParser()
 config.read(".spotify.ini")
@@ -31,7 +33,7 @@ oauth_object = spotipy.SpotifyOAuth(
 token_dict = oauth_object.get_access_token()
 token = token_dict["access_token"]
 spotify = spotipy.Spotify(auth=token)
-spotify.start_playback(context_uri=playlist)
+# spotify.start_playback(context_uri=playlist)
 
 backdrop_bulbs = ["192.168.1.165", "192.168.1.159", "192.168.1.160"]
 
@@ -57,11 +59,9 @@ async def main():
         print(f"likely need to make {sound_effect}")
     for light_bulb in light_bulbs:
         dim = 255 - int(random.random() * 181)
-        delta1 = int(random.random() * 20)
-        delta2 = int(random.random() * 20)
-        await light_bulb.turn_on(
-            PilotBuilder(rgb=(128 + delta1, 128 + delta2, 128 + delta1), brightness=dim)
-        )
+        b = blue + int(random.random() * color_variance)
+        g = green + int(random.random() * color_variance)
+        await light_bulb.turn_on(PilotBuilder(rgb=(red, g, b), brightness=dim))
     while True:
         print("start")
         random.shuffle(light_bulbs)
@@ -75,13 +75,9 @@ async def main():
                 )
                 time.sleep(1)
             dim = 255 - int(random.random() * 181)
-            delta1 = int(random.random() * 20)
-            delta2 = int(random.random() * 20)
-            await light_bulb.turn_on(
-                PilotBuilder(
-                    rgb=(128 + delta1, 128 + delta2, 128 + delta1), brightness=dim
-                )
-            )
+            b = blue + int(random.random() * color_variance)
+            g = green + int(random.random() * color_variance)
+            await light_bulb.turn_on(PilotBuilder(rgb=(red, g, b), brightness=dim))
             time.sleep(cycletime / len(light_bulbs))
 
 

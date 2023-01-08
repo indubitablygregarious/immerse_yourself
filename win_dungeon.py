@@ -32,9 +32,9 @@ token_dict = oauth_object.get_access_token()
 token = token_dict["access_token"]
 spotify = spotipy.Spotify(auth=token)
 
-office_bulbs = ["192.168.1.165", "192.168.1.159", "192.168.1.160"]
+backdrop_bulbs = ["192.168.1.165", "192.168.1.159", "192.168.1.160"]
 
-diningroom_bulbs = [
+overhead_bulbs = [
     "192.168.1.156",
     "192.168.1.155",
     "192.168.1.154",
@@ -44,15 +44,15 @@ diningroom_bulbs = [
 
 torch_scenes = [5, 28, 31]
 
-office_bulb_objs = []
-for b in office_bulbs:
+backdrop_bulb_objs = []
+for b in backdrop_bulbs:
     bulb = wizlight(b)
-    office_bulb_objs.append(bulb)
+    backdrop_bulb_objs.append(bulb)
 
-diningroom_bulb_objs = []
-for b in diningroom_bulbs:
+overhead_bulb_objs = []
+for b in overhead_bulbs:
     bulb = wizlight(b)
-    diningroom_bulb_objs.append(bulb)
+    overhead_bulb_objs.append(bulb)
 
 
 async def main():
@@ -61,12 +61,12 @@ async def main():
         playsound.playsound(sound_effect, True)
     except:
         print(f"likely need to make {sound_effect}")
-    for light_bulb in office_bulb_objs:
+    for light_bulb in backdrop_bulb_objs:
         dim = 128 - int(random.random() * 60)
         speed = 10 + int(random.random() * 180)
         scene = random.choice(torch_scenes)
         await light_bulb.turn_on(PilotBuilder(scene=scene, speed=speed, brightness=dim))
-    for light_bulb in diningroom_bulb_objs:
+    for light_bulb in overhead_bulb_objs:
         dim = 64 + int(random.random() * 20)
         delta1 = int(random.random() * 30)
         delta2 = int(random.random() * 30)
@@ -76,18 +76,18 @@ async def main():
         )
     while True:
         print("start")
-        random.shuffle(office_bulb_objs)
+        random.shuffle(backdrop_bulb_objs)
         if int(random.random() * 100) > 98:
-            for light_bulb in office_bulb_objs:
+            for light_bulb in backdrop_bulb_objs:
                 dim = 128 - int(random.random() * 60)
                 speed = 10 + int(random.random() * 180)
                 scene = random.choice(torch_scenes)
                 await light_bulb.turn_on(
                     PilotBuilder(scene=scene, speed=speed, brightness=dim)
                 )
-                time.sleep(cycletime / len(office_bulb_objs))
-        random.shuffle(diningroom_bulb_objs)
-        for light_bulb in diningroom_bulb_objs:
+                time.sleep(cycletime / len(backdrop_bulb_objs))
+        random.shuffle(overhead_bulb_objs)
+        for light_bulb in overhead_bulb_objs:
             dim = 32 + int(random.random() * 20)
             delta1 = int(random.random() * 30)
             delta2 = int(random.random() * 30)

@@ -33,9 +33,9 @@ token = token_dict["access_token"]
 spotify = spotipy.Spotify(auth=token)
 spotify.start_playback(context_uri=playlist)
 
-office_bulbs = ["192.168.1.165", "192.168.1.159", "192.168.1.160"]
+backdrop_bulbs = ["192.168.1.165", "192.168.1.159", "192.168.1.160"]
 
-diningroom_bulbs = [
+overhead_bulbs = [
     "192.168.1.156",
     "192.168.1.155",
     "192.168.1.154",
@@ -45,15 +45,15 @@ diningroom_bulbs = [
 # ['Ocean', 'Romance', 'Sunset', 'Party', 'Fireplace', 'Cozy', 'Forest', 'Pastel Colors', 'Wake up', 'Bedtime', 'Warm White', 'Daylight', 'Cool white', 'Night light', 'Focus', 'Relax', 'True colors', 'TV time', 'Plantgrowth', 'Spring', 'Summer', 'Fall', 'Deepdive', 'Jungle', 'Mojito', 'Club', 'Christmas', 'Halloween', 'Candlelight', 'Golden white', 'Pulse', 'Steampunk', 'Rhythm']
 
 
-office_bulb_objs = []
-for b in office_bulbs:
+backdrop_bulb_objs = []
+for b in backdrop_bulbs:
     bulb = wizlight(b)
-    office_bulb_objs.append(bulb)
+    backdrop_bulb_objs.append(bulb)
 
-diningroom_bulb_objs = []
-for b in diningroom_bulbs:
+overhead_bulb_objs = []
+for b in overhead_bulbs:
     bulb = wizlight(b)
-    diningroom_bulb_objs.append(bulb)
+    overhead_bulb_objs.append(bulb)
 
 
 async def main():
@@ -61,13 +61,13 @@ async def main():
         playsound.playsound(sound_effect, True)
     except:
         print(f"likely need to make {sound_effect}")
-    for light_bulb in office_bulb_objs:
+    for light_bulb in backdrop_bulb_objs:
         dim = 255 - int(random.random() * 20)
         speed = 10 + int(random.random() * 180)
         await light_bulb.turn_on(PilotBuilder(scene=7, speed=speed, brightness=dim))
     sun = False
-    random.shuffle(diningroom_bulb_objs)
-    for light_bulb in diningroom_bulb_objs:
+    random.shuffle(overhead_bulb_objs)
+    for light_bulb in overhead_bulb_objs:
         # be the sun
         if sun == False:
             sun = True
@@ -83,18 +83,18 @@ async def main():
             )
     while True:
         print("start")
-        random.shuffle(office_bulb_objs)
+        random.shuffle(backdrop_bulb_objs)
         if int(random.random() * 100) > 95:
-            for light_bulb in office_bulb_objs:
+            for light_bulb in backdrop_bulb_objs:
                 dim = 255 - int(random.random() * 20)
                 speed = 10 + int(random.random() * 180)
                 await light_bulb.turn_on(
                     PilotBuilder(scene=7, speed=speed, brightness=dim)
                 )
-                time.sleep(cycletime / len(office_bulb_objs))
+                time.sleep(cycletime / len(backdrop_bulb_objs))
         sun = False
-        random.shuffle(diningroom_bulb_objs)
-        for light_bulb in diningroom_bulb_objs:
+        random.shuffle(overhead_bulb_objs)
+        for light_bulb in overhead_bulb_objs:
             if sun == False:
                 sun = True
                 await light_bulb.turn_on(PilotBuilder(scene=12, brightness=255))
@@ -108,7 +108,7 @@ async def main():
                         rgb=(58 + delta1, 58 + delta2, 158 + delta1), brightness=dim
                     )
                 )
-                time.sleep(cycletime / len(diningroom_bulb_objs))
+                time.sleep(cycletime / len(overhead_bulb_objs))
 
 
 loop = asyncio.get_event_loop()

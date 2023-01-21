@@ -9,10 +9,12 @@ import webbrowser
 from spotipy.oauth2 import SpotifyClientCredentials
 from pywizlight import wizlight, PilotBuilder, discovery
 
-green = 15
-blue = 15
+red = 128
+green = 128
+blue = 64
 cycletime = 60
 flash_variance = 25
+how_chill = 175
 scope = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming"
 playlist = "spotify:playlist:0vvXsWCC9xrXsKd4FyS8kM"
 sound_effect = "chill.wav"
@@ -52,11 +54,13 @@ async def main():
     except:
         print(f"likely need to make {sound_effect}")
     for light_bulb in light_bulbs:
-        dim = 255 - int(random.random() * 181)
+        dim = how_chill - int(random.random() * 181)
         delta1 = int(random.random() * 20)
         delta2 = int(random.random() * 20)
         await light_bulb.turn_on(
-            PilotBuilder(rgb=(128 + delta1, 128 + delta2, 128 + delta1), brightness=dim)
+            PilotBuilder(
+                rgb=(red + delta1, green + delta2, blue + delta1), brightness=dim
+            )
         )
     while True:
         print("start")
@@ -65,17 +69,17 @@ async def main():
         for light_bulb in light_bulbs:
             if int(random.random() * 100) > 95:
                 print("flash")
-                flash_bright = 255 - int(random.random() * flash_variance)
+                flash_bright = how_chill - int(random.random() * flash_variance)
                 await light_bulb.turn_on(
                     PilotBuilder(rgb=(255, 255, 255), brightness=flash_bright)
                 )
                 time.sleep(1)
-            dim = 255 - int(random.random() * 181)
+            dim = how_chill - int(random.random() * 181)
             delta1 = int(random.random() * 20)
             delta2 = int(random.random() * 20)
             await light_bulb.turn_on(
                 PilotBuilder(
-                    rgb=(128 + delta1, 128 + delta2, 128 + delta1), brightness=dim
+                    rgb=(red + delta1, green + delta2, blue + delta1), brightness=dim
                 )
             )
             time.sleep(cycletime / len(light_bulbs))

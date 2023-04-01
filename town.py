@@ -62,19 +62,22 @@ async def main():
         await light_bulb.turn_on(PilotBuilder(scene=31, speed=speed, brightness=dim))
     sun = False
     random.shuffle(overhead_bulb_objs)
-    for light_bulb in overhead_bulb_objs:
-        if sun == False:
-            sun = True
-            await light_bulb.turn_on(PilotBuilder(scene=12, brightness=255))
-        else:
-            dim = 255 - int(random.random() * 30)
-            delta1 = int(random.random() * 50)
-            delta2 = int(random.random() * 50)
-            await light_bulb.turn_on(
-                PilotBuilder(
-                    rgb=(58 + delta1, 58 + delta2, 158 + delta1), brightness=dim
+    for i in range(3):
+        for light_bulb in overhead_bulb_objs:
+            if sun == False:
+                sun = True
+                await light_bulb.turn_on(PilotBuilder(scene=12, brightness=255))
+            else:
+                dim = 255 - int(random.random() * 30)
+                dim = dim * (i + 1) / 3
+                delta1 = int(random.random() * 50)
+                delta2 = int(random.random() * 50)
+                await light_bulb.turn_on(
+                    PilotBuilder(
+                        rgb=(58 + delta1, 58 + delta2, 158 + delta1), brightness=dim
+                    )
                 )
-            )
+        time.sleep(5)
     while True:
         print("start")
         random.shuffle(backdrop_bulb_objs)

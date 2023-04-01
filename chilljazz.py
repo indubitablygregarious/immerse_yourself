@@ -16,7 +16,7 @@ cycletime = 60
 flash_variance = 25
 how_chill = 220
 scope = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming"
-playlist = "spotify:playlist:0vvXsWCC9xrXsKd4FyS8kM"
+playlist = "spotify:playlist:37i9dQZF1EIe80k6uRBZGd"
 sound_effect = "chill.wav"
 config = configparser.ConfigParser()
 config.read(".spotify.ini")

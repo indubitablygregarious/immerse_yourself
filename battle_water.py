@@ -67,7 +67,7 @@ async def main():
                 print("flash")
                 flash_bright = 255 - int(random.random() * flash_variance)
                 await light_bulb.turn_on(
-                    PilotBuilder(rgb=(255, 64, 64), brightness=flash_bright)
+                    PilotBuilder(rgb=(255, 16, 16), brightness=flash_bright)
                 )
                 time.sleep(1)
             dim = 255 - int(random.random() * 181)

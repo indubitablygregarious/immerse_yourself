@@ -40,6 +40,7 @@ config = configparser.ConfigParser()
 config.read(".wizbulb.ini")
 backdrop_bulbs = config["DEFAULT"]["backdrop_bulbs"].split(" ")
 overhead_bulbs = config["DEFAULT"]["overhead_bulbs"].split(" ")
+battlefield_bulbs = config["DEFAULT"]["battlefield_bulbs"].split(" ")
 
 
 backdrop_bulb_objs = []
@@ -47,12 +48,12 @@ for b in backdrop_bulbs:
     bulb = wizlight(b)
     backdrop_bulb_objs.append(bulb)
 
-overhead_bulb_objs = []
-for b in overhead_bulbs:
+battlefield_bulb_objs = []
+for b in battlefield_bulbs:
     bulb = wizlight(b)
-    overhead_bulb_objs.append(bulb)
+    battlefield_bulb_objs.append(bulb)
 
-world_bulbs = backdrop_bulb_objs + overhead_bulb_objs
+world_bulbs = backdrop_bulb_objs + overhead_bulb_objs + battlefield_bulbs
 
 
 async def main():

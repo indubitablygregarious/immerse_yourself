@@ -36,6 +36,7 @@ spotify = spotipy.Spotify(auth=token)
 config = configparser.ConfigParser()
 config.read(".wizbulb.ini")
 backdrop_bulbs = config["DEFAULT"]["backdrop_bulbs"].split(" ")
+battlefield_bulbs = config["DEFAULT"]["battlefield_bulbs"].split(" ")
 overhead_bulbs = config["DEFAULT"]["overhead_bulbs"].split(" ")
 
 torch_scenes = [5, 28, 31]
@@ -46,7 +47,7 @@ for b in backdrop_bulbs:
     backdrop_bulb_objs.append(bulb)
 
 overhead_bulb_objs = []
-for b in overhead_bulbs:
+for b in (overhead_bulbs + battlefield_bulbs):
     bulb = wizlight(b)
     overhead_bulb_objs.append(bulb)
 

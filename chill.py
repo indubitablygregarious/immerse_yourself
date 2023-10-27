@@ -40,8 +40,9 @@ config = configparser.ConfigParser()
 config.read(".wizbulb.ini")
 backdrop_bulbs = config["DEFAULT"]["backdrop_bulbs"].split(" ")
 overhead_bulbs = config["DEFAULT"]["overhead_bulbs"].split(" ")
+battlefield_bulbs = config["DEFAULT"]["battlefield_bulbs"].split(" ")
 
-world_bulbs = backdrop_bulbs + overhead_bulbs
+world_bulbs = backdrop_bulbs + overhead_bulbs + battlefield_bulbs
 light_bulbs = []
 for b in world_bulbs:
     bulb = wizlight(b)

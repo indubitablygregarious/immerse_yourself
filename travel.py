@@ -48,9 +48,14 @@ for b in backdrop_bulbs:
     backdrop_bulb_objs.append(bulb)
 
 overhead_bulb_objs = []
-for b in (overhead_bulbs + battlefield_bulbs):
+for b in overhead_bulbs:
     bulb = wizlight(b)
     overhead_bulb_objs.append(bulb)
+
+battlefield_bulb_objs = []
+for b in battlefield_bulbs:
+    bulb = wizlight(b)
+    battlefield_bulb_objs.append(bulb)
 
 
 async def main():
@@ -65,21 +70,16 @@ async def main():
     sun = False
     random.shuffle(overhead_bulb_objs)
     for i in range(3):
-        for light_bulb in overhead_bulb_objs:
-            # be the sun
-            if sun == False:
-                sun = True
-                await light_bulb.turn_on(PilotBuilder(scene=12, brightness=255))
-            else:
-                dim = 255 - int(random.random() * 30)
-                dim = dim * (i + 1) / 3
-                delta1 = int(random.random() * 50)
-                delta2 = int(random.random() * 50)
-                await light_bulb.turn_on(
-                    PilotBuilder(
-                        rgb=(58 + delta1, 58 + delta2, 158 + delta1), brightness=dim
-                    )
+        for light_bulb in (overhead_bulb_objs + battlefield_bulb_objs):
+            dim = 255 - int(random.random() * 30)
+            dim = dim * (i + 1) / 3
+            delta1 = int(random.random() * 50)
+            delta2 = int(random.random() * 50)
+            await light_bulb.turn_on(
+                PilotBuilder(
+                    rgb=(58 + delta1, 58 + delta2, 158 + delta1), brightness=dim
                 )
+            )
         time.sleep(5)
     while True:
         print("start")
@@ -95,7 +95,7 @@ async def main():
         sun = False
         random.shuffle(overhead_bulb_objs)
         for light_bulb in overhead_bulb_objs:
-            if sun == False:
+            if light_bulb not in battlefield_bulb_objs and sun == False:
                 sun = True
                 await light_bulb.turn_on(PilotBuilder(scene=12, brightness=255))
                 time.sleep(cycletime * int(random.random() * 6))
@@ -109,6 +109,16 @@ async def main():
                     )
                 )
                 time.sleep(cycletime / len(overhead_bulb_objs))
+        for light_bulb in battlefield_bulb_objs:
+            dim = 255 - int(random.random() * 30)
+            delta1 = int(random.random() * 50)
+            delta2 = int(random.random() * 50)
+            await light_bulb.turn_on(
+                PilotBuilder(
+                    rgb=(58 + delta1, 58 + delta2, 158 + delta1), brightness=dim
+                )
+            )
+            time.sleep(cycletime / len(overhead_bulb_objs))
 
 
 loop = asyncio.get_event_loop()

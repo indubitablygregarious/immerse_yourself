@@ -14,7 +14,7 @@ blue = 15
 cycletime = 12
 flash_variance = 25
 scope = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming"
-playlist = "spotify:playlist:4O4Qlw3ScGmX3u8bq5ffGL"
+playlist = "spotify:playlist:4afgq42TTtXPh0Io3D135i"
 sound_effect = "dig.wav"
 config = configparser.ConfigParser()
 config.read(".spotify.ini")

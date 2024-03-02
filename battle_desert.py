@@ -9,13 +9,15 @@ import webbrowser
 from spotipy.oauth2 import SpotifyClientCredentials
 from pywizlight import wizlight, PilotBuilder, discovery
 
-green = 15
-blue = 15
-cycletime = 12
+green = 215
+red = 215
+blue = 5
+color_variance = 10
+cycletime = 3
 flash_variance = 25
 scope = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming"
-playlist = "spotify:playlist:4O4Qlw3ScGmX3u8bq5ffGL"
-sound_effect = "dig.wav"
+playlist = "spotify:playlist:6FohP6m1ipvNjgllOH4HLt"
+sound_effect = "danger.opus"
 config = configparser.ConfigParser()
 config.read(".spotify.ini")
 username = config["DEFAULT"]["username"]
@@ -40,15 +42,11 @@ backdrop_bulbs = config["DEFAULT"]["backdrop_bulbs"].split(" ")
 overhead_bulbs = config["DEFAULT"]["overhead_bulbs"].split(" ")
 battlefield_bulbs = config["DEFAULT"]["battlefield_bulbs"].split(" ")
 
-backdrop_bulb_objs = []
-for b in backdrop_bulbs:
+world_bulbs = backdrop_bulbs + overhead_bulbs + battlefield_bulbs
+light_bulbs = []
+for b in world_bulbs:
     bulb = wizlight(b)
-    backdrop_bulb_objs.append(bulb)
-
-overhead_bulb_objs = []
-for b in (overhead_bulbs + battlefield_bulbs):
-    bulb = wizlight(b)
-    overhead_bulb_objs.append(bulb)
+    light_bulbs.append(bulb)
 
 
 async def main():
@@ -56,21 +54,28 @@ async def main():
         playsound.playsound(sound_effect, True)
     except:
         print(f"likely need to make {sound_effect}")
-    spotify.start_playback(context_uri=playlist)
-    for light_bulb in backdrop_bulb_objs:
-        await light_bulb.turn_off()
-    for light_bulb in overhead_bulb_objs:
-        dim = 55 - int(random.random() * 11)
-        speed = 10 + int(random.random() * 180)
-        await light_bulb.turn_on(PilotBuilder(scene=5, speed=speed, brightness=dim))
+    for light_bulb in light_bulbs:
+        dim = 255 - int(random.random() * 181)
+        b = blue + int(random.random() * color_variance)
+        r = red + int(random.random() * color_variance)
+        await light_bulb.turn_on(PilotBuilder(rgb=(r, green, b), brightness=dim))
     while True:
         print("start")
-        random.shuffle(overhead_bulb_objs)
-        for light_bulb in overhead_bulb_objs:
-            dim = 55 - int(random.random() * 11)
-            speed = 10 + int(random.random() * 180)
-            await light_bulb.turn_on(PilotBuilder(scene=5, speed=speed, brightness=dim))
-            time.sleep(cycletime / len(overhead_bulb_objs))
+        random.shuffle(light_bulbs)
+        # Pulse the light bulbs red
+        for light_bulb in light_bulbs:
+            if int(random.random() * 100) > 75:
+                print("flash")
+                flash_bright = 255 - int(random.random() * flash_variance)
+                await light_bulb.turn_on(
+                    PilotBuilder(rgb=(255, 64, 64), brightness=flash_bright)
+                )
+                time.sleep(1)
+            dim = 255 - int(random.random() * 181)
+            b = blue + int(random.random() * color_variance)
+            r = red + int(random.random() * color_variance)
+            await light_bulb.turn_on(PilotBuilder(rgb=(r, green, b), brightness=dim))
+            time.sleep(cycletime / len(light_bulbs))
 
 
 loop = asyncio.get_event_loop()

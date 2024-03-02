@@ -13,6 +13,7 @@ green = 15
 blue = 15
 cycletime = 6
 flash_variance = 25
+backdrop_scene=30
 scope = "ugc-image-upload user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming"
 playlist = "spotify:playlist:4afgq42TTtXPh0Io3D135i"
 sound_effect = "chill.wav"
@@ -66,7 +67,7 @@ async def main():
     for light_bulb in backdrop_bulb_objs:
         dim = 255 - int(random.random() * 20)
         speed = 10 + int(random.random() * 180)
-        await light_bulb.turn_on(PilotBuilder(scene=7, speed=speed, brightness=dim))
+        await light_bulb.turn_on(PilotBuilder(scene=backdrop_scene, speed=speed, brightness=dim))
     sun = False
     random.shuffle(overhead_bulb_objs)
     for i in range(3):

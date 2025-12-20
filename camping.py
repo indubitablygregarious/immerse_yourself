@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import playsound
+import playsound3
 import configparser
 import asyncio
 import time
@@ -53,7 +53,7 @@ for b in (overhead_bulbs + battlefield_bulbs):
 
 async def main():
     try:
-        playsound.playsound(sound_effect, True)
+        playsound3.playsound(sound_effect)
     except:
         print(f"likely need to make {sound_effect}")
     spotify.start_playback(context_uri=playlist)

@@ -9,7 +9,6 @@ hot-swapping configurations without stopping the lights.
 import asyncio
 import configparser
 import random
-import time
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from pywizlight import wizlight, PilotBuilder
@@ -38,26 +37,46 @@ class LightBulbGroup:
         self.name = name
         self.bulbs = [wizlight(ip) for ip in ip_addresses]
 
-    async def apply_pilot(self, pilot: PilotBuilder) -> None:
+    def apply_pilot(self, pilot: PilotBuilder) -> None:
         """
-        Apply a pilot configuration to all bulbs in the group.
+        Apply a pilot configuration to all bulbs in the group (fire-and-forget).
 
         Args:
             pilot: PilotBuilder with desired light state
         """
         for bulb in self.bulbs:
-            try:
-                await bulb.turn_on(pilot)
-            except Exception as e:
-                print(f"WARNING: Failed to control bulb in {self.name} group: {e}")
+            # Fire-and-forget: create task without awaiting response
+            task = asyncio.create_task(self._send_to_bulb(bulb, pilot))
+            task.add_done_callback(self._handle_bulb_error)
 
-    async def turn_off(self) -> None:
-        """Turn off all bulbs in the group."""
+    async def _send_to_bulb(self, bulb: wizlight, pilot: PilotBuilder) -> None:
+        """Send command to a single bulb."""
+        await bulb.turn_on(pilot)
+
+    def _handle_bulb_error(self, task: asyncio.Task) -> None:
+        """Handle errors from fire-and-forget bulb commands."""
+        try:
+            task.result()
+        except Exception as e:
+            print(f"WARNING: Failed to control bulb in {self.name} group: {e}")
+
+    def turn_off(self) -> None:
+        """Turn off all bulbs in the group (fire-and-forget)."""
         for bulb in self.bulbs:
-            try:
-                await bulb.turn_off()
-            except Exception as e:
-                print(f"WARNING: Failed to turn off bulb in {self.name} group: {e}")
+            # Fire-and-forget: create task without awaiting response
+            task = asyncio.create_task(self._turn_off_bulb(bulb))
+            task.add_done_callback(self._handle_turnoff_error)
+
+    async def _turn_off_bulb(self, bulb: wizlight) -> None:
+        """Turn off a single bulb."""
+        await bulb.turn_off()
+
+    def _handle_turnoff_error(self, task: asyncio.Task) -> None:
+        """Handle errors from fire-and-forget turn off commands."""
+        try:
+            task.result()
+        except Exception as e:
+            print(f"WARNING: Failed to turn off bulb in {self.name} group: {e}")
 
 
 class LightsEngine:
@@ -149,41 +168,16 @@ class LightsEngine:
         else:
             return group_config
 
-    async def _animate_group(
-        self,
-        group: LightBulbGroup,
-        config: Dict[str, Any],
-        cycletime: float,
-        bulb_count: int
-    ) -> None:
+    def _apply_to_group(self, group: LightBulbGroup, config: Dict[str, Any]) -> None:
         """
-        Apply animation to a single bulb in a group.
+        Apply lighting configuration to a group (no sleep, fire-and-forget).
 
         Args:
-            group: Light bulb group to animate
+            group: Light bulb group to control
             config: Animation configuration for this group
-            cycletime: Time for full animation cycle
-            bulb_count: Total number of bulbs (for timing calculation)
         """
         group_type = config.get("type", "rgb")
 
-        # Handle flash effect
-        flash_config = config.get("flash", {})
-        flash_prob = flash_config.get("probability", 0.0)
-        if random.random() < flash_prob:
-            # Flash effect
-            flash_color = flash_config.get("color", [255, 255, 255])
-            flash_brightness = flash_config.get("brightness", 255)
-            flash_duration = flash_config.get("duration", 1.0)
-
-            pilot = PilotBuilder(
-                rgb=tuple(flash_color),
-                brightness=flash_brightness
-            )
-            await group.apply_pilot(pilot)
-            time.sleep(flash_duration)
-
-        # Apply normal animation based on type
         if group_type == "rgb":
             # RGB color mode
             rgb_config = config.get("rgb", {})
@@ -207,7 +201,7 @@ class LightsEngine:
             brightness = min_bright + int(random.random() * (max_bright - min_bright))
 
             pilot = PilotBuilder(rgb=(r, g, b), brightness=brightness)
-            await group.apply_pilot(pilot)
+            group.apply_pilot(pilot)
 
         elif group_type == "scene":
             # WIZ scene mode
@@ -227,10 +221,45 @@ class LightsEngine:
             brightness = min_bright + int(random.random() * (max_bright - min_bright))
 
             pilot = PilotBuilder(scene=scene_id, speed=speed, brightness=brightness)
-            await group.apply_pilot(pilot)
+            group.apply_pilot(pilot)
+
+    async def _animate_group(
+        self,
+        group: LightBulbGroup,
+        config: Dict[str, Any],
+        cycletime: float,
+        bulb_count: int
+    ) -> None:
+        """
+        Apply animation to a group with timing delay.
+
+        Args:
+            group: Light bulb group to animate
+            config: Animation configuration for this group
+            cycletime: Time for full animation cycle
+            bulb_count: Total number of bulbs (for timing calculation)
+        """
+        # Handle flash effect
+        flash_config = config.get("flash", {})
+        flash_prob = flash_config.get("probability", 0.0)
+        if random.random() < flash_prob:
+            # Flash effect
+            flash_color = flash_config.get("color", [255, 255, 255])
+            flash_brightness = flash_config.get("brightness", 255)
+            flash_duration = flash_config.get("duration", 1.0)
+
+            pilot = PilotBuilder(
+                rgb=tuple(flash_color),
+                brightness=flash_brightness
+            )
+            group.apply_pilot(pilot)
+            await asyncio.sleep(flash_duration)
+
+        # Apply the lighting config
+        self._apply_to_group(group, config)
 
         # Sleep based on cycletime and number of bulbs
-        time.sleep(cycletime / bulb_count)
+        await asyncio.sleep(cycletime / bulb_count)
 
     async def _initialize_lights(self, config: Dict[str, Any]) -> None:
         """
@@ -250,16 +279,11 @@ class LightsEngine:
                     group_config, groups_config
                 )
 
-        # Initialize each group
+        # Initialize each group (instant, no sleep)
         for group_name, group_config in resolved_configs.items():
             if group_name in self.bulb_groups:
                 group = self.bulb_groups[group_name]
-                await self._animate_group(
-                    group,
-                    group_config,
-                    config.get("cycletime", 12),
-                    1  # Initial setup, don't divide cycletime
-                )
+                self._apply_to_group(group, group_config)
 
     async def run_animation_loop(self, animation_config: Dict[str, Any]) -> None:
         """

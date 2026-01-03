@@ -77,17 +77,19 @@ class EngineRunner(QThread):
         animation_config = self.config["engines"]["lights"]["animation"]
 
         await self.lights_engine.start(animation_config)
+        self.status_update.emit("Light animation running")
 
-        # Keep running until stopped
+        # Keep running until stopped (check frequently for fast response)
         while self.running:
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.05)
 
         await self.lights_engine.stop()
 
     def stop(self):
         """Stop the engines."""
         self.running = False
-        self.wait(5000)  # Wait up to 5 seconds for thread to finish
+        # Don't block - let the old thread clean up in background
+        # New environment can start immediately
 
 
 class EnvironmentLauncher(QMainWindow):
@@ -342,7 +344,9 @@ class EnvironmentLauncher(QMainWindow):
             )
 
             if reply == QMessageBox.Yes:
-                self._stop_current()
+                # On exit, actually wait for cleanup
+                self.current_runner.running = False
+                self.current_runner.wait(2000)
                 event.accept()
             else:
                 event.ignore()

@@ -120,6 +120,7 @@ class EnvironmentLauncher(QMainWindow):
         self.current_config_name: Optional[str] = None
         self.buttons: Dict[str, QPushButton] = {}  # config_name -> button
         self.shortcuts: List[QShortcut] = []
+        self._old_runners: List[EngineRunner] = []  # Keep refs until threads finish
 
         # Create UI
         self._create_ui()
@@ -299,12 +300,21 @@ class EnvironmentLauncher(QMainWindow):
         """Stop the currently running environment."""
         if self.current_runner is not None:
             self.statusBar().showMessage("Stopping...")
-            self.current_runner.stop()
+            old_runner = self.current_runner
+            old_runner.stop()
+            # Keep reference until thread finishes to avoid QThread crash
+            self._old_runners.append(old_runner)
+            old_runner.finished.connect(lambda: self._cleanup_old_runner(old_runner))
             self.current_runner = None
             self.current_config_name = None
             self._reset_button_styles()
             self.stop_button.setEnabled(False)
             self.statusBar().showMessage("Stopped")
+
+    def _cleanup_old_runner(self, runner: EngineRunner) -> None:
+        """Remove finished runner from old runners list."""
+        if runner in self._old_runners:
+            self._old_runners.remove(runner)
 
     def _on_error(self, error_msg: str) -> None:
         """Handle error from engine runner."""

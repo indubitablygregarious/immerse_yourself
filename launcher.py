@@ -73,7 +73,10 @@ class EnvironmentDiscovery:
 class ProcessManager:
     """Manages subprocess execution and termination of environment scripts."""
 
-    def __init__(self, project_root: str = "/home/pete/immerse_yourself"):
+    def __init__(self, project_root: str = None):
+        # Default to the directory containing this launcher script
+        if project_root is None:
+            project_root = str(Path(__file__).parent.absolute())
         self.project_root = project_root
         self.current_process: Optional[subprocess.Popen] = None
         self.current_env_name: Optional[str] = None

@@ -1,0 +1,51 @@
+name: "Tavern"
+category: "social"
+description: "Cozy medieval tavern atmosphere with warm lighting and door sounds"
+
+metadata:
+  tags: ["social", "indoor", "cozy", "medieval"]
+  intensity: "low"
+  suitable_for: ["tabletop gaming", "social scenes", "downtime", "roleplay"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/dooropen.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:5Q8DWZnPe7o7GA96SARmOK"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+      flash_variance: 25
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [128, 128, 128]
+            variance: [20, 20, 20]
+          brightness:
+            min: 74
+            max: 255
+          flash:
+            probability: 0.05
+            color: [255, 255, 255]
+            brightness: 230
+            duration: 1.0
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 195
+            max: 255
+
+        battlefield:
+          type: "inherit_overhead"

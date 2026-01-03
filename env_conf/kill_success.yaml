@@ -1,0 +1,19 @@
+name: "Elimination Confirmed"
+category: "combat"
+description: "Game-style successful kill confirmation sound"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "game", "combat", "success", "achievement"]
+  intensity: "medium"
+  suitable_for: ["combat victories", "enemy defeated", "mission accomplished", "game events"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/kill-success.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

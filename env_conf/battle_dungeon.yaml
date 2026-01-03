@@ -1,0 +1,57 @@
+name: "Battle Dungeon"
+category: "combat"
+description: "High-intensity dungeon combat with danger sounds and red flashing lights"
+
+metadata:
+  tags: ["combat", "intense", "dungeon", "underground", "battle"]
+  intensity: "high"
+  suitable_for: ["boss fights", "combat encounters", "tense moments", "battles"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/danger.opus"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:6FohP6m1ipvNjgllOH4HLt"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 2  # Fast animation for combat intensity
+      flash_variance: 25
+
+      groups:
+        backdrop:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 68
+            max: 128
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [32, 32, 32]  # Dark base
+            variance: [30, 30, 30]
+          brightness:
+            min: 64
+            max: 84
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [32, 32, 32]
+            variance: [30, 30, 30]
+          brightness:
+            min: 32
+            max: 52
+          flash:
+            probability: 0.25  # High flash rate for intensity
+            color: [255, 0, 0]  # Red danger flash
+            brightness: 255
+            duration: 1.0

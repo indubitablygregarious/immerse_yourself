@@ -1,0 +1,52 @@
+name: "Travel Desert"
+category: "exploration"
+description: "Desert travel atmosphere with desert scene backdrops, sun, and bright sky lighting"
+
+metadata:
+  tags: ["exploration", "travel", "desert", "outdoor", "daytime", "hot", "sandy"]
+  intensity: "medium"
+  suitable_for: ["travel scenes", "desert exploration", "outdoor journeys"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:4afgq42TTtXPh0Io3D135i"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 6  # Medium speed for travel
+
+      groups:
+        backdrop:
+          type: "scene"
+          scenes:
+            ids: [30]  # Desert scene
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 235
+            max: 255
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [58, 58, 158]  # Sky blue
+            variance: [50, 50, 50]
+          brightness:
+            min: 225
+            max: 255
+          # Note: One bulb uses scene 12 (sun) at brightness 255 - handled separately in code
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [58, 58, 158]  # Sky blue
+            variance: [50, 50, 50]
+          brightness:
+            min: 225
+            max: 255

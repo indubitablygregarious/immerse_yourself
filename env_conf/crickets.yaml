@@ -1,0 +1,19 @@
+name: "Crickets"
+category: "social"
+description: "Awkward silence with cricket chirping"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "awkward", "silence", "comedic", "nature"]
+  intensity: "low"
+  suitable_for: ["awkward silences", "failed jokes", "uncomfortable moments", "comedic timing"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/crickets.swf.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

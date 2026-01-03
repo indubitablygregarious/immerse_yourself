@@ -1,0 +1,44 @@
+name: "Celebration"
+category: "special"
+description: "Victory celebration with applause and bright golden lights"
+
+metadata:
+  tags: ["celebration", "victory", "special", "one-shot", "achievement"]
+  intensity: "high"
+  suitable_for: ["victories", "achievements", "special moments", "quest completion"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/applause-4.mp3"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:37i9dQZF1DX3rxVfibe1L0"  # Mood Booster playlist
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 1  # Very fast for excitement
+      flash_variance: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [255, 200, 0]  # Golden
+            variance: [50, 50, 50]
+          brightness:
+            min: 200
+            max: 255
+          flash:
+            probability: 0.8  # Lots of flashing for celebration
+            color: [255, 255, 255]
+            brightness: 255
+            duration: 0.5
+
+        overhead:
+          type: "inherit_backdrop"
+
+        battlefield:
+          type: "inherit_backdrop"

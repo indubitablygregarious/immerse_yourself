@@ -1,0 +1,45 @@
+name: "Win Dungeon"
+category: "special"
+description: "Victory celebration in dungeon with torch scenes and dark ambient lighting"
+
+metadata:
+  tags: ["victory", "celebration", "dungeon", "special", "achievement"]
+  intensity: "medium"
+  suitable_for: ["boss victories", "achievements", "celebrations", "victory moments"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/win.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:2q6tU7SrOYgtSPw2x1cGt0"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 2  # Fast animation for celebration
+
+      groups:
+        backdrop:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 68
+            max: 128
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [32, 32, 32]  # Dark ambient
+            variance: [30, 30, 30]
+          brightness:
+            min: 32
+            max: 52
+
+        battlefield:
+          type: "inherit_overhead"

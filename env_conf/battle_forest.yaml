@@ -1,0 +1,43 @@
+name: "Battle Forest"
+category: "combat"
+description: "Intense forest combat with green lighting and danger sounds"
+
+metadata:
+  tags: ["combat", "forest", "battle", "intense", "nature", "outdoor"]
+  intensity: "high"
+  suitable_for: ["boss fights", "combat encounters", "forest battles"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/danger.opus"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:6FohP6m1ipvNjgllOH4HLt"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 3  # Fast animation for combat intensity
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [15, 255, 15]  # Bright green for forest
+            variance: [10, 10, 10]
+          brightness:
+            min: 74
+            max: 255
+          flash:
+            probability: 0.25  # High flash rate (>75%)
+            color: [255, 64, 64]  # Red danger flash
+            brightness: 230
+            duration: 1.0
+
+        overhead:
+          type: "inherit_backdrop"
+
+        battlefield:
+          type: "inherit_backdrop"

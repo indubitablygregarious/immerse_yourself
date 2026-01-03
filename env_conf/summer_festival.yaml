@@ -1,0 +1,43 @@
+name: "Summer Festival"
+category: "special"
+description: "Vibrant festival atmosphere with bright red lighting and occasional white flashes"
+
+metadata:
+  tags: ["festival", "celebration", "summer", "outdoor", "festive", "colorful"]
+  intensity: "medium"
+  suitable_for: ["celebrations", "festivals", "festive moments", "parties"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:5Q8DWZnPe7o7GA96SARmOK"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 6  # Medium speed for festival energy
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [255, 15, 15]  # Bright red
+            variance: [10, 10, 10]
+          brightness:
+            min: 74
+            max: 255
+          flash:
+            probability: 0.05  # Occasional flashes (>95%)
+            color: [255, 255, 255]
+            brightness: 230
+            duration: 1.0
+
+        overhead:
+          type: "inherit_backdrop"
+
+        battlefield:
+          type: "inherit_backdrop"

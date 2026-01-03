@@ -1,0 +1,19 @@
+name: "Sad Trombone"
+category: "social"
+description: "Classic womp-womp failure sound"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "comedic", "failure", "disappointment", "classic"]
+  intensity: "low"
+  suitable_for: ["failures", "mistakes", "bad news", "comedic defeats", "disappointments"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/sadtrombone.swf.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

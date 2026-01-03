@@ -1,0 +1,45 @@
+name: "Travel Night Desert"
+category: "exploration"
+description: "Nighttime desert travel with dim fireplace lighting and minimal illumination"
+
+metadata:
+  tags: ["exploration", "travel", "desert", "nighttime", "dark", "campfire"]
+  intensity: "low"
+  suitable_for: ["night travel", "desert exploration", "camping", "atmospheric"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/dig.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:4afgq42TTtXPh0Io3D135i"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [0, 0, 0]  # Backdrop turned off
+            variance: [0, 0, 0]
+          brightness:
+            min: 0
+            max: 0
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5]  # Fireplace scene
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 44
+            max: 55
+
+        battlefield:
+          type: "inherit_overhead"

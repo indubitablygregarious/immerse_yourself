@@ -1,0 +1,19 @@
+name: "Dramatic No!"
+category: "special"
+description: "Over-the-top dramatic 'Nooo!' scream"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "dramatic", "meme", "reaction", "despair"]
+  intensity: "high"
+  suitable_for: ["dramatic defeats", "devastating news", "comedic overreactions", "tragedy"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/nooo.swf.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

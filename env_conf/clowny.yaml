@@ -1,0 +1,39 @@
+name: "Clowny"
+category: "special"
+description: "Playful party atmosphere with bright animated party scene lighting"
+
+metadata:
+  tags: ["party", "playful", "fun", "celebration", "colorful"]
+  intensity: "medium"
+  suitable_for: ["parties", "celebrations", "fun scenes", "festive moments"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/dooropen.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:1gauLmjFqDP3iP7yKiJCHt"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "scene"
+          scenes:
+            ids: [4]  # Party scene
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 195
+            max: 255
+
+        overhead:
+          type: "inherit_backdrop"
+
+        battlefield:
+          type: "inherit_backdrop"

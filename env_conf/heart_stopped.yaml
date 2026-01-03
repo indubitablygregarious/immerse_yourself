@@ -1,0 +1,19 @@
+name: "Heartbeat Stopped"
+category: "combat"
+description: "Heart flatline and medical alarm sound"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "dramatic", "death", "medical", "tension"]
+  intensity: "high"
+  suitable_for: ["death scenes", "critical moments", "dramatic failures", "medical emergencies"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/heart-stopped.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

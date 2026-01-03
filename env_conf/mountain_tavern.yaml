@@ -1,0 +1,45 @@
+name: "Mountain Tavern"
+category: "social"
+description: "Minimal lighting mountain tavern with very dim torch scenes"
+
+metadata:
+  tags: ["social", "indoor", "minimal", "dark", "mysterious", "tavern", "mountain"]
+  intensity: "low"
+  suitable_for: ["tabletop gaming", "social scenes", "mysterious encounters", "atmospheric"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/dooropen.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:2q6tU7SrOYgtSPw2x1cGt0"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [0, 0, 0]  # Backdrop turned off
+            variance: [0, 0, 0]
+          brightness:
+            min: 0
+            max: 0
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 10
+            max: 10  # Fixed very dim brightness
+
+        battlefield:
+          type: "inherit_overhead"

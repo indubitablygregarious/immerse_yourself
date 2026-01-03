@@ -1,0 +1,45 @@
+name: "Camping"
+category: "relaxation"
+description: "Peaceful campfire atmosphere with fireplace scene and dim lighting"
+
+metadata:
+  tags: ["relaxation", "campfire", "outdoor", "peaceful", "night"]
+  intensity: "low"
+  suitable_for: ["rest scenes", "camping", "outdoor ambiance", "storytelling"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/dig.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:37i9dQZF1DXaa8UmWJHYTU"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [0, 0, 0]  # Backdrop turned off
+            variance: [0, 0, 0]
+          brightness:
+            min: 0
+            max: 0
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5]  # Fireplace scene
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 44
+            max: 55
+
+        battlefield:
+          type: "inherit_overhead"

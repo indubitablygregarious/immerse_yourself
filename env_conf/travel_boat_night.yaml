@@ -1,0 +1,45 @@
+name: "Travel Boat Night"
+category: "exploration"
+description: "Nighttime ocean travel with very dark lighting, moonlight, and minimal illumination"
+
+metadata:
+  tags: ["exploration", "travel", "boat", "ocean", "water", "nighttime", "dark", "moon"]
+  intensity: "low"
+  suitable_for: ["night travel", "sailing", "mysterious journeys", "atmospheric"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:37i9dQZF1DWV90ZWj21ygB"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 6  # Medium speed for travel
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [0, 0, 0]  # Very dark
+            variance: [10, 10, 10]
+          brightness:
+            min: 0
+            max: 10
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [0, 0, 16]  # Very dark blue
+            variance: [10, 10, 10]
+          brightness:
+            min: 0
+            max: 10
+          # Note: One bulb uses moon (255, 255, 128) at brightness 100 - handled separately in code
+
+        battlefield:
+          type: "inherit_overhead"

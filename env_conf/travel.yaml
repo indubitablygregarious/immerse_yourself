@@ -1,0 +1,51 @@
+name: "Travel"
+category: "exploration"
+description: "Daytime travel and exploration with ambient sounds"
+
+metadata:
+  tags: ["travel", "exploration", "outdoor", "daytime", "journey"]
+  intensity: "medium"
+  suitable_for: ["overworld travel", "exploration", "journey sequences"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:63aJnqjZ3LdZE3EzRQxkja"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12  # Medium speed
+      flash_variance: 25
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [128, 128, 64]
+            variance: [20, 20, 20]
+          brightness:
+            min: 74
+            max: 255
+          flash:
+            probability: 0.05
+            color: [255, 255, 255]
+            brightness: 230
+            duration: 1.0
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [12]  # Sun scene
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 255
+            max: 255  # Bright sun
+
+        battlefield:
+          type: "inherit_overhead"

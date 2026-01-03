@@ -1,0 +1,19 @@
+name: "Children Cheering"
+category: "social"
+description: "Happy children cheering and celebrating"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "joy", "celebration", "positive", "children"]
+  intensity: "medium"
+  suitable_for: ["victories", "happy moments", "achievements", "wholesome celebrations"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/children-yaysound-effect.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

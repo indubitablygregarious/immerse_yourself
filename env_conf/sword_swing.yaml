@@ -1,0 +1,19 @@
+name: "Sword Swing"
+category: "combat"
+description: "Fast metal sword swing whoosh sound"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "combat", "sword", "weapon", "action"]
+  intensity: "medium"
+  suitable_for: ["combat actions", "sword attacks", "weapon strikes", "action scenes"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/zapsplat_warfare_sword_swing_fast_whoosh_metal_004.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

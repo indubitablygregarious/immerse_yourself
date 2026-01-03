@@ -1,0 +1,19 @@
+name: "Dramatic Sting"
+category: "special"
+description: "Dramatic musical sting for shocking moments"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "dramatic", "shock", "reveal", "tension"]
+  intensity: "high"
+  suitable_for: ["plot twists", "shocking reveals", "dramatic moments", "tension building"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/dramatic.swf.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

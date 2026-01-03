@@ -1,0 +1,50 @@
+name: "Library"
+category: "social"
+description: "Quiet library atmosphere with warm torch lighting and door sounds"
+
+metadata:
+  tags: ["social", "indoor", "quiet", "reading", "study", "medieval"]
+  intensity: "low"
+  suitable_for: ["research scenes", "studying", "reading", "quiet moments", "downtime"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/dooropen.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:episode:2JyrEMqpT6YWslJOLstB0F"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [128, 128, 128]
+            variance: [20, 20, 20]
+          brightness:
+            min: 74
+            max: 255
+          flash:
+            probability: 0.05  # Rare flashes (>95%)
+            color: [255, 255, 255]
+            brightness: 230
+            duration: 1.0
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 195
+            max: 255
+
+        battlefield:
+          type: "inherit_overhead"

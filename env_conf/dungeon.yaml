@@ -1,0 +1,51 @@
+name: "Dungeon"
+category: "special"
+description: "Dark dungeon atmosphere with flickering torches and mysterious shadows"
+
+metadata:
+  tags: ["dungeon", "underground", "dark", "atmospheric", "exploration"]
+  intensity: "medium"
+  suitable_for: ["dungeon exploration", "mysterious encounters", "atmospheric scenes"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:2q6tU7SrOYgtSPw2x1cGt0"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 2  # Fast animation for flickering effect
+
+      groups:
+        backdrop:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 68
+            max: 128
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [32, 32, 32]  # Very dark
+            variance: [30, 30, 30]
+          brightness:
+            min: 64
+            max: 84
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [32, 32, 32]  # Very dark
+            variance: [30, 30, 30]
+          brightness:
+            min: 32
+            max: 52

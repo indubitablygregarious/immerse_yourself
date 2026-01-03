@@ -1,0 +1,19 @@
+name: "Bruh"
+category: "social"
+description: "Classic 'bruh' meme sound effect"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "meme", "reaction", "comedic"]
+  intensity: "low"
+  suitable_for: ["awkward moments", "facepalm situations", "disbelief", "comedic timing"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/bruh.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

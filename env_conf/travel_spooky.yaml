@@ -1,0 +1,46 @@
+name: "Travel Spooky"
+category: "exploration"
+description: "Eerie spooky travel atmosphere with campfire backdrops, sun, and mysterious lighting"
+
+metadata:
+  tags: ["exploration", "travel", "spooky", "mysterious", "eerie", "outdoor"]
+  intensity: "medium"
+  suitable_for: ["spooky encounters", "mysterious travel", "haunted areas", "atmospheric"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:5Ut1kkNxhOnqqXgZxrxIYI"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 6  # Medium speed for travel
+
+      groups:
+        backdrop:
+          type: "scene"
+          scenes:
+            ids: [7]  # Campfire scene for spooky atmosphere
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 235
+            max: 255
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [58, 58, 158]  # Sky blue
+            variance: [50, 50, 50]
+          brightness:
+            min: 225
+            max: 255
+          # Note: One bulb uses scene 12 (sun) at brightness 255 - handled separately in code
+
+        battlefield:
+          type: "inherit_overhead"

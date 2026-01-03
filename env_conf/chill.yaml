@@ -1,0 +1,44 @@
+name: "Chill"
+category: "relaxation"
+description: "Ultra-relaxed ambient atmosphere for meditation and peaceful downtime"
+
+metadata:
+  tags: ["relaxation", "ambient", "slow", "peaceful", "meditation"]
+  intensity: "low"
+  suitable_for: ["meditation", "reading", "background music", "rest"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:0vvXsWCC9xrXsKd4FyS8kM"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 60  # Very slow for relaxation
+      flash_variance: 25
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [128, 128, 64]  # Warm, golden tone
+            variance: [20, 20, 20]
+          brightness:
+            min: 100
+            max: 220
+          flash:
+            probability: 0.05
+            color: [255, 255, 255]
+            brightness: 220
+            duration: 1.0
+
+        overhead:
+          type: "inherit_backdrop"
+
+        battlefield:
+          type: "inherit_backdrop"

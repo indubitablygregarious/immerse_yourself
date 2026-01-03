@@ -1,0 +1,19 @@
+name: "Bone Crack"
+category: "combat"
+description: "Disturbing bone cracking sound effect"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "horror", "injury", "gruesome"]
+  intensity: "high"
+  suitable_for: ["horror moments", "injury scenes", "combat damage", "dramatic failures"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/bone-crack.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

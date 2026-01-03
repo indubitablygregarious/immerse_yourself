@@ -1,0 +1,19 @@
+name: "Church Bells"
+category: "exploration"
+description: "Solemn church bell tolling"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "solemn", "religious", "memorial", "atmospheric"]
+  intensity: "medium"
+  suitable_for: ["memorial moments", "solemn occasions", "time passing", "dramatic atmosphere"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/church-bell-tolling.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

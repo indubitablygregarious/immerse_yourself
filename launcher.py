@@ -1,328 +1,348 @@
 #!/usr/bin/env python3
 """
 Immerse Yourself Environment Launcher
-A PyQt5 GUI for managing ambient environment scripts with Spotify and smart lights.
+A PyQt5 GUI for managing ambient environment configs with Spotify and smart lights.
 """
 
 import sys
-import os
-import subprocess
-import signal
+import asyncio
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
+from collections import defaultdict
 
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QGridLayout, QPushButton,
-    QStatusBar, QMessageBox, QVBoxLayout
+    QStatusBar, QMessageBox, QVBoxLayout, QTabWidget, QHBoxLayout
 )
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QShortcut
 
-
-class EnvironmentDiscovery:
-    """Discovers and catalogs environment scripts from the environments directory."""
-
-    def __init__(self, environments_dir: str = "environments"):
-        self.environments_dir = Path(environments_dir)
-
-    def discover_environments(self) -> List[Dict[str, str]]:
-        """
-        Scan environments/ directory and return sorted list of environments.
-        Returns list of dicts with 'filename', 'filepath', and 'display_name' keys.
-        """
-        environments = []
-
-        if not self.environments_dir.exists():
-            return environments
-
-        # Find all .py files, sorted alphabetically
-        for py_file in sorted(self.environments_dir.glob("*.py")):
-            # Skip symlinks and test files
-            if py_file.is_symlink() or py_file.name == "f.py":
-                continue
-
-            env_info = {
-                "filename": py_file.name,
-                "filepath": str(py_file.absolute()),
-                "display_name": self._make_display_name(py_file.stem),
-                "category": self._categorize(py_file.stem),
-            }
-            environments.append(env_info)
-
-        return environments
-
-    def _make_display_name(self, stem: str) -> str:
-        """Convert filename stem to display name: battle_dungeon -> Battle Dungeon"""
-        return stem.replace("_", " ").title()
-
-    def _categorize(self, stem: str) -> str:
-        """Categorize environment for potential sorting/grouping."""
-        if stem.startswith("battle_"):
-            return "battle"
-        elif stem.startswith("travel_"):
-            return "travel"
-        elif "tavern" in stem:
-            return "tavern"
-        elif stem.startswith("town"):
-            return "town"
-        else:
-            return "other"
+from config_loader import ConfigLoader
+from engines import SoundEngine, SpotifyEngine, LightsEngine
 
 
-class ProcessManager:
-    """Manages subprocess execution and termination of environment scripts."""
+class EngineRunner(QThread):
+    """Background thread for running async engines."""
 
-    def __init__(self, project_root: str = None):
-        # Default to the directory containing this launcher script
-        if project_root is None:
-            project_root = str(Path(__file__).parent.absolute())
-        self.project_root = project_root
-        self.current_process: Optional[subprocess.Popen] = None
-        self.current_env_name: Optional[str] = None
+    error_occurred = pyqtSignal(str)
+    status_update = pyqtSignal(str)
 
-    def start_environment(self, script_path: str, env_name: str) -> bool:
-        """
-        Start a new environment, killing any existing one first.
-        Args:
-            script_path: Absolute path to the environment script
-            env_name: Display name of the environment
-        Returns:
-            True if successful, False otherwise
-        """
-        self.stop_current()
+    def __init__(self, config: Dict[str, Any]):
+        super().__init__()
+        self.config = config
+        self.lights_engine: Optional[LightsEngine] = None
+        self.running = False
 
+    def run(self):
+        """Run the engines based on configuration."""
         try:
-            # Use Popen for async execution with process control
-            # Set cwd to root so config files are found
-            self.current_process = subprocess.Popen(
-                [sys.executable, script_path],
-                cwd=self.project_root,
-                # Let stdout/stderr pass through to terminal for debugging
-                # Create new process group for clean termination
-                preexec_fn=os.setsid if sys.platform != "win32" else None,
-            )
-            self.current_env_name = env_name
-            return True
-        except Exception as e:
-            print(f"Error starting environment: {e}")
-            return False
+            self.running = True
 
-    def stop_current(self) -> None:
-        """Terminate the currently running environment gracefully."""
-        if self.current_process:
-            try:
-                # Send SIGTERM first for graceful shutdown
-                if sys.platform != "win32":
-                    os.killpg(os.getpgid(self.current_process.pid), signal.SIGTERM)
-                else:
-                    self.current_process.terminate()
+            # Sound engine (synchronous, one-shot)
+            if self.config["engines"]["sound"]["enabled"]:
+                sound_file = self.config["engines"]["sound"]["file"]
+                self.status_update.emit(f"Playing sound: {sound_file}")
+                sound_engine = SoundEngine()
+                sound_engine.play(sound_file)
 
-                # Wait briefly for graceful shutdown
+            # Spotify engine (synchronous)
+            if self.config["engines"]["spotify"]["enabled"]:
+                context_uri = self.config["engines"]["spotify"]["context_uri"]
+                self.status_update.emit(f"Starting Spotify...")
                 try:
-                    self.current_process.wait(timeout=2)
-                except subprocess.TimeoutExpired:
-                    # Force kill if not terminated
-                    if sys.platform != "win32":
-                        os.killpg(os.getpgid(self.current_process.pid), signal.SIGKILL)
-                    else:
-                        self.current_process.kill()
-            except Exception as e:
-                print(f"Error stopping process: {e}")
-            finally:
-                self.current_process = None
-                self.current_env_name = None
+                    spotify_engine = SpotifyEngine()
+                    spotify_engine.play_context(context_uri)
+                    self.status_update.emit("Spotify playback started")
+                except Exception as e:
+                    self.error_occurred.emit(f"Spotify error: {str(e)}")
 
-    def is_running(self) -> bool:
-        """Check if an environment is currently running."""
-        if self.current_process is None:
-            return False
-        return self.current_process.poll() is None
+            # Lights engine (asynchronous, continuous)
+            if self.config["engines"]["lights"]["enabled"]:
+                self.status_update.emit("Starting light animation...")
+                try:
+                    # Run async event loop for lights
+                    asyncio.run(self._run_lights())
+                except Exception as e:
+                    self.error_occurred.emit(f"Lights error: {str(e)}")
 
-    def get_current_env_name(self) -> Optional[str]:
-        """Return the name of the currently running environment."""
-        return self.current_env_name if self.is_running() else None
+        except Exception as e:
+            self.error_occurred.emit(f"Engine error: {str(e)}")
+        finally:
+            self.running = False
+
+    async def _run_lights(self):
+        """Run the lights engine asynchronously."""
+        self.lights_engine = LightsEngine()
+        animation_config = self.config["engines"]["lights"]["animation"]
+
+        await self.lights_engine.start(animation_config)
+
+        # Keep running until stopped
+        while self.running:
+            await asyncio.sleep(1)
+
+        await self.lights_engine.stop()
+
+    def stop(self):
+        """Stop the engines."""
+        self.running = False
+        self.wait(5000)  # Wait up to 5 seconds for thread to finish
 
 
 class EnvironmentLauncher(QMainWindow):
-    """Main PyQt5 window for the environment launcher."""
+    """Main PyQt5 window for the environment launcher with tabs."""
 
-    # Keyboard layout matching QWERTY rows
+    # Keyboard shortcuts (can be used across all tabs)
     KEYS = [
-        # Row 1: Q-P (10 keys)
         "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",
-        # Row 2: A-L (10 keys)
         "A", "S", "D", "F", "G", "H", "J", "K", "L", ";",
-        # Row 3: Z-N (6 keys)
         "Z", "X", "C", "V", "B", "N",
     ]
 
-    ACTIVE_STYLE = "background-color: #4CAF50; color: white; font-weight: bold; font-size: 11px;"
-    INACTIVE_STYLE = "background-color: #f0f0f0; font-size: 11px;"
-    OVERFLOW_STYLE = "background-color: #e0e0e0; font-size: 10px;"
+    ACTIVE_STYLE = "background-color: #4CAF50; color: white; font-weight: bold; font-size: 10px; padding: 5px;"
+    INACTIVE_STYLE = "background-color: #f0f0f0; font-size: 9px; padding: 5px;"
+    STOP_STYLE = "background-color: #f44336; color: white; font-weight: bold; font-size: 12px;"
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Immerse Yourself - Environment Launcher")
-        self.setGeometry(100, 100, 1100, 450)
+        self.setGeometry(100, 100, 1200, 500)
 
-        # Initialize discovery and process management
-        self.discovery = EnvironmentDiscovery()
-        self.process_manager = ProcessManager()
-        self.environments = self.discovery.discover_environments()
+        # Load configurations
+        self.config_loader = ConfigLoader("env_conf")
+        self.configs = self._load_and_organize_configs()
 
-        # Track buttons for highlighting
-        self.buttons: Dict[str, QPushButton] = {}
+        # Track active environment
+        self.current_runner: Optional[EngineRunner] = None
+        self.current_config_name: Optional[str] = None
+        self.buttons: Dict[str, QPushButton] = {}  # config_name -> button
         self.shortcuts: List[QShortcut] = []
 
         # Create UI
         self._create_ui()
 
-        # Monitor process status
-        self.process_monitor = QTimer()
-        self.process_monitor.timeout.connect(self._check_process_status)
-        self.process_monitor.start(500)  # Check every 500ms
+    def _load_and_organize_configs(self) -> Dict[str, List[Dict[str, Any]]]:
+        """Load all configs and organize by category."""
+        all_configs = self.config_loader.discover_all()
+
+        # Group by category
+        organized = defaultdict(list)
+        for config in all_configs:
+            category = config.get("category", "special")
+            organized[category].append(config)
+
+        # Sort categories
+        sorted_organized = {}
+        for category in ["combat", "social", "exploration", "relaxation", "special"]:
+            if category in organized:
+                # Sort configs within category by name
+                sorted_organized[category] = sorted(
+                    organized[category],
+                    key=lambda c: c["name"]
+                )
+
+        return sorted_organized
 
     def _create_ui(self) -> None:
-        """Create the main UI layout."""
-        # Central widget and main layout
+        """Create the main UI layout with tabs."""
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout()
 
-        # Grid layout for environment buttons
-        grid_layout = QGridLayout()
-        grid_layout.setSpacing(10)
+        # Create tab widget
+        self.tabs = QTabWidget()
+        self.tabs.setTabPosition(QTabWidget.North)
 
-        # Row configurations (row, col_offset, num_cols)
-        rows_config = [
-            (0, 0, 10),  # Row 0: Q-P (10 buttons)
-            (1, 0.5, 10),  # Row 1: A-L (offset 0.5 for stagger effect)
-            (2, 1, 6),  # Row 2: Z-N (offset 1)
-        ]
+        # Add a tab for each category
+        for category, configs in self.configs.items():
+            tab_widget = self._create_category_tab(category, configs)
+            self.tabs.addTab(tab_widget, category.capitalize())
 
-        btn_index = 0
-        for row_num, col_offset, num_cols in rows_config:
-            for col in range(num_cols):
-                if btn_index >= len(self.environments):
-                    break
+        main_layout.addWidget(self.tabs)
 
-                env = self.environments[btn_index]
-                self._create_button(
-                    grid_layout, env, row_num, col, btn_index
-                )
-                btn_index += 1
+        # Add control buttons (Stop button)
+        control_layout = QHBoxLayout()
 
-        main_layout.addLayout(grid_layout)
+        self.stop_button = QPushButton("STOP")
+        self.stop_button.setMinimumHeight(40)
+        self.stop_button.setStyleSheet(self.STOP_STYLE)
+        self.stop_button.clicked.connect(self._stop_current)
+        self.stop_button.setEnabled(False)
+        control_layout.addWidget(self.stop_button)
+
+        main_layout.addLayout(control_layout)
+
         central_widget.setLayout(main_layout)
 
         # Status bar
-        self.statusBar().showMessage("Ready")
+        self.statusBar().showMessage("Ready - Select an environment to start")
 
-    def _create_button(
-        self, layout: QGridLayout, env: Dict, row: int, col: int, index: int
-    ) -> None:
-        """Create a single environment button with optional keyboard shortcut."""
-        # Determine if this button has a keyboard shortcut
-        has_shortcut = index < len(self.KEYS)
-        shortcut_key = self.KEYS[index] if has_shortcut else ""
+    def _create_category_tab(self, category: str, configs: List[Dict[str, Any]]) -> QWidget:
+        """Create a tab widget for a category."""
+        tab_widget = QWidget()
+        layout = QGridLayout()
+        layout.setSpacing(10)
 
-        # Create button text
-        if has_shortcut:
-            btn_text = f"{env['display_name']}\n({shortcut_key})"
-        else:
-            btn_text = env["display_name"]
+        # Create buttons in a grid (4 columns)
+        for idx, config in enumerate(configs):
+            row = idx // 4
+            col = idx % 4
 
-        # Create button
+            # Determine if this config has a global keyboard shortcut
+            global_idx = self._get_global_config_index(config["name"])
+            has_shortcut = global_idx < len(self.KEYS)
+            shortcut_key = self.KEYS[global_idx] if has_shortcut else ""
+
+            # Create button
+            btn = self._create_button(config, shortcut_key)
+            layout.addWidget(btn, row, col)
+
+            # Store button reference
+            self.buttons[config["name"]] = btn
+
+        tab_widget.setLayout(layout)
+        return tab_widget
+
+    def _get_global_config_index(self, config_name: str) -> int:
+        """Get the global index of a config across all categories."""
+        idx = 0
+        for category in ["combat", "social", "exploration", "relaxation", "special"]:
+            if category in self.configs:
+                for config in self.configs[category]:
+                    if config["name"] == config_name:
+                        return idx
+                    idx += 1
+        return 999  # No shortcut
+
+    def _create_button(self, config: Dict[str, Any], shortcut_key: str) -> QPushButton:
+        """Create a button for an environment."""
+        # Button text with metadata
+        name = config["name"]
+        intensity = config.get("metadata", {}).get("intensity", "")
+        description = config.get("description", "")
+
+        # Determine which engines are enabled
+        sound_enabled = config.get("engines", {}).get("sound", {}).get("enabled", False)
+        spotify_enabled = config.get("engines", {}).get("spotify", {}).get("enabled", False)
+        lights_enabled = config.get("engines", {}).get("lights", {}).get("enabled", False)
+
+        # Build emoji indicators
+        emoji_indicators = ""
+        if sound_enabled:
+            emoji_indicators += "🔊"
+        if spotify_enabled:
+            emoji_indicators += "🎵"
+        if lights_enabled:
+            emoji_indicators += "💡"
+
+        # Truncate description if too long (max ~50 chars for readability)
+        if len(description) > 50:
+            description = description[:47] + "..."
+
+        btn_text = f"{emoji_indicators} {name}"
+        if intensity:
+            btn_text += f"\n[{intensity}]"
+        if shortcut_key:
+            btn_text += f" ({shortcut_key})"
+        if description:
+            btn_text += f"\n{description}"
+
+        # Create button with larger size to fit description
         btn = QPushButton(btn_text)
-        btn.setMinimumHeight(70)
-        btn.setMinimumWidth(90)
-        btn.setStyleSheet(self.INACTIVE_STYLE if has_shortcut else self.OVERFLOW_STYLE)
-        btn.env = env  # Store environment info on button
+        btn.setMinimumHeight(100)
+        btn.setMinimumWidth(140)
+        btn.setStyleSheet(self.INACTIVE_STYLE)
+        btn.setToolTip(config.get("description", ""))  # Full description in tooltip
 
-        # Connect click event
-        btn.clicked.connect(lambda checked, e=env: self._on_environment_clicked(e))
-
-        # Store button for highlighting
-        self.buttons[env["filename"]] = btn
-
-        # Add to grid layout
-        layout.addWidget(btn, row, col)
+        # Connect click
+        btn.clicked.connect(lambda: self._start_environment(config))
 
         # Create keyboard shortcut if applicable
-        if has_shortcut:
+        if shortcut_key:
             shortcut = QShortcut(QKeySequence(shortcut_key), self)
-            shortcut.activated.connect(
-                lambda e=env: self._on_environment_clicked(e)
-            )
+            shortcut.activated.connect(lambda: self._start_environment(config))
             self.shortcuts.append(shortcut)
 
-    def _on_environment_clicked(self, env: Dict) -> None:
-        """Handle environment button click or keyboard shortcut."""
-        success = self.process_manager.start_environment(
-            env["filepath"], env["display_name"]
-        )
+        return btn
 
-        if success:
-            # Update UI
-            self._update_active_button(env["filename"])
-            self.statusBar().showMessage(f"Running: {env['display_name']}")
-        else:
-            self.statusBar().showMessage(
-                f"Failed to start: {env['display_name']}"
-            )
-            QMessageBox.warning(
+    def _start_environment(self, config: Dict[str, Any]) -> None:
+        """Start an environment."""
+        # Stop current if running
+        if self.current_runner is not None:
+            self._stop_current()
+
+        # Create and start runner
+        try:
+            self.current_runner = EngineRunner(config)
+            self.current_runner.error_occurred.connect(self._on_error)
+            self.current_runner.status_update.connect(self._on_status_update)
+            self.current_runner.finished.connect(self._on_runner_finished)
+            self.current_runner.start()
+
+            self.current_config_name = config["name"]
+            self._update_active_button(config["name"])
+            self.stop_button.setEnabled(True)
+            self.statusBar().showMessage(f"Running: {config['name']}")
+
+        except Exception as e:
+            QMessageBox.critical(
                 self,
-                "Launch Failed",
-                f"Could not start {env['display_name']}.\n\nCheck that all config files (.spotify.ini, .wizbulb.ini) are present.",
+                "Error",
+                f"Failed to start {config['name']}:\n{str(e)}"
             )
+            self.statusBar().showMessage("Error starting environment")
 
-    def _update_active_button(self, active_filename: str) -> None:
-        """Highlight the active environment button and unhighlight others."""
-        for filename, btn in self.buttons.items():
-            if filename == active_filename:
+    def _stop_current(self) -> None:
+        """Stop the currently running environment."""
+        if self.current_runner is not None:
+            self.statusBar().showMessage("Stopping...")
+            self.current_runner.stop()
+            self.current_runner = None
+            self.current_config_name = None
+            self._reset_button_styles()
+            self.stop_button.setEnabled(False)
+            self.statusBar().showMessage("Stopped")
+
+    def _on_error(self, error_msg: str) -> None:
+        """Handle error from engine runner."""
+        QMessageBox.warning(self, "Engine Error", error_msg)
+        self.statusBar().showMessage(f"Error: {error_msg}")
+
+    def _on_status_update(self, status: str) -> None:
+        """Handle status update from engine runner."""
+        self.statusBar().showMessage(status)
+
+    def _on_runner_finished(self) -> None:
+        """Handle runner thread finishing."""
+        if self.current_config_name:
+            self.statusBar().showMessage(f"{self.current_config_name} finished")
+
+    def _update_active_button(self, active_name: str) -> None:
+        """Highlight the active environment button."""
+        for name, btn in self.buttons.items():
+            if name == active_name:
                 btn.setStyleSheet(self.ACTIVE_STYLE)
             else:
-                # Determine if button should have regular or overflow style
-                btn_index = next(
-                    (i for i, env in enumerate(self.environments)
-                     if env["filename"] == filename),
-                    -1
-                )
-                has_shortcut = btn_index < len(self.KEYS) if btn_index >= 0 else False
-                btn.setStyleSheet(
-                    self.INACTIVE_STYLE if has_shortcut else self.OVERFLOW_STYLE
-                )
-
-    def _check_process_status(self) -> None:
-        """Periodically check if the current process is still running."""
-        if not self.process_manager.is_running():
-            if self.process_manager.current_env_name:
-                # Process has died, reset UI
-                self._reset_button_styles()
-                self.statusBar().showMessage("Environment stopped")
-                self.process_manager.current_env_name = None
+                btn.setStyleSheet(self.INACTIVE_STYLE)
 
     def _reset_button_styles(self) -> None:
         """Reset all buttons to inactive state."""
-        for i, (filename, btn) in enumerate(self.buttons.items()):
-            has_shortcut = i < len(self.KEYS)
-            btn.setStyleSheet(
-                self.INACTIVE_STYLE if has_shortcut else self.OVERFLOW_STYLE
-            )
+        for btn in self.buttons.values():
+            btn.setStyleSheet(self.INACTIVE_STYLE)
 
     def closeEvent(self, event) -> None:
-        """Handle window close event - stop any running environment."""
-        if self.process_manager.is_running():
+        """Handle window close event."""
+        if self.current_runner is not None and self.current_runner.running:
             reply = QMessageBox.question(
                 self,
                 "Confirm Exit",
-                f"Environment '{self.process_manager.current_env_name}' is running.\n\nStop and exit?",
+                f"Environment '{self.current_config_name}' is running.\n\nStop and exit?",
                 QMessageBox.Yes | QMessageBox.No,
             )
 
             if reply == QMessageBox.Yes:
-                self.process_manager.stop_current()
+                self._stop_current()
                 event.accept()
             else:
                 event.ignore()

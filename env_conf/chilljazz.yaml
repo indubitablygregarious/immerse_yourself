@@ -1,0 +1,43 @@
+name: "Chill Jazz"
+category: "relaxation"
+description: "Ultra-relaxed jazz atmosphere with soft warm lighting and gentle animations"
+
+metadata:
+  tags: ["relaxation", "jazz", "ambient", "slow", "peaceful", "music"]
+  intensity: "low"
+  suitable_for: ["meditation", "reading", "background music", "downtime"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:37i9dQZF1EIe80k6uRBZGd"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 60  # Very slow for relaxation
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [128, 128, 64]  # Warm yellowish
+            variance: [20, 20, 20]
+          brightness:
+            min: 100
+            max: 220
+          flash:
+            probability: 0.05  # Rare flashes (>95%)
+            color: [255, 255, 255]
+            brightness: 220
+            duration: 1.0
+
+        overhead:
+          type: "inherit_backdrop"
+
+        battlefield:
+          type: "inherit_backdrop"

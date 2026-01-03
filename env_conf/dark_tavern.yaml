@@ -1,0 +1,45 @@
+name: "Dark Tavern"
+category: "social"
+description: "Atmospheric dark tavern with dim torch lighting and door sounds"
+
+metadata:
+  tags: ["social", "indoor", "dark", "mysterious", "medieval", "tavern"]
+  intensity: "low"
+  suitable_for: ["tabletop gaming", "social scenes", "mysterious encounters", "noir"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/dooropen.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:5Q8DWZnPe7o7GA96SARmOK"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [0, 0, 0]  # Backdrop turned off
+            variance: [0, 0, 0]
+          brightness:
+            min: 0
+            max: 0
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 0
+            max: 60
+
+        battlefield:
+          type: "inherit_overhead"

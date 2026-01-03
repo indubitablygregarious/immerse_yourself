@@ -1,0 +1,19 @@
+name: "Gasp"
+category: "special"
+description: "Shocked gasp reaction sound"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "shock", "surprise", "reaction", "dramatic"]
+  intensity: "medium"
+  suitable_for: ["surprising moments", "revelations", "shock reactions", "dramatic reveals"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/gasp_SJHmiqB.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

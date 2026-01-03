@@ -1,0 +1,19 @@
+name: "Crowd Boo"
+category: "social"
+description: "Crowd booing and jeering disapproval"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "crowd", "negative", "disapproval"]
+  intensity: "medium"
+  suitable_for: ["failures", "bad decisions", "unpopular choices", "defeats"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/booing_1.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

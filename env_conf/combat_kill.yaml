@@ -1,0 +1,19 @@
+name: "Combat Elimination"
+category: "combat"
+description: "Tactical combat kill sound effect"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "combat", "tactical", "game", "elimination"]
+  intensity: "medium"
+  suitable_for: ["combat events", "enemy elimination", "tactical victories", "game moments"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/stationary-kill_BYNTAld.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

@@ -1,0 +1,43 @@
+name: "Battle Water"
+category: "combat"
+description: "Intense water combat with blue lighting and red danger flashes"
+
+metadata:
+  tags: ["combat", "water", "battle", "intense", "ocean", "underwater"]
+  intensity: "high"
+  suitable_for: ["boss fights", "combat encounters", "water battles", "sea battles"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/danger.opus"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:6FohP6m1ipvNjgllOH4HLt"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 3  # Fast animation for combat intensity
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [15, 15, 255]  # Deep blue for water
+            variance: [10, 10, 10]
+          brightness:
+            min: 74
+            max: 255
+          flash:
+            probability: 0.25  # High flash rate (>75%)
+            color: [255, 16, 16]  # Red danger flash
+            brightness: 230
+            duration: 1.0
+
+        overhead:
+          type: "inherit_backdrop"
+
+        battlefield:
+          type: "inherit_backdrop"

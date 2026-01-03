@@ -1,0 +1,19 @@
+name: "Rimshot"
+category: "social"
+description: "Classic comedy ba-dum-tss drum sting"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "comedy", "joke", "punchline"]
+  intensity: "low"
+  suitable_for: ["comedic moments", "jokes", "puns", "awkward situations"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/badumtss.swf.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

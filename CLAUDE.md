@@ -9,13 +9,185 @@ This is the "Immerse Yourself" project—an interactive ambient environment syst
 - **Smart light control**: WIZ smart bulbs that respond to scene context with synchronized color and animation patterns
 - **Sound effects**: Local audio files that play when scenes are triggered
 
-Each scene is a standalone Python script that orchestrates both music and lighting for a specific ambiance (taverns, dungeons, travel routes, battles, etc).
+## Current Architecture (Refactored)
 
-The project includes:
-- **`launcher.py`**: PyQt5 GUI for launching environments with keyboard shortcuts
-- **`environments/`**: Directory containing all scene scripts (26+ different environments)
+The project has been refactored from individual Python scripts into a modular engine-based architecture:
 
-## Architecture
+### Core Components
+
+- **Three Engines** (`engines/` directory):
+  - **Sound Engine**: Plays sound effects with graceful error handling
+  - **Spotify Engine**: Manages Spotify authentication and playback
+  - **Lights Engine**: Controls WIZ bulbs with async animations and hot-swapping support
+
+- **YAML Configuration** (`env_conf/` directory):
+  - Environments defined in YAML files instead of Python scripts
+  - See `env_conf/README.md` for complete schema documentation
+  - Example configs: `tavern.yaml`, `battle_dungeon.yaml`, `chill.yaml`, etc.
+
+- **Lighting Daemon** (`lighting_daemon.py`):
+  - Separate process for background light animation
+  - Keeps lights running while switching environments (no flicker/blackout)
+  - Communicates via JSON over stdin/stdout
+  - Hot-swaps animation configs without restarting
+
+- **Config Loader** (`config_loader.py`):
+  - Loads and validates YAML environment configurations
+  - Caching and discovery of all configs
+  - Category filtering
+
+- **Launcher** (`launcher.py`):
+  - PyQt5 GUI for launching environments with keyboard shortcuts
+  - ⚠️ **Currently being refactored** to use new engine-based architecture
+  - Will add: Tabs, Stop button, Error viewer, Engine orchestrator
+
+### Key Innovation: Background Lighting Persistence
+
+The lighting daemon runs independently, allowing lights to continue animating while you switch between environments. Configuration updates are hot-swapped without turning lights off, resulting in smooth transitions.
+
+## Architecture (Detailed)
+
+See `ARCHITECTURE.md` for complete architectural documentation including:
+- Component descriptions and APIs
+- Data flow diagrams
+- Design decisions and rationale
+- IPC protocol specification
+- Testing strategy
+
+## Common Development Tasks (New Architecture)
+
+### Using the Makefile
+
+```bash
+make help           # Show all available commands
+make install        # Install dependencies
+make validate-configs  # Validate all YAML configs
+make run            # Start launcher
+make daemon         # Start lighting daemon manually (for debugging)
+make test           # Run tests (when available)
+make clean          # Remove cache files
+```
+
+### Creating a New Environment
+
+1. Create a new YAML file in `env_conf/`:
+
+```yaml
+name: "My Custom Environment"
+category: "special"
+description: "Brief description"
+
+metadata:
+  tags: ["custom", "experimental"]
+  intensity: "medium"
+
+engines:
+  sound:
+    enabled: true
+    file: "your_sound.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:YOUR_PLAYLIST_ID"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [128, 128, 128]
+            variance: [20, 20, 20]
+          brightness:
+            min: 100
+            max: 255
+```
+
+2. Validate the config:
+
+```bash
+make validate-configs
+# or
+python3 -c "from config_loader import ConfigLoader; ConfigLoader('env_conf').load('your_file.yaml')"
+```
+
+3. Restart the launcher to see your new environment
+
+### Testing the Engines Individually
+
+**Sound Engine:**
+```python
+from engines import SoundEngine
+engine = SoundEngine()
+engine.play("chill.wav")
+```
+
+**Spotify Engine:**
+```python
+from engines import SpotifyEngine
+engine = SpotifyEngine()
+engine.play_context("spotify:playlist:XXXX...")
+```
+
+**Lights Engine:**
+```python
+import asyncio
+from engines import LightsEngine
+
+config = {
+    "cycletime": 10,
+    "groups": {
+        "backdrop": {
+            "type": "rgb",
+            "rgb": {"base": [255, 0, 0], "variance": [20, 20, 20]},
+            "brightness": {"min": 100, "max": 200}
+        }
+    }
+}
+
+async def test():
+    engine = LightsEngine()
+    await engine.start(config)
+    await asyncio.sleep(30)  # Run for 30 seconds
+    await engine.stop()
+
+asyncio.run(test())
+```
+
+### Testing the Lighting Daemon
+
+Start the daemon manually:
+```bash
+python3 lighting_daemon.py
+```
+
+Send commands via stdin (JSON, one per line):
+```json
+{"command": "update_animation", "config": {"cycletime": 5, "groups": {...}}}
+{"command": "ping"}
+{"command": "stop"}
+```
+
+Watch stdout for responses:
+```json
+{"type": "status", "message": "Animation started"}
+{"type": "error", "message": "Bulb unreachable", "timestamp": "..."}
+```
+
+### Modifying Light Behavior
+
+Edit the YAML config file for an environment:
+
+- **Speed up/slow down**: Change `cycletime` (lower = faster)
+- **Change colors**: Modify `rgb.base` values `[R, G, B]`
+- **More variety**: Increase `rgb.variance` values
+- **Brightness**: Adjust `brightness.min` and `brightness.max`
+- **Flash rate**: Change `flash.probability` (0.0 to 1.0)
+- **Flash color**: Modify `flash.color` `[R, G, B]`
+
+## Legacy Architecture (Pre-Refactoring)
 
 ### Scene Structure
 Each scene follows a consistent pattern:

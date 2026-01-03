@@ -1,0 +1,19 @@
+name: "Science Success"
+category: "social"
+description: "Enthusiastic 'Yes! Science!' celebration"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "science", "celebration", "discovery", "achievement"]
+  intensity: "medium"
+  suitable_for: ["scientific discoveries", "eureka moments", "problem solving", "intellectual victories"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/yes-science.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

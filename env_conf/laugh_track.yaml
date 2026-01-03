@@ -1,0 +1,19 @@
+name: "Laugh Track"
+category: "social"
+description: "Sitcom audience laughter track"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "comedy", "sitcom", "audience", "reaction"]
+  intensity: "medium"
+  suitable_for: ["comedic moments", "jokes", "funny situations", "lighthearted scenes"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/sitcom-laughing-1.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

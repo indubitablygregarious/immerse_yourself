@@ -1,0 +1,46 @@
+name: "Town"
+category: "social"
+description: "Bright daytime town atmosphere with torch backdrops, sun lighting, and vibrant sky colors"
+
+metadata:
+  tags: ["social", "outdoor", "town", "daytime", "bright", "medieval"]
+  intensity: "low"
+  suitable_for: ["town exploration", "social scenes", "shopping", "daytime activities"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/dooropen.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:68O4wDfqFOBcDm3RV9dvsF"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 30  # Slow peaceful animation
+
+      groups:
+        backdrop:
+          type: "scene"
+          scenes:
+            ids: [31]  # Torch scene
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 235
+            max: 255
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [58, 58, 158]  # Sky blue
+            variance: [50, 50, 50]
+          brightness:
+            min: 225
+            max: 255
+          # Note: One bulb uses scene 12 (sun) at brightness 255 - handled separately in code
+
+        battlefield:
+          type: "inherit_overhead"

@@ -1,0 +1,19 @@
+name: "Wah Wah"
+category: "social"
+description: "Descending wah-wah disappointment sound"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "failure", "disappointment", "comedic", "classic"]
+  intensity: "low"
+  suitable_for: ["letdowns", "failed attempts", "bad outcomes", "comedic failures"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/wah-wah-sound-effect.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

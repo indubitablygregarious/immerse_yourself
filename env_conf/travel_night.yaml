@@ -1,0 +1,51 @@
+name: "Travel Night"
+category: "exploration"
+description: "Nighttime travel with very dark lighting, moonlight, and minimal illumination"
+
+metadata:
+  tags: ["exploration", "travel", "nighttime", "dark", "mysterious", "moon"]
+  intensity: "low"
+  suitable_for: ["night travel", "mysterious journeys", "atmospheric exploration"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:4Hhe4kDZSKZNBQjpUZABpK"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 6  # Medium speed for travel
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [0, 0, 0]  # Very dark
+            variance: [10, 10, 10]
+          brightness:
+            min: 0
+            max: 10
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [0, 0, 16]  # Very dark blue
+            variance: [10, 10, 10]
+          brightness:
+            min: 0
+            max: 10
+          # Note: One bulb uses moon (255, 255, 128) at brightness 100 - handled separately in code
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [0, 0, 16]  # Very dark blue
+            variance: [30, 30, 30]
+          brightness:
+            min: 0
+            max: 20

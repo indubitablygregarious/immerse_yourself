@@ -1,0 +1,19 @@
+name: "Oh My God!"
+category: "special"
+description: "Viral 'Oh my god!' vine sound clip"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "meme", "reaction", "shock", "surprise"]
+  intensity: "medium"
+  suitable_for: ["shocking moments", "dramatic reveals", "surprise reactions", "comedic timing"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/oh_my_god_vine.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

@@ -1,0 +1,19 @@
+name: "Wilhelm Scream"
+category: "combat"
+description: "Iconic Wilhelm scream sound effect"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "classic", "scream", "death", "cinematic"]
+  intensity: "high"
+  suitable_for: ["death scenes", "falling", "dramatic moments", "cinematic references"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/wilhelmscream.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

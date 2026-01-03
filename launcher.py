@@ -98,8 +98,7 @@ class ProcessManager:
             self.current_process = subprocess.Popen(
                 [sys.executable, script_path],
                 cwd=self.project_root,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                # Let stdout/stderr pass through to terminal for debugging
                 # Create new process group for clean termination
                 preexec_fn=os.setsid if sys.platform != "win32" else None,
             )

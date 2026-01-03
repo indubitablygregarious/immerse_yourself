@@ -1,8 +1,22 @@
+# Spotify and WIZ bulb configuration (contains credentials)
 .spotify*
 .wizbulb*
 .cache
-*wav
-*opus
+
+# Audio files (not royalty-free, avoid copyright issues)
+*.mp3
+*.wav
+*.opus
+*.ogg
+*.flac
+*.aac
+*.m4a
+*.wma
+*.aiff
+*.aif
+*.swf.mp3
+
+# Python
 __pycache__/
 *.pyc
 *.pyo

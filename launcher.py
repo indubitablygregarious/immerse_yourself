@@ -95,21 +95,21 @@ class EngineRunner(QThread):
 class EnvironmentLauncher(QMainWindow):
     """Main PyQt5 window for the environment launcher with tabs."""
 
-    # Keyboard shortcuts (can be used across all tabs)
+    # Keyboard shortcuts (applied to current tab only)
     KEYS = [
         "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",
         "A", "S", "D", "F", "G", "H", "J", "K", "L", ";",
         "Z", "X", "C", "V", "B", "N",
     ]
 
-    ACTIVE_STYLE = "background-color: #4CAF50; color: white; font-weight: bold; font-size: 10px; padding: 5px;"
-    INACTIVE_STYLE = "background-color: #f0f0f0; font-size: 9px; padding: 5px;"
+    ACTIVE_STYLE = "background-color: #4CAF50; color: white; padding: 8px; font-family: monospace; font-size: 13px;"
+    INACTIVE_STYLE = "background-color: #f0f0f0; padding: 8px; font-family: monospace; font-size: 13px;"
     STOP_STYLE = "background-color: #f44336; color: white; font-weight: bold; font-size: 12px;"
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Immerse Yourself - Environment Launcher")
-        self.setGeometry(100, 100, 1200, 500)
+        self.setGeometry(100, 100, 1000, 600)
 
         # Load configurations
         self.config_loader = ConfigLoader("env_conf")
@@ -121,9 +121,11 @@ class EnvironmentLauncher(QMainWindow):
         self.buttons: Dict[str, QPushButton] = {}  # config_name -> button
         self.shortcuts: List[QShortcut] = []
         self._old_runners: List[EngineRunner] = []  # Keep refs until threads finish
+        self.tab_configs: Dict[int, List[Dict[str, Any]]] = {}  # tab_index -> configs
 
         # Create UI
         self._create_ui()
+        self._setup_tab_shortcuts()
 
     def _load_and_organize_configs(self) -> Dict[str, List[Dict[str, Any]]]:
         """Load all configs and organize by category."""
@@ -158,9 +160,15 @@ class EnvironmentLauncher(QMainWindow):
         self.tabs.setTabPosition(QTabWidget.North)
 
         # Add a tab for each category
+        tab_index = 0
         for category, configs in self.configs.items():
             tab_widget = self._create_category_tab(category, configs)
             self.tabs.addTab(tab_widget, category.capitalize())
+            self.tab_configs[tab_index] = configs
+            tab_index += 1
+
+        # Connect tab change to update shortcuts
+        self.tabs.currentChanged.connect(self._on_tab_changed)
 
         main_layout.addWidget(self.tabs)
 
@@ -192,10 +200,8 @@ class EnvironmentLauncher(QMainWindow):
             row = idx // 4
             col = idx % 4
 
-            # Determine if this config has a global keyboard shortcut
-            global_idx = self._get_global_config_index(config["name"])
-            has_shortcut = global_idx < len(self.KEYS)
-            shortcut_key = self.KEYS[global_idx] if has_shortcut else ""
+            # Shortcut key based on position in this tab
+            shortcut_key = self.KEYS[idx] if idx < len(self.KEYS) else ""
 
             # Create button
             btn = self._create_button(config, shortcut_key)
@@ -207,22 +213,51 @@ class EnvironmentLauncher(QMainWindow):
         tab_widget.setLayout(layout)
         return tab_widget
 
-    def _get_global_config_index(self, config_name: str) -> int:
-        """Get the global index of a config across all categories."""
-        idx = 0
-        for category in ["combat", "social", "exploration", "relaxation", "special"]:
-            if category in self.configs:
-                for config in self.configs[category]:
-                    if config["name"] == config_name:
-                        return idx
-                    idx += 1
-        return 999  # No shortcut
+    def _setup_tab_shortcuts(self) -> None:
+        """Setup tab navigation and per-tab button shortcuts."""
+        # Tab navigation: Ctrl+PgUp/PgDn
+        next_tab = QShortcut(QKeySequence("Ctrl+PgDown"), self)
+        next_tab.activated.connect(lambda: self.tabs.setCurrentIndex(
+            (self.tabs.currentIndex() + 1) % self.tabs.count()
+        ))
+
+        prev_tab = QShortcut(QKeySequence("Ctrl+PgUp"), self)
+        prev_tab.activated.connect(lambda: self.tabs.setCurrentIndex(
+            (self.tabs.currentIndex() - 1) % self.tabs.count()
+        ))
+
+        # Setup initial shortcuts for first tab
+        self._update_shortcuts_for_tab(0)
+
+    def _on_tab_changed(self, index: int) -> None:
+        """Handle tab change - remap keyboard shortcuts."""
+        self._update_shortcuts_for_tab(index)
+
+    def _update_shortcuts_for_tab(self, tab_index: int) -> None:
+        """Update keyboard shortcuts to point to current tab's buttons."""
+        # Clear existing shortcuts
+        for shortcut in self.shortcuts:
+            shortcut.setEnabled(False)
+            shortcut.deleteLater()
+        self.shortcuts.clear()
+
+        # Get configs for this tab
+        configs = self.tab_configs.get(tab_index, [])
+
+        # Create shortcuts for each button in this tab
+        for idx, config in enumerate(configs):
+            if idx >= len(self.KEYS):
+                break
+            key = self.KEYS[idx]
+            shortcut = QShortcut(QKeySequence(key), self)
+            shortcut.activated.connect(
+                lambda c=config: self._start_environment(c)
+            )
+            self.shortcuts.append(shortcut)
 
     def _create_button(self, config: Dict[str, Any], shortcut_key: str) -> QPushButton:
         """Create a button for an environment."""
-        # Button text with metadata
         name = config["name"]
-        intensity = config.get("metadata", {}).get("intensity", "")
         description = config.get("description", "")
 
         # Determine which engines are enabled
@@ -230,42 +265,62 @@ class EnvironmentLauncher(QMainWindow):
         spotify_enabled = config.get("engines", {}).get("spotify", {}).get("enabled", False)
         lights_enabled = config.get("engines", {}).get("lights", {}).get("enabled", False)
 
-        # Build emoji indicators
+        # Build emoji indicators - use distinct emoji for sound-only
         emoji_indicators = ""
+        is_sound_only = sound_enabled and not spotify_enabled and not lights_enabled
         if sound_enabled:
-            emoji_indicators += "🔊"
+            emoji_indicators += "📢" if is_sound_only else "🔊"
         if spotify_enabled:
             emoji_indicators += "🎵"
         if lights_enabled:
             emoji_indicators += "💡"
 
-        # Truncate description if too long (max ~50 chars for readability)
-        if len(description) > 50:
-            description = description[:47] + "..."
-
-        btn_text = f"{emoji_indicators} {name}"
-        if intensity:
-            btn_text += f"\n[{intensity}]"
-        if shortcut_key:
-            btn_text += f" ({shortcut_key})"
+        # Word wrap description to ~30 chars per line for 3 lines
+        desc_lines = []
         if description:
-            btn_text += f"\n{description}"
+            words = description.split()
+            current_line = ""
+            for word in words:
+                if len(current_line) + len(word) + 1 <= 30:
+                    current_line += (" " if current_line else "") + word
+                else:
+                    if current_line:
+                        desc_lines.append(current_line)
+                    current_line = word
+                if len(desc_lines) >= 3:
+                    break
+            if current_line and len(desc_lines) < 3:
+                desc_lines.append(current_line)
 
-        # Create button with larger size to fit description
+        # Build button text with fixed-width padding for alignment
+        # Header: "emoji      name      (key)"
+        hotkey_text = f"({shortcut_key})" if shortcut_key else "   "
+
+        # Pad to create: emoji (left) ... name (center) ... hotkey (right)
+        total_width = 28
+        emoji_part = emoji_indicators.ljust(4)
+        hotkey_part = hotkey_text.rjust(4)
+        # Center the name in remaining space
+        center_width = total_width - 8
+        name_part = name.center(center_width)
+
+        header = f"{emoji_part}{name_part}{hotkey_part}"
+
+        # Combine: header, blank line, description
+        btn_text = header + "\n"
+        if desc_lines:
+            for line in desc_lines:
+                btn_text += "\n" + line.center(total_width)
+
+        # Create button
         btn = QPushButton(btn_text)
-        btn.setMinimumHeight(100)
-        btn.setMinimumWidth(140)
+        btn.setMinimumHeight(130)
+        btn.setMinimumWidth(260)
         btn.setStyleSheet(self.INACTIVE_STYLE)
-        btn.setToolTip(config.get("description", ""))  # Full description in tooltip
+        btn.setToolTip(config.get("description", ""))
 
         # Connect click
-        btn.clicked.connect(lambda: self._start_environment(config))
-
-        # Create keyboard shortcut if applicable
-        if shortcut_key:
-            shortcut = QShortcut(QKeySequence(shortcut_key), self)
-            shortcut.activated.connect(lambda: self._start_environment(config))
-            self.shortcuts.append(shortcut)
+        btn.clicked.connect(lambda checked=False, c=config: self._start_environment(c))
 
         return btn
 

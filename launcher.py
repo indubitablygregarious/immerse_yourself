@@ -6,6 +6,7 @@ A PyQt5 GUI for managing ambient environment configs with Spotify and smart ligh
 
 import sys
 import asyncio
+import threading
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 from collections import defaultdict
@@ -27,24 +28,31 @@ class EngineRunner(QThread):
 
     error_occurred = pyqtSignal(str)
     status_update = pyqtSignal(str)
+    sound_finished = pyqtSignal()  # Signal when sound-only config finishes
 
     def __init__(self, config: Dict[str, Any]):
         super().__init__()
         self.config = config
         self.lights_engine: Optional[LightsEngine] = None
         self.running = False
+        self.has_lights = config["engines"]["lights"]["enabled"]
+        self._sound_done_event = threading.Event()
 
     def run(self):
         """Run the engines based on configuration."""
         try:
             self.running = True
 
-            # Sound engine (synchronous, one-shot)
+            # Sound engine (non-blocking, fire and forget)
             if self.config["engines"]["sound"]["enabled"]:
                 sound_file = self.config["engines"]["sound"]["file"]
                 self.status_update.emit(f"Playing sound: {sound_file}")
                 sound_engine = SoundEngine()
-                sound_engine.play(sound_file)
+                # For sound-only configs, use callback to signal when done
+                if not self.has_lights:
+                    sound_engine.play_async(sound_file, on_complete=self._on_sound_complete)
+                else:
+                    sound_engine.play_async(sound_file)
 
             # Spotify engine (synchronous)
             if self.config["engines"]["spotify"]["enabled"]:
@@ -65,11 +73,19 @@ class EngineRunner(QThread):
                     asyncio.run(self._run_lights())
                 except Exception as e:
                     self.error_occurred.emit(f"Lights error: {str(e)}")
+            elif self.config["engines"]["sound"]["enabled"]:
+                # Sound-only config - wait for sound to finish
+                self._sound_done_event.wait()
 
         except Exception as e:
             self.error_occurred.emit(f"Engine error: {str(e)}")
         finally:
             self.running = False
+
+    def _on_sound_complete(self):
+        """Called when sound-only playback completes."""
+        self._sound_done_event.set()
+        self.sound_finished.emit()
 
     async def _run_lights(self):
         """Run the lights engine asynchronously."""
@@ -118,6 +134,8 @@ class EnvironmentLauncher(QMainWindow):
         # Track active environment
         self.current_runner: Optional[EngineRunner] = None
         self.current_config_name: Optional[str] = None
+        self.lights_runner: Optional[EngineRunner] = None  # Runner with active lights
+        self.lights_config_name: Optional[str] = None  # Config name with active lights
         self.buttons: Dict[str, QPushButton] = {}  # config_name -> button
         self.shortcuts: List[QShortcut] = []
         self._old_runners: List[EngineRunner] = []  # Keep refs until threads finish
@@ -326,22 +344,38 @@ class EnvironmentLauncher(QMainWindow):
 
     def _start_environment(self, config: Dict[str, Any]) -> None:
         """Start an environment."""
-        # Stop current if running
-        if self.current_runner is not None:
-            self._stop_current()
+        has_lights = config["engines"]["lights"]["enabled"]
+
+        # Only stop lights runner if new config has lights
+        if has_lights and self.lights_runner is not None:
+            self._stop_lights()
 
         # Create and start runner
         try:
-            self.current_runner = EngineRunner(config)
-            self.current_runner.error_occurred.connect(self._on_error)
-            self.current_runner.status_update.connect(self._on_status_update)
-            self.current_runner.finished.connect(self._on_runner_finished)
-            self.current_runner.start()
+            runner = EngineRunner(config)
+            runner.error_occurred.connect(self._on_error)
+            runner.status_update.connect(self._on_status_update)
+            runner.finished.connect(lambda: self._on_runner_finished(runner))
+            runner.sound_finished.connect(lambda: self._on_sound_finished(config["name"]))
+            runner.start()
 
+            self.current_runner = runner
             self.current_config_name = config["name"]
-            self._update_active_button(config["name"])
-            self.stop_button.setEnabled(True)
-            self.statusBar().showMessage(f"Running: {config['name']}")
+
+            if has_lights:
+                # This is a lights config - track it and highlight button
+                self.lights_runner = runner
+                self.lights_config_name = config["name"]
+                self._update_active_button(config["name"])
+                self.stop_button.setEnabled(True)
+                self.statusBar().showMessage(f"Running: {config['name']}")
+            else:
+                # Sound-only config - highlight it while playing
+                self._update_active_button(config["name"])
+                status = f"Playing: {config['name']}"
+                if self.lights_config_name:
+                    status += f" (Lights: {self.lights_config_name})"
+                self.statusBar().showMessage(status)
 
         except Exception as e:
             QMessageBox.critical(
@@ -351,20 +385,25 @@ class EnvironmentLauncher(QMainWindow):
             )
             self.statusBar().showMessage("Error starting environment")
 
-    def _stop_current(self) -> None:
-        """Stop the currently running environment."""
-        if self.current_runner is not None:
-            self.statusBar().showMessage("Stopping...")
-            old_runner = self.current_runner
+    def _stop_lights(self) -> None:
+        """Stop the currently running lights."""
+        if self.lights_runner is not None:
+            old_runner = self.lights_runner
             old_runner.stop()
             # Keep reference until thread finishes to avoid QThread crash
             self._old_runners.append(old_runner)
             old_runner.finished.connect(lambda: self._cleanup_old_runner(old_runner))
-            self.current_runner = None
-            self.current_config_name = None
-            self._reset_button_styles()
-            self.stop_button.setEnabled(False)
-            self.statusBar().showMessage("Stopped")
+            self.lights_runner = None
+            self.lights_config_name = None
+
+    def _stop_current(self) -> None:
+        """Stop all running environments (lights)."""
+        self._stop_lights()
+        self.current_runner = None
+        self.current_config_name = None
+        self._reset_button_styles()
+        self.stop_button.setEnabled(False)
+        self.statusBar().showMessage("Stopped")
 
     def _cleanup_old_runner(self, runner: EngineRunner) -> None:
         """Remove finished runner from old runners list."""
@@ -380,13 +419,28 @@ class EnvironmentLauncher(QMainWindow):
         """Handle status update from engine runner."""
         self.statusBar().showMessage(status)
 
-    def _on_runner_finished(self) -> None:
+    def _on_sound_finished(self, sound_name: str) -> None:
+        """Handle sound-only config finishing."""
+        if self.lights_config_name:
+            self.statusBar().showMessage(f"Sound '{sound_name}' finished - Lights: {self.lights_config_name}")
+            # Re-highlight the active lights button
+            self._update_active_button(self.lights_config_name)
+        else:
+            self.statusBar().showMessage(f"Sound '{sound_name}' finished")
+            self._reset_button_styles()
+
+    def _on_runner_finished(self, runner: EngineRunner) -> None:
         """Handle runner thread finishing."""
-        if self.current_config_name:
-            self.statusBar().showMessage(f"{self.current_config_name} finished")
+        # Only update status if this was the lights runner
+        if runner == self.lights_runner:
+            self.statusBar().showMessage(f"{self.lights_config_name} finished")
+            self.lights_runner = None
+            self.lights_config_name = None
+            self._reset_button_styles()
+            self.stop_button.setEnabled(False)
 
     def _update_active_button(self, active_name: str) -> None:
-        """Highlight the active environment button."""
+        """Highlight the active lights button."""
         for name, btn in self.buttons.items():
             if name == active_name:
                 btn.setStyleSheet(self.ACTIVE_STYLE)
@@ -400,18 +454,18 @@ class EnvironmentLauncher(QMainWindow):
 
     def closeEvent(self, event) -> None:
         """Handle window close event."""
-        if self.current_runner is not None and self.current_runner.running:
+        if self.lights_runner is not None and self.lights_runner.running:
             reply = QMessageBox.question(
                 self,
                 "Confirm Exit",
-                f"Environment '{self.current_config_name}' is running.\n\nStop and exit?",
+                f"Lights '{self.lights_config_name}' are running.\n\nStop and exit?",
                 QMessageBox.Yes | QMessageBox.No,
             )
 
             if reply == QMessageBox.Yes:
                 # On exit, actually wait for cleanup
-                self.current_runner.running = False
-                self.current_runner.wait(2000)
+                self.lights_runner.running = False
+                self.lights_runner.wait(2000)
                 event.accept()
             else:
                 event.ignore()

@@ -2,6 +2,7 @@
 Sound Engine - Handles sound effect playback with graceful degradation
 """
 
+import threading
 from pathlib import Path
 from typing import Optional
 import playsound3
@@ -77,6 +78,43 @@ class SoundEngine:
             print(f"         Reason: {str(e)}")
             print(f"         Path: {sound_path}")
             return False
+
+    def play_async(self, sound_file: Optional[str], on_complete=None) -> bool:
+        """
+        Play a sound file asynchronously (non-blocking).
+
+        Args:
+            sound_file: Filename relative to project root
+            on_complete: Optional callback to call when sound finishes
+
+        Returns:
+            True if playback was started, False otherwise
+        """
+        if sound_file is None:
+            if on_complete:
+                on_complete()
+            return False
+
+        sound_path = self.project_root / sound_file
+
+        if not sound_path.exists():
+            print(f"INFO: Sound file not found: {sound_file}")
+            if on_complete:
+                on_complete()
+            return False
+
+        def play_in_thread():
+            try:
+                playsound3.playsound(str(sound_path))
+            except Exception as e:
+                print(f"WARNING: Could not play sound file {sound_file}: {e}")
+            finally:
+                if on_complete:
+                    on_complete()
+
+        thread = threading.Thread(target=play_in_thread, daemon=True)
+        thread.start()
+        return True
 
     def test_sound(self, sound_file: str) -> bool:
         """

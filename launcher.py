@@ -686,9 +686,12 @@ class FuzzySearchBar(QLineEdit):
         self.setPlaceholderText("Search environments... (Ctrl+L)")
         self.setMinimumWidth(300)
 
-        # Build searchable index: maps display string -> (config_name, category_index, config)
+        # Build searchable index: one entry per environment
+        # display_text -> (config_name, category_index, config)
         self.search_index: Dict[str, tuple] = {}
-        self.search_terms: List[str] = []  # For completer
+        # display_text -> full_searchable_text (includes tags for matching)
+        self.searchable_text: Dict[str, str] = {}
+        self.display_terms: List[str] = []  # For completer display
 
         category_index = 0
         for category, config_list in configs.items():
@@ -698,23 +701,21 @@ class FuzzySearchBar(QLineEdit):
                 tags = config.get("metadata", {}).get("tags", [])
                 intensity = config.get("metadata", {}).get("intensity", "")
 
-                # Create searchable text combining all fields
-                search_text = f"{name} - {description}"
-                self.search_index[search_text] = (name, category_index, config)
-                self.search_terms.append(search_text)
+                # Display text shown in dropdown (one per environment)
+                display_text = f"{name} - {description}"
 
-                # Also index by tags
-                for tag in tags:
-                    tag_text = f"{name} [{tag}]"
-                    if tag_text not in self.search_index:
-                        self.search_index[tag_text] = (name, category_index, config)
-                        self.search_terms.append(tag_text)
+                # Full searchable text includes tags (for matching, not display)
+                all_searchable = f"{name} {description} {intensity} {' '.join(tags)}"
+
+                self.search_index[display_text] = (name, category_index, config)
+                self.searchable_text[display_text] = all_searchable.lower()
+                self.display_terms.append(display_text)
 
             category_index += 1
 
         # Setup completer with fuzzy matching
-        self.completer_model = QStringListModel(self.search_terms)
-        self.proxy_model = FuzzyFilterProxyModel()
+        self.completer_model = QStringListModel(self.display_terms)
+        self.proxy_model = FuzzyFilterProxyModel(self.searchable_text)
         self.proxy_model.setSourceModel(self.completer_model)
         self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
 
@@ -736,29 +737,83 @@ class FuzzySearchBar(QLineEdit):
 
     def _on_activated(self, text: str) -> None:
         """Handle selection from dropdown."""
+        print(f"_on_activated called with: '{text}'")
         if text in self.search_index:
             name, category_index, config = self.search_index[text]
+            print(f"Emitting environment_selected: name='{name}', category={category_index}")
             self.environment_selected.emit(name, category_index)
             self.clear()
             self.clearFocus()
+        else:
+            print(f"Text '{text}' not found in search_index")
 
     def _on_return_pressed(self) -> None:
         """Handle enter key - select first match."""
-        if self.proxy_model.rowCount() > 0:
-            first_match = self.proxy_model.data(self.proxy_model.index(0, 0), Qt.DisplayRole)
-            if first_match and first_match in self.search_index:
-                name, category_index, config = self.search_index[first_match]
+        current_text = self.text()
+        print(f"_on_return_pressed called with text: '{current_text}'")
+
+        # First check: exact match (user selected from dropdown, text is full display text)
+        if current_text in self.search_index:
+            name, category_index, config = self.search_index[current_text]
+            print(f"Exact match found: name='{name}', category={category_index}")
+            self.environment_selected.emit(name, category_index)
+            self.clear()
+            self.clearFocus()
+            return
+
+        # Case-insensitive exact match
+        current_lower = current_text.lower()
+        for display_text in self.search_index:
+            if display_text.lower() == current_lower:
+                name, category_index, config = self.search_index[display_text]
+                print(f"Case-insensitive match found: name='{name}', category={category_index}")
                 self.environment_selected.emit(name, category_index)
                 self.clear()
                 self.clearFocus()
+                return
+
+        # Second check: get first visible item from completer popup
+        popup = self.completer.popup()
+        if popup.isVisible() and popup.model().rowCount() > 0:
+            first_index = popup.model().index(0, 0)
+            first_match = popup.model().data(first_index, Qt.DisplayRole)
+            print(f"First match from popup: '{first_match}'")
+            if first_match and first_match in self.search_index:
+                name, category_index, config = self.search_index[first_match]
+                print(f"Emitting from popup: name='{name}', category={category_index}")
+                self.environment_selected.emit(name, category_index)
+                self.clear()
+                self.clearFocus()
+                return
+
+        # Fallback: fuzzy match based on current text
+        current_lower = current_text.lower()
+        print(f"Fallback fuzzy search with: '{current_lower}'")
+        if current_lower:
+            for display_text, searchable in self.searchable_text.items():
+                # Check if all chars appear in order (fuzzy match)
+                pattern_idx = 0
+                for char in searchable:
+                    if pattern_idx < len(current_lower) and char == current_lower[pattern_idx]:
+                        pattern_idx += 1
+                if pattern_idx == len(current_lower):
+                    name, category_index, config = self.search_index[display_text]
+                    print(f"Emitting from fallback: name='{name}', category={category_index}")
+                    self.environment_selected.emit(name, category_index)
+                    self.clear()
+                    self.clearFocus()
+                    return
+        print("No match found")
 
 
 class FuzzyFilterProxyModel(QSortFilterProxyModel):
     """Proxy model that implements fuzzy filtering."""
 
-    def __init__(self, parent=None):
+    def __init__(self, searchable_text: Dict[str, str] = None, parent=None):
         super().__init__(parent)
         self._filter_pattern = ""
+        # Maps display text -> full searchable text (includes tags)
+        self._searchable_text = searchable_text or {}
 
     def setFilterPattern(self, pattern: str) -> None:
         """Set the fuzzy filter pattern."""
@@ -771,11 +826,12 @@ class FuzzyFilterProxyModel(QSortFilterProxyModel):
             return True
 
         index = self.sourceModel().index(source_row, 0, source_parent)
-        text = self.sourceModel().data(index, Qt.DisplayRole)
-        if not text:
+        display_text = self.sourceModel().data(index, Qt.DisplayRole)
+        if not display_text:
             return False
 
-        text_lower = text.lower()
+        # Use full searchable text (includes tags) if available
+        text_lower = self._searchable_text.get(display_text, display_text.lower())
         pattern = self._filter_pattern
 
         # Fuzzy match: all characters must appear in order
@@ -1491,13 +1547,31 @@ class EnvironmentLauncher(QMainWindow):
 
     def _on_search_selected(self, config_name: str, category_index: int) -> None:
         """Handle environment selection from search bar."""
+        # Debug output
+        print(f"Search selected: '{config_name}' in category {category_index}")
+        print(f"Available buttons: {list(self.buttons.keys())}")
+        print(f"Category count: {self.category_list.count()}")
+
         # Switch to the correct category
-        self.category_list.setCurrentRow(category_index)
+        if category_index < self.category_list.count():
+            self.category_list.setCurrentRow(category_index)
+            # Force the stacked widget to update
+            self.category_stack.setCurrentIndex(category_index)
+        else:
+            print(f"ERROR: category_index {category_index} out of range")
 
         # Find and pulse the button
         if config_name in self.buttons:
             btn = self.buttons[config_name]
             self._pulse_button(btn)
+            # Scroll button into view and give it focus
+            btn.setFocus()
+            print(f"Found and pulsing button: {config_name}")
+        else:
+            print(f"ERROR: Button '{config_name}' not found in self.buttons")
+
+        # Return focus to main window (not search bar)
+        self.setFocus()
 
         self.statusBar().showMessage(f"Found: {config_name}")
 

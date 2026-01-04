@@ -439,15 +439,22 @@ class EngineRunner(QThread):
             self.running = True
 
             # Sound engine (non-blocking, fire and forget)
+            # Default transition sound if none specified
+            DEFAULT_SOUND = "chill.wav"
+
             if self.config["engines"]["sound"]["enabled"]:
-                sound_file = self.config["engines"]["sound"]["file"]
-                self.status_update.emit(f"Playing sound: {sound_file}")
-                sound_engine = SoundEngine()
-                # For sound-only configs, use callback to signal when done
-                if not self.has_lights:
-                    sound_engine.play_async(sound_file, on_complete=self._on_sound_complete)
-                else:
-                    sound_engine.play_async(sound_file)
+                sound_file = self.config["engines"]["sound"].get("file", DEFAULT_SOUND)
+            else:
+                # Play default transition sound even if sound not explicitly enabled
+                sound_file = DEFAULT_SOUND
+
+            self.status_update.emit(f"Playing sound: {sound_file}")
+            sound_engine = SoundEngine()
+            # For sound-only configs, use callback to signal when done
+            if not self.has_lights and self.config["engines"]["sound"]["enabled"]:
+                sound_engine.play_async(sound_file, on_complete=self._on_sound_complete)
+            else:
+                sound_engine.play_async(sound_file)
 
             # Spotify engine (synchronous)
             if self.config["engines"]["spotify"]["enabled"]:
@@ -792,9 +799,20 @@ class EnvironmentLauncher(QMainWindow):
 
         control_layout.addWidget(stop_sound_container)
 
-        # Equal width for both stop buttons
+        # Stop Spotify button
+        self.stop_spotify_button = QPushButton("STOP SPOTIFY")
+        self.stop_spotify_button.setMinimumHeight(40)
+        self.stop_spotify_button.setStyleSheet(
+            "background-color: #1DB954; color: white; font-weight: bold; font-size: 12px;"
+        )
+        self.stop_spotify_button.clicked.connect(self._stop_spotify)
+        self.stop_spotify_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        control_layout.addWidget(self.stop_spotify_button)
+
+        # Equal width for all three stop buttons
         control_layout.setStretch(0, 1)
         control_layout.setStretch(1, 1)
+        control_layout.setStretch(2, 1)
 
         main_layout.addLayout(control_layout)
 
@@ -1048,6 +1066,17 @@ class EnvironmentLauncher(QMainWindow):
             self.statusBar().showMessage(f"Stopped {stopped} sound(s)")
         else:
             self.statusBar().showMessage("No sounds playing")
+
+    def _stop_spotify(self) -> None:
+        """Stop Spotify playback."""
+        try:
+            spotify_engine = SpotifyEngine()
+            if spotify_engine.stop():
+                self.statusBar().showMessage("Spotify playback stopped")
+            else:
+                self.statusBar().showMessage("Could not stop Spotify")
+        except Exception as e:
+            self.statusBar().showMessage(f"Spotify error: {str(e)}")
 
     def _focus_search(self) -> None:
         """Focus the search bar."""

@@ -1,0 +1,64 @@
+name: "Beach Day"
+category: "relaxation"
+description: "Calm seaside under a shaded umbrella, waves softly crashing"
+icon: "🏖️"
+
+metadata:
+  tags: ["beach", "ocean", "calm", "relaxation", "waves", "coastal", "summer"]
+  intensity: "low"
+  suitable_for: ["relaxation", "meditation", "background ambiance", "coastal scenes"]
+
+engines:
+  sound:
+    enabled: true
+    file: "chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:7o2W8HWWiozS25FZHqSNwQ"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 8  # Gentle wave rhythm
+
+      groups:
+        backdrop:
+          # Soft ocean blue waves - gentle ebb and flow
+          type: "rgb"
+          rgb:
+            base: [100, 180, 220]  # Soft sky blue
+            variance: [20, 30, 30]
+          brightness:
+            min: 140
+            max: 200
+          flash:
+            probability: 0.02  # Occasional sun glint on water
+            color: [255, 255, 230]  # Warm sunlight
+            brightness: 240
+            duration: 1.5
+
+        overhead:
+          # Warm filtered sunlight through umbrella
+          type: "rgb"
+          rgb:
+            base: [255, 240, 200]  # Warm sunlight
+            variance: [0, 15, 30]
+          brightness:
+            min: 180
+            max: 230
+
+        battlefield:
+          # Sandy warm tones with water reflection
+          type: "rgb"
+          rgb:
+            base: [180, 200, 220]  # Light blue-grey water reflection
+            variance: [30, 20, 20]
+          brightness:
+            min: 120
+            max: 180
+          flash:
+            probability: 0.03  # Gentle wave shimmer
+            color: [220, 240, 255]  # Soft white-blue
+            brightness: 200
+            duration: 2.0

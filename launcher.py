@@ -177,7 +177,7 @@ class SettingsDialog(QDialog):
         )
 
 
-from engines import SoundEngine, SpotifyEngine, LightsEngine
+from engines import SoundEngine, SpotifyEngine, LightsEngine, stop_all_sounds
 
 
 class OutlinedLabel(QLabel):
@@ -511,15 +511,52 @@ class EnvironmentLauncher(QMainWindow):
 
         main_layout.addWidget(self.tabs)
 
-        # Add control buttons (Stop button)
+        # Add control buttons (Stop buttons)
         control_layout = QHBoxLayout()
 
-        self.stop_button = QPushButton("STOP")
+        self.stop_button = QPushButton("STOP LIGHTS")
         self.stop_button.setMinimumHeight(40)
         self.stop_button.setStyleSheet(self.STOP_STYLE)
         self.stop_button.clicked.connect(self._stop_current)
         self.stop_button.setEnabled(False)
+        self.stop_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         control_layout.addWidget(self.stop_button)
+
+        # Stop Sound button with shortcut badge
+        stop_sound_container = QWidget()
+        stop_sound_container.setMinimumHeight(45)
+        stop_sound_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        self.stop_sound_button = QPushButton("STOP SOUND")
+        self.stop_sound_button.setMinimumHeight(40)
+        self.stop_sound_button.setStyleSheet(
+            "background-color: #FF9800; color: white; font-weight: bold; font-size: 12px;"
+        )
+        self.stop_sound_button.clicked.connect(self._stop_sounds)
+        self.stop_sound_button.setParent(stop_sound_container)
+
+        # Shortcut badge showing spacebar
+        space_badge = OutlinedLabel("␣")
+        pastel_color = self._generate_pastel_color()
+        space_badge.setStyleSheet(
+            f"background-color: {pastel_color}; border: 1px solid gray; border-radius: 3px;"
+        )
+        space_badge.setFixedSize(29, 25)
+        space_badge.setParent(stop_sound_container)
+
+        # Position elements using resize event
+        def resize_stop_sound(event):
+            w, h = stop_sound_container.width(), stop_sound_container.height()
+            self.stop_sound_button.setGeometry(0, 0, w, h)
+            space_badge.move(5, (h - 25) // 2)
+            space_badge.raise_()
+        stop_sound_container.resizeEvent = resize_stop_sound
+
+        control_layout.addWidget(stop_sound_container)
+
+        # Equal width for both stop buttons
+        control_layout.setStretch(0, 1)
+        control_layout.setStretch(1, 1)
 
         main_layout.addLayout(control_layout)
 
@@ -564,6 +601,10 @@ class EnvironmentLauncher(QMainWindow):
         prev_tab.activated.connect(lambda: self.tabs.setCurrentIndex(
             (self.tabs.currentIndex() - 1) % self.tabs.count()
         ))
+
+        # Spacebar to stop sounds
+        stop_sound_shortcut = QShortcut(QKeySequence(Qt.Key_Space), self)
+        stop_sound_shortcut.activated.connect(self._stop_sounds)
 
         # Setup initial shortcuts for first tab
         self._update_shortcuts_for_tab(0)
@@ -753,6 +794,14 @@ class EnvironmentLauncher(QMainWindow):
         self._reset_button_styles()
         self.stop_button.setEnabled(False)
         self.statusBar().showMessage("Stopped")
+
+    def _stop_sounds(self) -> None:
+        """Stop all playing sound effects."""
+        stopped = stop_all_sounds()
+        if stopped > 0:
+            self.statusBar().showMessage(f"Stopped {stopped} sound(s)")
+        else:
+            self.statusBar().showMessage("No sounds playing")
 
     def _cleanup_old_runner(self, runner: EngineRunner) -> None:
         """Remove finished runner from old runners list."""

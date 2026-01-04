@@ -3,17 +3,42 @@ Sound Engine - Handles sound effect playback with graceful degradation
 """
 
 import threading
+import subprocess
 from pathlib import Path
-from typing import Optional
-import playsound3
+from typing import Optional, List
+
+
+# Global list to track active sound processes
+_active_sound_processes: List[subprocess.Popen] = []
+_process_lock = threading.Lock()
+
+
+def stop_all_sounds() -> int:
+    """
+    Stop all currently playing sounds.
+
+    Returns:
+        Number of sounds stopped
+    """
+    global _active_sound_processes
+    stopped = 0
+    with _process_lock:
+        for proc in _active_sound_processes[:]:
+            try:
+                proc.terminate()
+                stopped += 1
+            except Exception:
+                pass
+        _active_sound_processes.clear()
+    return stopped
 
 
 class SoundEngine:
     """
     Manages sound effect playback with error tolerance.
 
-    This engine wraps playsound3 to provide graceful degradation when
-    sound files are missing or playback fails. All errors are logged
+    This engine uses ffplay/paplay for audio playback to allow stopping sounds.
+    Falls back to playsound3 if neither is available. All errors are logged
     but don't crash the application.
 
     Attributes:
@@ -31,6 +56,35 @@ class SoundEngine:
             self.project_root = Path.cwd()
         else:
             self.project_root = Path(project_root)
+
+        # Detect available audio player
+        self._player_cmd = self._detect_player()
+
+    def _detect_player(self) -> Optional[List[str]]:
+        """Detect available audio player command."""
+        # Try ffplay first (from ffmpeg, very common)
+        try:
+            subprocess.run(["ffplay", "-version"], capture_output=True, timeout=1)
+            return ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet"]
+        except (subprocess.SubprocessError, FileNotFoundError):
+            pass
+
+        # Try paplay (PulseAudio, common on Linux)
+        try:
+            subprocess.run(["paplay", "--version"], capture_output=True, timeout=1)
+            return ["paplay"]
+        except (subprocess.SubprocessError, FileNotFoundError):
+            pass
+
+        # Try aplay (ALSA, common on Linux)
+        try:
+            subprocess.run(["aplay", "--version"], capture_output=True, timeout=1)
+            return ["aplay", "-q"]
+        except (subprocess.SubprocessError, FileNotFoundError):
+            pass
+
+        # No subprocess player available, will use playsound3
+        return None
 
     def play(self, sound_file: Optional[str]) -> bool:
         """
@@ -70,7 +124,14 @@ class SoundEngine:
             return False
 
         try:
-            playsound3.playsound(str(sound_path))
+            if self._player_cmd:
+                # Use subprocess player (preferred)
+                cmd = self._player_cmd + [str(sound_path)]
+                subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            else:
+                # Fallback to playsound3
+                import playsound3
+                playsound3.playsound(str(sound_path))
             return True
         except Exception as e:
             # Graceful degradation - log but don't crash
@@ -105,7 +166,24 @@ class SoundEngine:
 
         def play_in_thread():
             try:
-                playsound3.playsound(str(sound_path))
+                if self._player_cmd:
+                    # Use subprocess player (can be stopped)
+                    cmd = self._player_cmd + [str(sound_path)]
+                    proc = subprocess.Popen(
+                        cmd,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL
+                    )
+                    with _process_lock:
+                        _active_sound_processes.append(proc)
+                    proc.wait()
+                    with _process_lock:
+                        if proc in _active_sound_processes:
+                            _active_sound_processes.remove(proc)
+                else:
+                    # Fallback to playsound3 (cannot be stopped)
+                    import playsound3
+                    playsound3.playsound(str(sound_path))
             except Exception as e:
                 print(f"WARNING: Could not play sound file {sound_file}: {e}")
             finally:

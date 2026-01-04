@@ -34,13 +34,17 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 
 ### GUI Launcher
 
+- **File menu** (Alt+F) with Settings and Quit options
+- **Settings dialog** - configure appearance (Light/Dark/System theme)
 - **Tabbed interface** organized by category (Combat, Social, Exploration, Relaxation, Special)
-- **Dark mode support** - automatically detects GNOME/KDE system theme
+- **Dark mode support** - choose Light, Dark, or auto-detect from GNOME/KDE system theme
 - **Keyboard shortcuts** (Q, W, E, R...) - displayed as badges with white text and black outline
 - **Tab navigation** with Ctrl+PgUp/PgDn
 - **Visual feedback** - active lights environment stays highlighted
 - **Sound effects** can trigger without interrupting current lights
-- **Stop button** to turn off lights
+- **Two stop buttons**:
+  - **STOP LIGHTS** - turn off light animations
+  - **STOP SOUND** (Spacebar) - stop all playing sound effects
 - **Scalable buttons** - expand automatically when window is resized
 - **Clear button layout** with:
   - Background icon emoji (large, semi-transparent) for visual identification
@@ -131,7 +135,8 @@ python3 launcher.py
 - Use Ctrl+PgUp/PgDn to switch between category tabs
 - **Lights environments** replace each other (new lights stop old lights)
 - **Sound-only buttons** (📢) play sounds without stopping lights
-- Press the STOP button or close window to stop lights
+- Press **STOP LIGHTS** or close window to stop lights
+- Press **Spacebar** or **STOP SOUND** button to stop playing sounds
 
 ### Run scenes directly
 ```bash
@@ -197,7 +202,7 @@ Each scene script controls lights via:
 immerse_yourself/
 ├── launcher.py              # PyQt5 GUI launcher (tabbed interface)
 ├── engines/                 # Modular engine components
-│   ├── sound_engine.py     # Sound playback (sync and async)
+│   ├── sound_engine.py     # Sound playback (stoppable via subprocess)
 │   ├── spotify_engine.py   # Spotify API integration
 │   └── lights_engine.py    # WIZ bulb control (fire-and-forget)
 ├── env_conf/               # YAML environment configurations
@@ -210,6 +215,7 @@ immerse_yourself/
 ├── .spotify.ini            # Spotify credentials (not in git)
 ├── .wizbulb.ini            # Bulb IP addresses (not in git)
 ├── .cache                  # OAuth token cache (not in git)
+├── settings.ini            # User preferences (auto-created)
 ├── requirements.txt        # Python dependencies
 └── *.mp3, *.wav            # Sound effect files
 ```

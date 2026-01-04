@@ -30,12 +30,12 @@ engines:
             base: [80, 90, 110]  # Muted blue-grey
             variance: [15, 15, 20]
           brightness:
-            min: 60
-            max: 120
+            min: 30
+            max: 60
           flash:
             probability: 0.02  # Occasional subtle brightening
             color: [120, 130, 150]  # Slightly brighter grey
-            brightness: 140
+            brightness: 70
             duration: 1.5
 
         overhead:
@@ -45,8 +45,8 @@ engines:
             base: [100, 110, 130]  # Soft grey-blue
             variance: [10, 15, 20]
           brightness:
-            min: 80
-            max: 140
+            min: 40
+            max: 70
 
         battlefield:
           # Wet ground reflections
@@ -55,10 +55,10 @@ engines:
             base: [60, 70, 90]  # Darker blue-grey
             variance: [20, 20, 25]
           brightness:
-            min: 40
-            max: 100
+            min: 20
+            max: 50
           flash:
             probability: 0.03  # Puddle reflections
             color: [100, 120, 150]
-            brightness: 120
+            brightness: 60
             duration: 0.8

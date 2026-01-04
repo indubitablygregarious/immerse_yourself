@@ -1,0 +1,69 @@
+name: "Heaven"
+category: "special"
+description: "Celestial paradise with soft golden light and divine radiance"
+icon: "👼"
+
+metadata:
+  tags: ["heaven", "celestial", "divine", "peaceful", "angelic", "paradise"]
+  intensity: "low"
+  suitable_for: ["divine encounters", "peaceful moments", "ascension", "holy places", "afterlife"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/heaven.m4a"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:6CGzeXP7y71R94To9KD0RC"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 45  # Very slow, peaceful transitions
+
+      groups:
+        backdrop:
+          # Warm golden divine light
+          type: "rgb"
+          rgb:
+            base: [255, 220, 180]  # Soft warm gold
+            variance: [0, 20, 40]
+          brightness:
+            min: 180
+            max: 255
+          flash:
+            probability: 0.03  # Rare gentle shimmer
+            color: [255, 255, 240]  # Soft white glow
+            brightness: 255
+            duration: 2.0  # Long, gentle pulse
+
+        overhead:
+          # Bright celestial white with golden tint
+          type: "rgb"
+          rgb:
+            base: [255, 250, 230]  # Warm white
+            variance: [0, 10, 20]
+          brightness:
+            min: 200
+            max: 255
+          flash:
+            probability: 0.02  # Very rare divine radiance
+            color: [255, 255, 255]  # Pure white
+            brightness: 255
+            duration: 3.0
+
+        battlefield:
+          # Soft pale blue - ethereal sky
+          type: "rgb"
+          rgb:
+            base: [200, 220, 255]  # Pale sky blue
+            variance: [20, 20, 0]
+          brightness:
+            min: 150
+            max: 220
+          flash:
+            probability: 0.02
+            color: [255, 250, 200]  # Golden shimmer
+            brightness: 230
+            duration: 2.5

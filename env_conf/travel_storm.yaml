@@ -1,0 +1,69 @@
+name: "Travel Storm"
+category: "exploration"
+description: "Dramatic thunderstorm with intense lightning strikes illuminating the darkness"
+icon: "⛈️"
+
+metadata:
+  tags: ["travel", "exploration", "storm", "lightning", "thunder", "intense", "dramatic"]
+  intensity: "high"
+  suitable_for: ["stormy travel", "dramatic scenes", "intense atmosphere", "chase sequences"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:7BzRcrEaDLIylIEgZGONTC"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 3  # Fast, chaotic pace
+
+      groups:
+        backdrop:
+          # Dark stormy sky with frequent lightning
+          type: "rgb"
+          rgb:
+            base: [20, 15, 40]  # Very dark purple-black
+            variance: [15, 10, 20]
+          brightness:
+            min: 20
+            max: 60
+          flash:
+            probability: 0.25  # Frequent lightning!
+            color: [255, 255, 255]  # Bright white lightning
+            brightness: 255
+            duration: 0.15
+
+        overhead:
+          # Ominous dark clouds with lightning bursts
+          type: "rgb"
+          rgb:
+            base: [30, 25, 50]  # Dark purple-grey
+            variance: [20, 15, 25]
+          brightness:
+            min: 30
+            max: 80
+          flash:
+            probability: 0.30  # Very frequent overhead lightning
+            color: [240, 240, 255]  # Blue-white lightning
+            brightness: 255
+            duration: 0.1
+
+        battlefield:
+          # Ground briefly illuminated by lightning
+          type: "rgb"
+          rgb:
+            base: [15, 20, 35]  # Near-black blue
+            variance: [10, 15, 20]
+          brightness:
+            min: 10
+            max: 50
+          flash:
+            probability: 0.20  # Ground lit by strikes
+            color: [200, 200, 255]  # Reflected lightning
+            brightness: 220
+            duration: 0.2

@@ -1,0 +1,64 @@
+name: "Travel Rainy"
+category: "exploration"
+description: "Gentle rain accompanies your journey through misty landscapes"
+icon: "🌧️"
+
+metadata:
+  tags: ["travel", "exploration", "rain", "calm", "atmospheric", "melancholy"]
+  intensity: "low"
+  suitable_for: ["rainy travel", "contemplative journeys", "atmospheric exploration"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:2ALchm62vkQWpeUY8cBVbV"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 8  # Slow, calm pace
+
+      groups:
+        backdrop:
+          # Cool grey-blue rain clouds
+          type: "rgb"
+          rgb:
+            base: [80, 90, 110]  # Muted blue-grey
+            variance: [15, 15, 20]
+          brightness:
+            min: 60
+            max: 120
+          flash:
+            probability: 0.02  # Occasional subtle brightening
+            color: [120, 130, 150]  # Slightly brighter grey
+            brightness: 140
+            duration: 1.5
+
+        overhead:
+          # Overcast sky
+          type: "rgb"
+          rgb:
+            base: [100, 110, 130]  # Soft grey-blue
+            variance: [10, 15, 20]
+          brightness:
+            min: 80
+            max: 140
+
+        battlefield:
+          # Wet ground reflections
+          type: "rgb"
+          rgb:
+            base: [60, 70, 90]  # Darker blue-grey
+            variance: [20, 20, 25]
+          brightness:
+            min: 40
+            max: 100
+          flash:
+            probability: 0.03  # Puddle reflections
+            color: [100, 120, 150]
+            brightness: 120
+            duration: 0.8

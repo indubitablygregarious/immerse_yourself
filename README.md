@@ -24,7 +24,7 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 - Standard Tavern, Dark Tavern, Mountain Tavern
 
 **Travel** - Journey ambiance
-- Desert, Boat, Night Travel, Spooky Routes, Dawn, Afternoon
+- Desert, Boat, Night Travel, Spooky Routes, Dawn, Afternoon, Rainy, Storm
 
 **Towns & Places**
 - Town (Day/Night), Library, Shop, Summer Festival

@@ -17,9 +17,10 @@ from PyQt5.QtWidgets import (
     QStatusBar, QMessageBox, QVBoxLayout, QTabWidget, QHBoxLayout,
     QShortcut, QLabel, QFrame, QSizePolicy, QStyleFactory, QMenuBar,
     QMenu, QAction, QDialog, QListWidget, QListWidgetItem, QStackedWidget,
-    QRadioButton, QButtonGroup, QGroupBox, QSplitter
+    QRadioButton, QButtonGroup, QGroupBox, QSplitter, QLineEdit, QCompleter,
+    QAbstractItemView
 )
-from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, QSize
+from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, QSize, QStringListModel, QSortFilterProxyModel
 from PyQt5.QtGui import QKeySequence, QPalette, QColor, QPainter, QPen, QFont, QIcon
 
 from config_loader import ConfigLoader
@@ -286,6 +287,137 @@ class ButtonContainer(QWidget):
         super().resizeEvent(event)
 
 
+class FuzzySearchBar(QLineEdit):
+    """Search bar with fuzzy matching dropdown for environment selection."""
+
+    environment_selected = pyqtSignal(str, int)  # (config_name, category_index)
+
+    def __init__(self, configs: Dict[str, List[Dict[str, Any]]], parent=None):
+        super().__init__(parent)
+        self.setPlaceholderText("Search environments... (Ctrl+L)")
+        self.setMinimumWidth(300)
+
+        # Build searchable index: maps display string -> (config_name, category_index, config)
+        self.search_index: Dict[str, tuple] = {}
+        self.search_terms: List[str] = []  # For completer
+
+        category_index = 0
+        for category, config_list in configs.items():
+            for config in config_list:
+                name = config["name"]
+                description = config.get("description", "")
+                tags = config.get("metadata", {}).get("tags", [])
+                intensity = config.get("metadata", {}).get("intensity", "")
+
+                # Create searchable text combining all fields
+                search_text = f"{name} - {description}"
+                self.search_index[search_text] = (name, category_index, config)
+                self.search_terms.append(search_text)
+
+                # Also index by tags
+                for tag in tags:
+                    tag_text = f"{name} [{tag}]"
+                    if tag_text not in self.search_index:
+                        self.search_index[tag_text] = (name, category_index, config)
+                        self.search_terms.append(tag_text)
+
+            category_index += 1
+
+        # Setup completer with fuzzy matching
+        self.completer_model = QStringListModel(self.search_terms)
+        self.proxy_model = FuzzyFilterProxyModel()
+        self.proxy_model.setSourceModel(self.completer_model)
+        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+
+        self.completer = QCompleter(self.proxy_model, self)
+        self.completer.setCompletionMode(QCompleter.PopupCompletion)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.completer.setFilterMode(Qt.MatchContains)
+        self.completer.popup().setMinimumWidth(400)
+        self.setCompleter(self.completer)
+
+        # Connect signals
+        self.textChanged.connect(self._on_text_changed)
+        self.completer.activated.connect(self._on_activated)
+        self.returnPressed.connect(self._on_return_pressed)
+
+    def _on_text_changed(self, text: str) -> None:
+        """Update fuzzy filter when text changes."""
+        self.proxy_model.setFilterPattern(text)
+
+    def _on_activated(self, text: str) -> None:
+        """Handle selection from dropdown."""
+        if text in self.search_index:
+            name, category_index, config = self.search_index[text]
+            self.environment_selected.emit(name, category_index)
+            self.clear()
+            self.clearFocus()
+
+    def _on_return_pressed(self) -> None:
+        """Handle enter key - select first match."""
+        if self.proxy_model.rowCount() > 0:
+            first_match = self.proxy_model.data(self.proxy_model.index(0, 0), Qt.DisplayRole)
+            if first_match and first_match in self.search_index:
+                name, category_index, config = self.search_index[first_match]
+                self.environment_selected.emit(name, category_index)
+                self.clear()
+                self.clearFocus()
+
+
+class FuzzyFilterProxyModel(QSortFilterProxyModel):
+    """Proxy model that implements fuzzy filtering."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._filter_pattern = ""
+
+    def setFilterPattern(self, pattern: str) -> None:
+        """Set the fuzzy filter pattern."""
+        self._filter_pattern = pattern.lower()
+        self.invalidateFilter()
+
+    def filterAcceptsRow(self, source_row: int, source_parent) -> bool:
+        """Check if row matches fuzzy pattern."""
+        if not self._filter_pattern:
+            return True
+
+        index = self.sourceModel().index(source_row, 0, source_parent)
+        text = self.sourceModel().data(index, Qt.DisplayRole)
+        if not text:
+            return False
+
+        text_lower = text.lower()
+        pattern = self._filter_pattern
+
+        # Fuzzy match: all characters must appear in order
+        pattern_idx = 0
+        for char in text_lower:
+            if pattern_idx < len(pattern) and char == pattern[pattern_idx]:
+                pattern_idx += 1
+        return pattern_idx == len(pattern)
+
+    def lessThan(self, left, right) -> bool:
+        """Sort by match quality - prefer matches at word boundaries."""
+        left_text = self.sourceModel().data(left, Qt.DisplayRole).lower()
+        right_text = self.sourceModel().data(right, Qt.DisplayRole).lower()
+
+        # Prefer exact prefix matches
+        left_starts = left_text.startswith(self._filter_pattern)
+        right_starts = right_text.startswith(self._filter_pattern)
+        if left_starts != right_starts:
+            return left_starts
+
+        # Prefer word boundary matches
+        left_word = any(word.startswith(self._filter_pattern)
+                       for word in left_text.split())
+        right_word = any(word.startswith(self._filter_pattern)
+                        for word in right_text.split())
+        if left_word != right_word:
+            return left_word
+
+        return left_text < right_text
+
+
 class EngineRunner(QThread):
     """Background thread for running async engines."""
 
@@ -493,7 +625,42 @@ class EnvironmentLauncher(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setContentsMargins(5, 5, 5, 5)
+
+        # Search bar at top
+        search_layout = QHBoxLayout()
+        self.search_bar = FuzzySearchBar(self.configs)
+        self.search_bar.environment_selected.connect(self._on_search_selected)
+        if self.is_dark_mode:
+            self.search_bar.setStyleSheet("""
+                QLineEdit {
+                    padding: 6px 10px;
+                    border: 1px solid #555;
+                    border-radius: 4px;
+                    background-color: #2d2d2d;
+                    color: white;
+                }
+                QLineEdit:focus {
+                    border: 2px solid #4CAF50;
+                }
+            """)
+        else:
+            self.search_bar.setStyleSheet("""
+                QLineEdit {
+                    padding: 6px 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                }
+                QLineEdit:focus {
+                    border: 2px solid #4CAF50;
+                }
+            """)
+        search_label = QLabel("🔍")
+        search_label.setStyleSheet("font-size: 16px;")
+        search_layout.addWidget(search_label)
+        search_layout.addWidget(self.search_bar)
+        search_layout.addStretch()
+        main_layout.addLayout(search_layout)
 
         # Create splitter for left tabs and right content
         self.splitter = QSplitter(Qt.Horizontal)
@@ -676,6 +843,14 @@ class EnvironmentLauncher(QMainWindow):
         # Spacebar to stop sounds
         stop_sound_shortcut = QShortcut(QKeySequence(Qt.Key_Space), self)
         stop_sound_shortcut.activated.connect(self._stop_sounds)
+
+        # Ctrl+L to focus search bar
+        search_shortcut = QShortcut(QKeySequence("Ctrl+L"), self)
+        search_shortcut.activated.connect(self._focus_search)
+
+        # Escape to clear search and unfocus
+        escape_shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        escape_shortcut.activated.connect(self._clear_search)
 
         # Setup initial shortcuts for first tab
         self._update_shortcuts_for_tab(0)
@@ -873,6 +1048,58 @@ class EnvironmentLauncher(QMainWindow):
             self.statusBar().showMessage(f"Stopped {stopped} sound(s)")
         else:
             self.statusBar().showMessage("No sounds playing")
+
+    def _focus_search(self) -> None:
+        """Focus the search bar."""
+        self.search_bar.setFocus()
+        self.search_bar.selectAll()
+
+    def _clear_search(self) -> None:
+        """Clear and unfocus search bar."""
+        self.search_bar.clear()
+        self.search_bar.clearFocus()
+        self.setFocus()
+
+    def _on_search_selected(self, config_name: str, category_index: int) -> None:
+        """Handle environment selection from search bar."""
+        # Switch to the correct category
+        self.category_list.setCurrentRow(category_index)
+
+        # Find and pulse the button
+        if config_name in self.buttons:
+            btn = self.buttons[config_name]
+            self._pulse_button(btn)
+
+        self.statusBar().showMessage(f"Found: {config_name}")
+
+    def _pulse_button(self, btn: QPushButton) -> None:
+        """Make a button pulse green for 3 seconds."""
+        original_style = btn.styleSheet()
+
+        # Pulse styles
+        pulse_styles = [
+            "background-color: #4CAF50; color: white; padding: 8px; font-size: 17px;",
+            "background-color: #81C784; color: white; padding: 8px; font-size: 17px;",
+            "background-color: #4CAF50; color: white; padding: 8px; font-size: 17px;",
+            "background-color: #A5D6A7; color: white; padding: 8px; font-size: 17px;",
+            "background-color: #4CAF50; color: white; padding: 8px; font-size: 17px;",
+            "background-color: #81C784; color: white; padding: 8px; font-size: 17px;",
+        ]
+
+        # Create pulse animation using timers
+        pulse_count = [0]
+        total_pulses = len(pulse_styles)
+
+        def do_pulse():
+            if pulse_count[0] < total_pulses:
+                btn.setStyleSheet(pulse_styles[pulse_count[0]])
+                pulse_count[0] += 1
+                QTimer.singleShot(500, do_pulse)  # 500ms per pulse = 3 seconds total
+            else:
+                # Restore original style
+                btn.setStyleSheet(original_style)
+
+        do_pulse()
 
     def _cleanup_old_runner(self, runner: EngineRunner) -> None:
         """Remove finished runner from old runners list."""

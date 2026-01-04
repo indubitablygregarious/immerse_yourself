@@ -29,8 +29,11 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 **Towns & Places**
 - Town (Day/Night), Library, Shop, Summer Festival
 
+**Relaxation**
+- Chill, Beach Day, Heaven
+
 **Special**
-- Camping, Chill, Dungeon, Win Dungeon, Chill Jazz, Clowny, Heaven
+- Camping, Dungeon, Win Dungeon, Chill Jazz, Clowny
 
 **Intense**
 - Hell (infernal hellscape with chaotic fire)
@@ -46,13 +49,14 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 - **Keyboard shortcuts** (Q, W, E, R...) - displayed as badges with white text and black outline
 - **Category navigation** with Ctrl+PgUp/PgDn
 - **Visual feedback** - active lights environment stays highlighted
-- **Sound effects** can trigger without interrupting current lights
-- **Two stop buttons**:
-  - **STOP LIGHTS** - turn off light animations
-  - **STOP SOUND** (Spacebar) - stop all playing sound effects
+- **Default transition sound** - "chill.wav" plays automatically when switching environments
+- **Three stop buttons**:
+  - **STOP LIGHTS** (red) - turn off light animations
+  - **STOP SOUND** (orange, Spacebar) - stop all playing sound effects
+  - **STOP SPOTIFY** (green) - pause Spotify playback
 - **Scalable buttons** - expand automatically when window is resized
 - **Clear button layout** with:
-  - Background icon emoji (large, semi-transparent) for visual identification
+  - Background icon emoji (large, semi-transparent, scales with button size)
   - Shortcut key badge (top-left, random pastel background, outlined text)
   - Centered environment name
   - Emoji indicators below button with pastel backgrounds:

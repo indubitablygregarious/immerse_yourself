@@ -16,7 +16,7 @@ The project has been refactored from individual Python scripts into a modular en
 ### Core Components
 
 - **Three Engines** (`engines/` directory):
-  - **Sound Engine**: Plays sound effects via subprocess (ffplay/paplay/aplay) for stoppable playback; `stop_all_sounds()` terminates all playing sounds
+  - **Sound Engine**: Plays sound effects via subprocess (ffplay/paplay/aplay) for stoppable playback; `stop_all_sounds()` terminates all playing sounds; default "chill.wav" plays on all environment switches
   - **Spotify Engine**: Manages Spotify authentication and playback
   - **Lights Engine**: Controls WIZ bulbs with async animations and hot-swapping support
 
@@ -51,11 +51,13 @@ The project has been refactored from individual Python scripts into a modular en
   - Uses Fusion style with custom dark palette when dark mode enabled
   - Per-category keyboard shortcuts (Q, W, E, R... remap when switching categories)
   - Ctrl+PgUp/PgDn to navigate between categories
-  - **Two stop buttons**:
-    - STOP LIGHTS (red) - stops light animations
-    - STOP SOUND (orange, Spacebar shortcut with badge) - stops all playing sounds
+  - **Default transition sound**: "chill.wav" plays automatically when switching environments
+  - **Three stop buttons**:
+    - STOP LIGHTS (red #f44336) - stops light animations
+    - STOP SOUND (orange #FF9800, Spacebar shortcut with badge) - stops all playing sounds
+    - STOP SPOTIFY (green #1DB954) - pauses Spotify playback
   - Scalable buttons that expand with window size (using `ButtonContainer` widget)
-  - **Background icon**: Large semi-transparent emoji from config's `icon` field (`IconButton` class)
+  - **Background icon**: Semi-transparent emoji from config's `icon` field, scales with button size (`IconButton` class, 50% of smaller dimension, min 24pt)
   - **Shortcut key badge**: Top-left corner with random pastel background, white text with black outline (`OutlinedLabel` class)
   - Centered environment name (17px font)
   - Emoji indicators displayed below button (overlapping) with pastel backgrounds:

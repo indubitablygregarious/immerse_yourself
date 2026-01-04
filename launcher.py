@@ -722,17 +722,31 @@ class FuzzySearchBar(QLineEdit):
         self.completer = QCompleter(self.proxy_model, self)
         self.completer.setCompletionMode(QCompleter.PopupCompletion)
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
-        self.completer.setFilterMode(Qt.MatchContains)
         self.completer.popup().setMinimumWidth(400)
         self.setCompleter(self.completer)
+
+        # Track if we're navigating to avoid re-filtering
+        self._navigating = False
 
         # Connect signals
         self.textChanged.connect(self._on_text_changed)
         self.completer.activated.connect(self._on_activated)
+        self.completer.highlighted.connect(self._on_highlighted)
         self.returnPressed.connect(self._on_return_pressed)
+
+    def _on_highlighted(self, text: str) -> None:
+        """Track when user navigates in popup (arrow keys)."""
+        self._navigating = True
 
     def _on_text_changed(self, text: str) -> None:
         """Update fuzzy filter when text changes."""
+        # Don't re-filter if text is a complete entry (user navigated to it)
+        # or if we're in the middle of navigating
+        if text in self.search_index:
+            return
+        if self._navigating:
+            self._navigating = False
+            return
         self.proxy_model.setFilterPattern(text)
 
     def _on_activated(self, text: str) -> None:

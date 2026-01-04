@@ -30,7 +30,7 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 - Town (Day/Night), Library, Shop, Summer Festival
 
 **Relaxation**
-- Chill, Beach Day, Heaven
+- Chill, Beach Day, Beach Afternoon, Beach Night, Heaven
 
 **Special**
 - Camping, Dungeon, Win Dungeon, Chill Jazz, Clowny

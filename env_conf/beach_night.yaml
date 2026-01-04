@@ -1,0 +1,64 @@
+name: "Beach Night"
+category: "relaxation"
+description: "Moonlit shoreline with gentle waves under the stars"
+icon: "🌊"
+
+metadata:
+  tags: ["beach", "ocean", "night", "relaxation", "waves", "coastal", "moonlit", "stars"]
+  intensity: "low"
+  suitable_for: ["relaxation", "meditation", "nighttime ambiance", "romantic scenes"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:7o2W8HWWiozS25FZHqSNwQ"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10  # Slow, peaceful night rhythm
+
+      groups:
+        backdrop:
+          # Dark ocean with moonlight reflections
+          type: "rgb"
+          rgb:
+            base: [20, 40, 70]  # Deep dark blue
+            variance: [10, 15, 20]
+          brightness:
+            min: 40
+            max: 80
+          flash:
+            probability: 0.03  # Moonlight glinting on waves
+            color: [180, 200, 220]  # Pale moonlight
+            brightness: 120
+            duration: 2.0
+
+        overhead:
+          # Soft moonlight
+          type: "rgb"
+          rgb:
+            base: [140, 150, 180]  # Cool silvery moonlight
+            variance: [10, 10, 15]
+          brightness:
+            min: 60
+            max: 100
+
+        battlefield:
+          # Wet sand reflecting moonlight
+          type: "rgb"
+          rgb:
+            base: [40, 50, 70]  # Dark blue-grey
+            variance: [15, 15, 20]
+          brightness:
+            min: 30
+            max: 70
+          flash:
+            probability: 0.02  # Gentle wave foam
+            color: [150, 160, 180]  # Pale foam
+            brightness: 100
+            duration: 1.5

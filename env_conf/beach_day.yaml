@@ -11,7 +11,7 @@ metadata:
 engines:
   sound:
     enabled: true
-    file: "chill.wav"
+    file: "sounds/chill.wav"
 
   spotify:
     enabled: true

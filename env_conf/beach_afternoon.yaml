@@ -1,0 +1,64 @@
+name: "Beach Afternoon"
+category: "relaxation"
+description: "Golden hour on the shore as the sun begins its descent"
+icon: "🌅"
+
+metadata:
+  tags: ["beach", "ocean", "afternoon", "relaxation", "waves", "coastal", "sunset", "golden hour"]
+  intensity: "low"
+  suitable_for: ["relaxation", "meditation", "sunset ambiance", "warm coastal scenes"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:7o2W8HWWiozS25FZHqSNwQ"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12  # Slow, lazy afternoon pace
+
+      groups:
+        backdrop:
+          # Warm orange-pink sunset sky reflecting on water
+          type: "rgb"
+          rgb:
+            base: [255, 160, 100]  # Warm orange-gold
+            variance: [0, 40, 50]
+          brightness:
+            min: 160
+            max: 220
+          flash:
+            probability: 0.03  # Sun glare on water
+            color: [255, 220, 150]  # Bright golden
+            brightness: 255
+            duration: 1.5
+
+        overhead:
+          # Rich golden sunset light
+          type: "rgb"
+          rgb:
+            base: [255, 180, 80]  # Deep golden orange
+            variance: [0, 30, 40]
+          brightness:
+            min: 180
+            max: 240
+
+        battlefield:
+          # Warm sand and sunset-tinted water
+          type: "rgb"
+          rgb:
+            base: [220, 150, 100]  # Warm sandy gold
+            variance: [20, 30, 30]
+          brightness:
+            min: 140
+            max: 200
+          flash:
+            probability: 0.04  # Sparkling water
+            color: [255, 200, 130]  # Golden shimmer
+            brightness: 230
+            duration: 1.0

@@ -2,7 +2,7 @@
 
 An interactive ambient environment system that transforms your space with synchronized music, smart lighting, and sound effects.
 
-![Immerse Yourself Screenshot](https://raw.githubusercontent.com/indubitablygregarious/immerse_yourself/main/immerse_yourself_screenshot.jpg)
+![Immerse Yourself Screenshot](https://raw.githubusercontent.com/indubitablygregarious/immerse_yourself/refs/heads/main/immerse_yourself_screenshot.jpg)
 
 ## What It Does
 

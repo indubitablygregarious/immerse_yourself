@@ -2,6 +2,8 @@
 
 An interactive ambient environment system that transforms your space with synchronized music, smart lighting, and sound effects.
 
+![Immerse Yourself Screenshot](https://raw.githubusercontent.com/indubitablygregarious/immerse_yourself/main/immerse_yourself_screenshot.jpg)
+
 ## What It Does
 
 Immerse Yourself creates immersive environments by controlling:

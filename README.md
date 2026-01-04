@@ -35,17 +35,20 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 ### GUI Launcher
 
 - **Tabbed interface** organized by category (Combat, Social, Exploration, Relaxation, Special)
-- **Keyboard shortcuts** (Q, W, E, R...) - displayed as badges, remap per tab
+- **Dark mode support** - automatically detects GNOME/KDE system theme
+- **Keyboard shortcuts** (Q, W, E, R...) - displayed as badges with white text and black outline
 - **Tab navigation** with Ctrl+PgUp/PgDn
 - **Visual feedback** - active lights environment stays highlighted
 - **Sound effects** can trigger without interrupting current lights
 - **Stop button** to turn off lights
 - **Scalable buttons** - expand automatically when window is resized
 - **Clear button layout** with:
-  - Shortcut key badge (top-left, random pastel background)
-  - Centered name and wrapped description
+  - Background icon emoji (large, semi-transparent) for visual identification
+  - Shortcut key badge (top-left, random pastel background, outlined text)
+  - Centered environment name
   - Emoji indicators below button with pastel backgrounds:
     - 🔊 Sound (peach) | 🎵 Spotify (mint) | 💡 Lights (yellow)
+  - Description box below indicators
 
 ## Requirements
 

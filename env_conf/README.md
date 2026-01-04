@@ -10,6 +10,7 @@ Create a new environment by copying an existing YAML file and modifying it, or c
 ```yaml
 name: "My Environment"
 category: "special"
+icon: "🎮"
 
 metadata:
   tags: ["custom"]
@@ -47,7 +48,8 @@ engines:
 |-------|------|----------|-------------|
 | `name` | string | Yes | Display name shown in launcher |
 | `category` | string | Yes | Category for tab organization: `combat`, `social`, `exploration`, `relaxation`, `special` |
-| `description` | string | No | Short description (shown on hover) |
+| `description` | string | No | Short description (shown below button) |
+| `icon` | string | No | Emoji displayed as semi-transparent background on button (e.g., `"🍺"`) |
 | `metadata` | object | No | Additional metadata for UI/filtering |
 | `engines` | object | Yes | Configuration for sound, spotify, and lights engines |
 

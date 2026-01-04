@@ -39,16 +39,20 @@ The project has been refactored from individual Python scripts into a modular en
 - **Launcher** (`launcher.py`):
   - PyQt5 GUI for launching environments
   - Tabbed interface organized by category (Combat, Social, Exploration, etc.)
+  - **Dark mode support**: Detects GNOME/KDE system theme via `gsettings` and `kdeglobals`
+  - Uses Fusion style with custom dark palette when dark mode detected
   - Per-tab keyboard shortcuts (Q, W, E, R... remap when switching tabs)
   - Ctrl+PgUp/PgDn to navigate between tabs
   - Stop button for stopping lights
   - Scalable buttons that expand with window size (using `ButtonContainer` widget)
-  - Shortcut key displayed as badge in top-left corner with random pastel background
-  - Centered name with word-wrapped description (25 chars/line)
+  - **Background icon**: Large semi-transparent emoji from config's `icon` field (`IconButton` class)
+  - **Shortcut key badge**: Top-left corner with random pastel background, white text with black outline (`OutlinedLabel` class)
+  - Centered environment name (17px font)
   - Emoji indicators displayed below button (overlapping) with pastel backgrounds:
     - 🔊/📢 Sound (peach #FFCBA4)
     - 🎵 Spotify (mint #B4F0A8)
     - 💡 Lights (yellow #FFF9B0)
+  - Description box below emoji indicators (11px font, bordered)
   - Distinct handling of sound-only (📢) vs full environment (🔊🎵💡) buttons
 
 ### Key Innovation: Background Lighting Persistence
@@ -102,6 +106,7 @@ make clean          # Remove cache files
 name: "My Custom Environment"
 category: "special"
 description: "Brief description"
+icon: "🎮"  # Emoji displayed as semi-transparent background on button
 
 metadata:
   tags: ["custom", "experimental"]

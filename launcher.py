@@ -195,14 +195,17 @@ class OutlinedLabel(QLabel):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        # Get the font and text rect
+        # Scale font size based on label dimensions
+        rect = self.rect()
+        min_dimension = min(rect.width(), rect.height())
+        font_size = max(8, int(min_dimension * 0.5))  # 50% of smaller dimension, min 8pt
+
         font = self.font()
         font.setBold(True)
-        font.setPointSize(12)
+        font.setPointSize(font_size)
         painter.setFont(font)
 
         # Calculate centered position
-        rect = self.rect()
         text_rect = painter.fontMetrics().boundingRect(self._text)
         x = (rect.width() - text_rect.width()) / 2
         y = (rect.height() + text_rect.height()) / 2 - painter.fontMetrics().descent()
@@ -280,9 +283,13 @@ class ButtonContainer(QWidget):
         # Emoji row at bottom of button, overlapping by 10px
         self.emoji_row.setGeometry(0, btn_height - 10, w, 20)
         self.emoji_row.raise_()
-        # Shortcut label in top-left, overlapping button
+        # Shortcut label in top-left, scaling with button size
         if self.shortcut_label:
-            self.shortcut_label.setGeometry(5, 5, 33, 29)
+            # Scale badge size based on button dimensions (15-20% of smaller dimension)
+            min_dim = min(w, btn_height)
+            badge_size = max(25, int(min_dim * 0.18))  # 18% of smaller dimension, min 25px
+            badge_width = int(badge_size * 1.15)  # Slightly wider than tall
+            self.shortcut_label.setGeometry(5, 5, badge_width, badge_size)
             self.shortcut_label.raise_()
         # Description below emoji row
         if self.desc_label:
@@ -942,7 +949,7 @@ class EnvironmentLauncher(QMainWindow):
                 f"background-color: {pastel_color}; border: 1px solid gray; "
                 f"border-radius: 3px;"
             )
-            shortcut_label.setFixedSize(29, 25)
+            # Size is set dynamically in ButtonContainer.resizeEvent
 
         # Create description label (below emoji row)
         desc_label = None

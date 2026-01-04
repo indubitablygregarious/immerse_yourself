@@ -44,6 +44,7 @@ The project has been refactored from individual Python scripts into a modular en
   - **Left sidebar navigation**: Categories in QListWidget (15% width), content in QStackedWidget
   - **Search bar** (Ctrl+L): Fuzzy search across name, description, and metadata tags
     - `FuzzySearchBar` class with `FuzzyFilterProxyModel` for matching
+    - `ClickFocus` policy - only focuses on click or Ctrl+L (keyboard shortcuts work immediately)
     - Escape clears and unfocuses search
     - Selected button pulses green for 3 seconds (`_pulse_button` method)
   - **Dark mode support**: Three options in Settings - Light, Dark, or Use OS setting
@@ -51,14 +52,14 @@ The project has been refactored from individual Python scripts into a modular en
   - Uses Fusion style with custom dark palette when dark mode enabled
   - Per-category keyboard shortcuts (Q, W, E, R... remap when switching categories)
   - Ctrl+PgUp/PgDn to navigate between categories
-  - **Default transition sound**: "chill.wav" plays automatically when switching environments
+  - **Default transition sound**: `sounds/chill.wav` plays for any environment with lights or Spotify
   - **Three stop buttons**:
     - STOP LIGHTS (red #f44336) - stops light animations
     - STOP SOUND (orange #FF9800, Spacebar shortcut with badge) - stops all playing sounds
     - STOP SPOTIFY (green #1DB954) - pauses Spotify playback
   - Scalable buttons that expand with window size (using `ButtonContainer` widget)
   - **Background icon**: Semi-transparent emoji from config's `icon` field, scales with button size (`IconButton` class, 50% of smaller dimension, min 24pt)
-  - **Shortcut key badge**: Top-left corner with random pastel background, white text with black outline (`OutlinedLabel` class)
+  - **Shortcut key badge**: Top-left corner with random pastel background, scales with button size (`OutlinedLabel` class, badge 18% of smaller dimension min 25px, font 50% of badge min 8pt)
   - Centered environment name (17px font)
   - Emoji indicators displayed below button (overlapping) with pastel backgrounds:
     - 🔊/📢 Sound (peach #FFCBA4)

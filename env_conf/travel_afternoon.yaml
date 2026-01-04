@@ -1,0 +1,64 @@
+name: "Travel Afternoon"
+category: "exploration"
+description: "Warm afternoon journey under the golden sun"
+icon: "☀️"
+
+metadata:
+  tags: ["travel", "exploration", "afternoon", "sunny", "warm", "golden hour"]
+  intensity: "medium"
+  suitable_for: ["afternoon travel", "sunny journeys", "open road"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:3Vz5yr3PL1xIIAe89mPfT4"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 15  # Relaxed pace
+
+      groups:
+        backdrop:
+          # Warm golden afternoon light
+          type: "rgb"
+          rgb:
+            base: [255, 200, 120]  # Golden yellow
+            variance: [0, 30, 40]
+          brightness:
+            min: 180
+            max: 255
+          flash:
+            probability: 0.03
+            color: [255, 255, 200]  # Bright sun glint
+            brightness: 255
+            duration: 1.0
+
+        overhead:
+          # Bright warm sun
+          type: "rgb"
+          rgb:
+            base: [255, 240, 180]  # Warm white-yellow
+            variance: [0, 15, 30]
+          brightness:
+            min: 220
+            max: 255
+
+        battlefield:
+          # Warm earth tones with sun dappling
+          type: "rgb"
+          rgb:
+            base: [220, 180, 120]  # Warm tan/earth
+            variance: [20, 30, 30]
+          brightness:
+            min: 140
+            max: 200
+          flash:
+            probability: 0.04
+            color: [255, 250, 220]  # Dappled sunlight
+            brightness: 230
+            duration: 0.8

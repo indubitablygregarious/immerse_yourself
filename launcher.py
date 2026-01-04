@@ -449,22 +449,28 @@ class EngineRunner(QThread):
             self.running = True
 
             # Sound engine (non-blocking, fire and forget)
-            # Default transition sound if none specified
-            DEFAULT_SOUND = "chill.wav"
+            # Default transition sound for environments with lights or spotify
+            DEFAULT_SOUND = "sounds/chill.wav"
 
-            if self.config["engines"]["sound"]["enabled"]:
+            has_spotify = self.config["engines"]["spotify"]["enabled"]
+            sound_enabled = self.config["engines"]["sound"]["enabled"]
+
+            if sound_enabled:
                 sound_file = self.config["engines"]["sound"].get("file", DEFAULT_SOUND)
-            else:
-                # Play default transition sound even if sound not explicitly enabled
+            elif self.has_lights or has_spotify:
+                # Play default transition sound for lights/spotify environments without explicit sound
                 sound_file = DEFAULT_SOUND
-
-            self.status_update.emit(f"Playing sound: {sound_file}")
-            sound_engine = SoundEngine()
-            # For sound-only configs, use callback to signal when done
-            if not self.has_lights and self.config["engines"]["sound"]["enabled"]:
-                sound_engine.play_async(sound_file, on_complete=self._on_sound_complete)
             else:
-                sound_engine.play_async(sound_file)
+                sound_file = None
+
+            if sound_file:
+                self.status_update.emit(f"Playing sound: {sound_file}")
+                sound_engine = SoundEngine()
+                # For sound-only configs, use callback to signal when done
+                if not self.has_lights and sound_enabled:
+                    sound_engine.play_async(sound_file, on_complete=self._on_sound_complete)
+                else:
+                    sound_engine.play_async(sound_file)
 
             # Spotify engine (synchronous)
             if self.config["engines"]["spotify"]["enabled"]:
@@ -648,6 +654,8 @@ class EnvironmentLauncher(QMainWindow):
         search_layout = QHBoxLayout()
         self.search_bar = FuzzySearchBar(self.configs)
         self.search_bar.environment_selected.connect(self._on_search_selected)
+        # Only focus search bar when clicked or via Ctrl+L, not by default
+        self.search_bar.setFocusPolicy(Qt.ClickFocus)
         if self.is_dark_mode:
             self.search_bar.setStyleSheet("""
                 QLineEdit {
@@ -827,6 +835,9 @@ class EnvironmentLauncher(QMainWindow):
         main_layout.addLayout(control_layout)
 
         central_widget.setLayout(main_layout)
+
+        # Set focus to main window so keyboard shortcuts work immediately
+        self.setFocus()
 
         # Status bar
         self.statusBar().showMessage("Ready - Select an environment to start")

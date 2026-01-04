@@ -24,7 +24,7 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 - Standard Tavern, Dark Tavern, Mountain Tavern
 
 **Travel** - Journey ambiance
-- Desert, Boat, Night Travel, Spooky Routes
+- Desert, Boat, Night Travel, Spooky Routes, Dawn, Afternoon
 
 **Towns & Places**
 - Town (Day/Night), Library, Shop, Summer Festival
@@ -45,11 +45,12 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 - **Left sidebar navigation** - categories listed vertically (15% width)
 - **Dark mode support** - choose Light, Dark, or auto-detect from GNOME/KDE system theme
 - **Search bar** (Ctrl+L) - fuzzy search across all environments by name, description, and tags
+  - Only focuses on click or Ctrl+L (keyboard shortcuts work immediately)
   - Selected environment's button pulses green for 3 seconds
 - **Keyboard shortcuts** (Q, W, E, R...) - displayed as badges with white text and black outline
 - **Category navigation** with Ctrl+PgUp/PgDn
 - **Visual feedback** - active lights environment stays highlighted
-- **Default transition sound** - "chill.wav" plays automatically when switching environments
+- **Default transition sound** - `sounds/chill.wav` plays for any environment with lights or Spotify
 - **Three stop buttons**:
   - **STOP LIGHTS** (red) - turn off light animations
   - **STOP SOUND** (orange, Spacebar) - stop all playing sound effects
@@ -57,7 +58,7 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 - **Scalable buttons** - expand automatically when window is resized
 - **Clear button layout** with:
   - Background icon emoji (large, semi-transparent, scales with button size)
-  - Shortcut key badge (top-left, random pastel background, outlined text)
+  - Shortcut key badge (top-left, random pastel background, scales with button size)
   - Centered environment name
   - Emoji indicators below button with pastel backgrounds:
     - 🔊 Sound (peach) | 🎵 Spotify (mint) | 💡 Lights (yellow)

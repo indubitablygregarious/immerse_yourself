@@ -1,0 +1,64 @@
+name: "Travel Dawn"
+category: "exploration"
+description: "Early morning twilight journey as the sun rises"
+icon: "🌅"
+
+metadata:
+  tags: ["travel", "exploration", "dawn", "twilight", "morning", "sunrise"]
+  intensity: "low"
+  suitable_for: ["early morning travel", "sunrise scenes", "new beginnings"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:3Vz5yr3PL1xIIAe89mPfT4"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 20  # Slow, peaceful transitions
+
+      groups:
+        backdrop:
+          # Soft pink-purple twilight sky
+          type: "rgb"
+          rgb:
+            base: [180, 120, 160]  # Soft pink-purple
+            variance: [30, 20, 30]
+          brightness:
+            min: 80
+            max: 150
+          flash:
+            probability: 0.02
+            color: [255, 200, 150]  # Warm sunrise glow
+            brightness: 180
+            duration: 2.0
+
+        overhead:
+          # Early morning golden-orange horizon
+          type: "rgb"
+          rgb:
+            base: [255, 180, 100]  # Golden orange sunrise
+            variance: [0, 30, 40]
+          brightness:
+            min: 100
+            max: 180
+
+        battlefield:
+          # Cool morning mist with hints of warmth
+          type: "rgb"
+          rgb:
+            base: [150, 140, 180]  # Cool purple-blue mist
+            variance: [20, 20, 30]
+          brightness:
+            min: 60
+            max: 120
+          flash:
+            probability: 0.03
+            color: [255, 220, 180]  # Sun breaking through
+            brightness: 160
+            duration: 1.5

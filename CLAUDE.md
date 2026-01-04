@@ -18,6 +18,10 @@ The project has been refactored from individual Python scripts into a modular en
 - **Three Engines** (`engines/` directory):
   - **Sound Engine**: Plays sound effects via subprocess (ffplay/paplay/aplay) for stoppable playback; `stop_all_sounds()` terminates all playing sounds; default "chill.wav" plays on all environment switches
   - **Spotify Engine**: Manages Spotify authentication and playback
+    - GUI-friendly OAuth flow with local HTTP server (no terminal prompts)
+    - Device detection: `get_local_computer_device()`, `get_remote_devices()`
+    - Auto-start Spotify: `is_spotify_running()`, `start_spotify()`
+    - Helper functions exported: `is_spotify_in_path()`, `wait_for_spotify_device()`
   - **Lights Engine**: Controls WIZ bulbs with async animations and hot-swapping support
 
 - **YAML Configuration** (`env_conf/` directory):
@@ -41,7 +45,13 @@ The project has been refactored from individual Python scripts into a modular en
   - **File menu** (Alt+F): Settings (Ctrl+,) and Quit (Ctrl+Q)
   - **Settings dialog** (`SettingsDialog` class): Icon navigation on left, settings panels on right
     - **Appearance panel**: Light/Dark/System theme selection
-    - **Spotify panel**: Configure API credentials (username, client_id, client_secret, redirect_uri)
+    - **Spotify panel**: Configure API credentials and startup behavior
+      - Credentials: username, client_id, client_secret, redirect_uri
+      - **Startup behavior** setting (when Spotify not playing on this PC):
+        - "Ask me what to do" - shows dialog with options
+        - "Start Spotify on this PC" - auto-starts local Spotify
+        - "Connect to another device" - uses remote device (e.g., Echo, phone)
+        - "Run without music" - silently skips music
     - **WIZ Bulbs panel**: Configure bulb IPs with "Discover Bulbs" network scanner
     - Navigation items show status: `[✓]` configured, `[!]` needs setup
   - **Config managers**:
@@ -54,6 +64,7 @@ The project has been refactored from individual Python scripts into a modular en
     - `ClickFocus` policy - only focuses on click or Ctrl+L (keyboard shortcuts work immediately)
     - Escape clears and unfocuses search
     - Selected button pulses green for 3 seconds (`_pulse_button` method)
+    - **Enter twice to activate**: Search result gets focus, press Enter again to trigger
   - **Dark mode support**: Three options in Settings - Light, Dark, or Use OS setting
     - OS detection via `gsettings` (GNOME/GTK) and `kdeglobals` (KDE)
   - Uses Fusion style with custom dark palette when dark mode enabled
@@ -74,6 +85,14 @@ The project has been refactored from individual Python scripts into a modular en
     - 💡 Lights (yellow #FFF9B0)
   - Description box below emoji indicators (11px font, bordered)
   - Distinct handling of sound-only (📢) vs full environment (🔊🎵💡) buttons
+  - **Startup behavior** (`_check_startup_spotify` method):
+    - On launch, checks if Spotify is configured and ready
+    - If local device available, auto-plays "Travel" environment
+    - If not, shows dialog based on settings (ask/start_local/use_remote/disabled)
+    - Polls for Spotify readiness after starting, with 5-second delay before playback
+  - **Exit cleanup** (`_cleanup_on_exit` method):
+    - Stops Spotify playback
+    - Sets all configured lights (backdrop/overhead/battlefield) to soft warm white
 
 ### Key Innovation: Background Lighting Persistence
 
@@ -287,7 +306,7 @@ Contains Spotify API credentials. Optional - for music playback.
 username = <spotify_username>
 client_id = <spotify_app_client_id>
 client_secret = <spotify_app_client_secret>
-redirectURI = http://localhost:8888/callback
+redirectURI = http://127.0.0.1:8888/callback
 ```
 Managed by `SpotifyConfigManager` class in `launcher.py`.
 
@@ -310,6 +329,10 @@ User preferences (auto-created on first launch). Managed by `SettingsManager` cl
 ```ini
 [appearance]
 theme = light  # Options: light, dark, system
+
+[spotify]
+auto_start = ask  # Options: ask, start_local, use_remote, disabled
+startup_playlist =  # Optional playlist URI to play on startup
 ```
 
 ## Common Development Tasks

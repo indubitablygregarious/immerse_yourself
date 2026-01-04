@@ -43,7 +43,9 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 - **File menu** (Alt+F) with Settings and Quit options
 - **Settings dialog** with three configuration panels:
   - **Appearance** - Light/Dark/System theme
-  - **Spotify** - API credentials (Client ID, Secret, Username, Redirect URI)
+  - **Spotify** - API credentials and startup behavior:
+    - Credentials: Client ID, Secret, Username, Redirect URI
+    - Startup options: Ask / Start locally / Use remote device / Disabled
   - **WIZ Bulbs** - IP addresses for backdrop/overhead/battlefield bulb groups
   - Status indicators show [✓] configured or [!] needs setup
   - Built-in "Discover Bulbs" button scans your network for WIZ bulbs
@@ -52,7 +54,8 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 - **Dark mode support** - choose Light, Dark, or auto-detect from GNOME/KDE system theme
 - **Search bar** (Ctrl+L) - fuzzy search across all environments by name, description, and tags
   - Only focuses on click or Ctrl+L (keyboard shortcuts work immediately)
-  - Selected environment's button pulses green for 3 seconds
+  - Selected environment's button pulses green and gets focus
+  - Press Enter twice: once to select search result, again to activate
 - **Keyboard shortcuts** (Q, W, E, R...) - displayed as badges with white text and black outline
 - **Category navigation** with Ctrl+PgUp/PgDn
 - **Visual feedback** - active lights environment stays highlighted
@@ -69,6 +72,14 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
   - Emoji indicators below button with pastel backgrounds:
     - 🔊 Sound (peach) | 🎵 Spotify (mint) | 💡 Lights (yellow)
   - Description box below indicators
+- **Startup behavior**:
+  - Auto-checks Spotify connection on launch
+  - If Spotify ready, auto-plays "Travel" environment
+  - If not, shows options: Start Spotify / Connect to remote device / Skip music
+  - "Remember my choice" checkbox saves preference
+- **Exit cleanup**:
+  - Stops Spotify playback
+  - Sets all lights to soft warm white
 
 ## Requirements
 
@@ -106,7 +117,7 @@ Launch the app and go to **File > Settings** to configure:
 **Spotify** (optional - for music playback):
 1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
 2. Create a new app and note your **Client ID** and **Client Secret**
-3. Add `http://localhost:8888/callback` as a Redirect URI in app settings
+3. Add `http://127.0.0.1:8888/callback` as a Redirect URI in app settings
 4. Enter credentials in Settings > Spotify panel
 5. First environment click will open browser for OAuth authorization
 
@@ -125,7 +136,7 @@ You can also create config files directly in the project root:
 username = your_spotify_username
 client_id = your_client_id
 client_secret = your_client_secret
-redirectURI = http://localhost:8888/callback
+redirectURI = http://127.0.0.1:8888/callback
 ```
 
 `.wizbulb.ini`:

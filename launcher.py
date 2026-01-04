@@ -33,6 +33,10 @@ class SettingsManager:
     DEFAULT_SETTINGS = {
         "appearance": {
             "theme": "light"  # Options: "light", "dark", "system"
+        },
+        "spotify": {
+            "auto_start": "ask",  # Options: "always", "never", "ask"
+            "startup_playlist": ""  # Playlist URI to play on startup (empty = none)
         }
     }
 
@@ -74,6 +78,22 @@ class SettingsManager:
     def set_theme(self, theme: str) -> None:
         """Set the theme setting."""
         self.set("appearance", "theme", theme)
+
+    def get_spotify_auto_start(self) -> str:
+        """Get Spotify auto-start setting: 'always', 'never', or 'ask'."""
+        return self.get("spotify", "auto_start", "ask")
+
+    def set_spotify_auto_start(self, value: str) -> None:
+        """Set Spotify auto-start setting."""
+        self.set("spotify", "auto_start", value)
+
+    def get_startup_playlist(self) -> str:
+        """Get the startup playlist URI."""
+        return self.get("spotify", "startup_playlist", "")
+
+    def set_startup_playlist(self, uri: str) -> None:
+        """Set the startup playlist URI."""
+        self.set("spotify", "startup_playlist", uri)
 
 
 class SpotifyConfigManager:
@@ -312,13 +332,48 @@ class SettingsDialog(QDialog):
         redirect_layout = QHBoxLayout()
         redirect_layout.addWidget(QLabel("Redirect URI:"))
         self.spotify_redirect = QLineEdit()
-        self.spotify_redirect.setText(self.spotify_config.get("redirectURI", "http://localhost:8888/callback"))
-        self.spotify_redirect.setPlaceholderText("http://localhost:8888/callback")
+        self.spotify_redirect.setText(self.spotify_config.get("redirectURI", "http://127.0.0.1:8888/callback"))
+        self.spotify_redirect.setPlaceholderText("http://127.0.0.1:8888/callback")
         redirect_layout.addWidget(self.spotify_redirect)
         creds_layout.addLayout(redirect_layout)
 
         creds_group.setLayout(creds_layout)
         layout.addWidget(creds_group)
+
+        # Auto-start behavior group
+        autostart_group = QGroupBox("When Spotify is not playing on this PC")
+        autostart_layout = QVBoxLayout()
+
+        self.autostart_button_group = QButtonGroup()
+
+        self.autostart_ask = QRadioButton("Ask me what to do")
+        self.autostart_start_local = QRadioButton("Start Spotify on this PC")
+        self.autostart_use_remote = QRadioButton("Connect to Spotify on another device")
+        self.autostart_disabled = QRadioButton("Run without music")
+
+        self.autostart_button_group.addButton(self.autostart_ask, 0)
+        self.autostart_button_group.addButton(self.autostart_start_local, 1)
+        self.autostart_button_group.addButton(self.autostart_use_remote, 2)
+        self.autostart_button_group.addButton(self.autostart_disabled, 3)
+
+        autostart_layout.addWidget(self.autostart_ask)
+        autostart_layout.addWidget(self.autostart_start_local)
+        autostart_layout.addWidget(self.autostart_use_remote)
+        autostart_layout.addWidget(self.autostart_disabled)
+
+        # Set current value
+        current_autostart = self.settings_manager.get_spotify_auto_start()
+        if current_autostart == "start_local":
+            self.autostart_start_local.setChecked(True)
+        elif current_autostart == "use_remote":
+            self.autostart_use_remote.setChecked(True)
+        elif current_autostart == "disabled":
+            self.autostart_disabled.setChecked(True)
+        else:
+            self.autostart_ask.setChecked(True)
+
+        autostart_group.setLayout(autostart_layout)
+        layout.addWidget(autostart_group)
 
         # Save button
         save_btn = QPushButton("Save Spotify Settings")
@@ -339,7 +394,7 @@ class SettingsDialog(QDialog):
             <li>Click "Create App"</li>
             <li>Fill in app name and description (anything works)</li>
             <li>Copy the <b>Client ID</b> and <b>Client Secret</b> into the fields above</li>
-            <li>In your app settings, add the Redirect URI: <code>http://localhost:8888/callback</code></li>
+            <li>In your app settings, add the Redirect URI: <code>http://127.0.0.1:8888/callback</code></li>
             <li>Save settings here, then restart the app</li>
         </ol>
         <p><b>First-time authentication:</b> When you first click an environment with music,
@@ -463,8 +518,18 @@ class SettingsDialog(QDialog):
             username=self.spotify_username.text().strip(),
             client_id=self.spotify_client_id.text().strip(),
             client_secret=self.spotify_client_secret.text().strip(),
-            redirect_uri=self.spotify_redirect.text().strip() or "http://localhost:8888/callback"
+            redirect_uri=self.spotify_redirect.text().strip() or "http://127.0.0.1:8888/callback"
         )
+
+        # Save auto-start setting
+        if self.autostart_start_local.isChecked():
+            self.settings_manager.set_spotify_auto_start("start_local")
+        elif self.autostart_use_remote.isChecked():
+            self.settings_manager.set_spotify_auto_start("use_remote")
+        elif self.autostart_disabled.isChecked():
+            self.settings_manager.set_spotify_auto_start("disabled")
+        else:
+            self.settings_manager.set_spotify_auto_start("ask")
 
         # Update nav item status
         self.nav_list.item(1).setText("🎵 Spotify [✓]")
@@ -557,7 +622,11 @@ class SettingsDialog(QDialog):
         )
 
 
-from engines import SoundEngine, SpotifyEngine, LightsEngine, stop_all_sounds
+from engines import (
+    SoundEngine, SpotifyEngine, LightsEngine, stop_all_sounds,
+    SpotifyNoActiveDeviceError, is_spotify_running, is_spotify_in_path,
+    start_spotify, wait_for_spotify_device
+)
 
 
 class OutlinedLabel(QLabel):
@@ -793,6 +862,7 @@ class EngineRunner(QThread):
     error_occurred = pyqtSignal(str)
     status_update = pyqtSignal(str)
     sound_finished = pyqtSignal()  # Signal when sound-only config finishes
+    spotify_no_device = pyqtSignal()  # Signal when Spotify has no active device
 
     def __init__(self, config: Dict[str, Any]):
         super().__init__()
@@ -837,8 +907,10 @@ class EngineRunner(QThread):
                 self.status_update.emit(f"Starting Spotify...")
                 try:
                     spotify_engine = SpotifyEngine()
-                    spotify_engine.play_context(context_uri)
+                    spotify_engine.play_context_with_device_check(context_uri)
                     self.status_update.emit("Spotify playback started")
+                except SpotifyNoActiveDeviceError:
+                    self.spotify_no_device.emit()
                 except Exception as e:
                     self.error_occurred.emit(f"Spotify error: {str(e)}")
 
@@ -870,7 +942,8 @@ class EngineRunner(QThread):
         animation_config = self.config["engines"]["lights"]["animation"]
 
         await self.lights_engine.start(animation_config)
-        self.status_update.emit("Light animation running")
+        config_name = self.config.get("name", "Unknown")
+        self.status_update.emit(f"Light animation running: {config_name}")
 
         # Keep running until stopped (check frequently for fast response)
         while self.running:
@@ -925,10 +998,463 @@ class EnvironmentLauncher(QMainWindow):
         self._old_runners: List[EngineRunner] = []  # Keep refs until threads finish
         self.tab_configs: Dict[int, List[Dict[str, Any]]] = {}  # tab_index -> configs
 
+        # Store Spotify config manager for checking configuration
+        self.spotify_config = SpotifyConfigManager()
+
         # Create UI
         self._create_menu()
         self._create_ui()
         self._setup_tab_shortcuts()
+
+        # Schedule startup Spotify check (after window is shown)
+        QTimer.singleShot(500, self._check_startup_spotify)
+
+    def _check_startup_spotify(self) -> None:
+        """Check Spotify status on startup and optionally play music."""
+        # Only proceed if Spotify is configured
+        if not self.spotify_config.is_configured():
+            return
+
+        # Find the "travel" config for startup
+        travel_config = None
+        for category, configs in self.configs.items():
+            for config in configs:
+                if config.get("name", "").lower() == "travel":
+                    travel_config = config
+                    break
+            if travel_config:
+                break
+
+        if not travel_config:
+            return
+
+        # Check Spotify status FIRST before trying to play
+        auto_start = self.settings_manager.get_spotify_auto_start()
+
+        # If disabled, skip startup music entirely
+        if auto_start == "disabled":
+            self.statusBar().showMessage("Ready (Spotify disabled in settings)")
+            return
+
+        # Try to connect to Spotify and check for active device
+        try:
+            engine = SpotifyEngine()
+            local_device = engine.get_local_computer_device()
+
+            if local_device:
+                # Local device exists and ready - start travel
+                self.statusBar().showMessage("Spotify connected - starting Travel...")
+                self._start_environment(travel_config)
+                return
+
+            # No local device - need to handle based on settings
+            spotify_running = is_spotify_running()
+            spotify_available = is_spotify_in_path()
+            remote_devices = engine.get_remote_devices()
+
+            if auto_start == "start_local":
+                if self._ensure_local_spotify(spotify_running, spotify_available, travel_config):
+                    # Spotify starting - polling will auto-start travel when ready
+                    return
+                # Failed to start - fall through to show status
+                self.statusBar().showMessage("Ready (could not start Spotify)")
+                return
+
+            if auto_start == "use_remote":
+                if remote_devices:
+                    # Connect to first remote device and play
+                    device = remote_devices[0]
+                    if engine.transfer_to_device(device["id"], start_playback=False):
+                        self.statusBar().showMessage(f"Connected to {device['name']} - starting Travel...")
+                        self._start_environment(travel_config)
+                        return
+                self.statusBar().showMessage("Ready (no remote devices available)")
+                return
+
+            # auto_start == "ask" - show dialog
+            if self._show_startup_spotify_dialog(spotify_running, spotify_available, remote_devices, engine, travel_config):
+                # User chose an option that connected successfully
+                self.statusBar().showMessage("Spotify connected - starting Travel...")
+                self._start_environment(travel_config)
+
+        except FileNotFoundError:
+            # Spotify not configured
+            self.statusBar().showMessage("Ready (Spotify not configured)")
+        except Exception as e:
+            # Other error - just show ready
+            self.statusBar().showMessage(f"Ready (Spotify: {e})")
+
+    def _ensure_local_spotify(self, spotify_running: bool, spotify_available: bool,
+                               then_play_config: Optional[Dict[str, Any]] = None) -> bool:
+        """Ensure Spotify is running locally. Returns True if started/running.
+
+        Args:
+            spotify_running: Whether Spotify process is currently running
+            spotify_available: Whether Spotify executable is in PATH
+            then_play_config: If provided, auto-start this config after Spotify is ready
+        """
+        if spotify_running:
+            # Spotify is running but no device - need user to activate it
+            QMessageBox.information(
+                self,
+                "Spotify Running",
+                "Spotify is running but not playing on this PC.\n\n"
+                "Please click on any track in Spotify to activate playback, "
+                "then click an environment to start music."
+            )
+            return False
+
+        if not spotify_available:
+            return False
+
+        self.statusBar().showMessage("Starting Spotify...")
+        if start_spotify():
+            # Start polling for Spotify to be ready
+            self._poll_for_spotify_ready(then_play_config)
+            return True
+        return False
+
+    def _poll_for_spotify_ready(self, then_play_config: Optional[Dict[str, Any]] = None,
+                                 attempts: int = 0, max_attempts: int = 20) -> None:
+        """Poll for Spotify to become ready, then optionally start an environment.
+
+        Args:
+            then_play_config: Config to auto-start when ready
+            attempts: Current attempt number
+            max_attempts: Maximum polling attempts (20 * 500ms = 10 seconds)
+        """
+        if attempts >= max_attempts:
+            self.statusBar().showMessage("Spotify started - click an environment to play music")
+            self.activateWindow()
+            self.raise_()
+            return
+
+        # Check if Spotify device is now available
+        try:
+            engine = SpotifyEngine()
+            local_device = engine.get_local_computer_device()
+
+            if local_device:
+                # Device found! Wait 5 more seconds for stability, then proceed
+                self.statusBar().showMessage("Spotify ready - starting music in 5s...")
+                QTimer.singleShot(5000, lambda: self._spotify_ready_play(then_play_config))
+                return
+        except:
+            pass
+
+        # Not ready yet - check again in 500ms
+        self.statusBar().showMessage(f"Waiting for Spotify... ({attempts + 1})")
+        QTimer.singleShot(500, lambda: self._poll_for_spotify_ready(then_play_config, attempts + 1, max_attempts))
+
+    def _spotify_ready_play(self, config: Optional[Dict[str, Any]]) -> None:
+        """Called when Spotify is ready - steal focus and optionally start environment."""
+        # Steal focus back from Spotify
+        self.activateWindow()
+        self.raise_()
+
+        if config:
+            self.statusBar().showMessage(f"Starting {config['name']}...")
+            self._start_environment(config)
+
+    def _show_startup_spotify_dialog(self, spotify_running: bool, spotify_available: bool,
+                                      remote_devices: list, engine: "SpotifyEngine",
+                                      then_play_config: Optional[Dict[str, Any]] = None) -> bool:
+        """Show startup Spotify options dialog. Returns True if connected successfully."""
+        from PyQt5.QtWidgets import QDialog, QCheckBox
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Spotify Setup")
+        dialog.setMinimumWidth(400)
+
+        layout = QVBoxLayout()
+
+        # Message
+        msg = QLabel(
+            "Spotify is not playing on this PC.\n\n"
+            "How would you like to play music?"
+        )
+        msg.setWordWrap(True)
+        layout.addWidget(msg)
+
+        # Store result
+        self._startup_dialog_result = None
+
+        # Options as buttons
+        btn_layout = QVBoxLayout()
+
+        # Option 1: Start Spotify locally
+        btn_start = QPushButton("Start Spotify on this PC")
+        btn_start.setEnabled(spotify_available and not spotify_running)
+        if spotify_running:
+            btn_start.setText("Spotify is running (activate it manually)")
+            btn_start.setEnabled(False)
+        elif not spotify_available:
+            btn_start.setToolTip("Spotify not found in PATH")
+        btn_start.clicked.connect(lambda: self._startup_dialog_choose(dialog, "start_local"))
+        btn_layout.addWidget(btn_start)
+
+        # Option 2: Use remote device
+        btn_remote = QPushButton(f"Connect to another device ({len(remote_devices)} available)")
+        btn_remote.setEnabled(len(remote_devices) > 0)
+        if not remote_devices:
+            btn_remote.setToolTip("No remote devices found")
+        btn_remote.clicked.connect(lambda: self._startup_dialog_choose(dialog, "use_remote"))
+        btn_layout.addWidget(btn_remote)
+
+        # Option 3: Continue without music
+        btn_skip = QPushButton("Continue without music")
+        btn_skip.clicked.connect(lambda: self._startup_dialog_choose(dialog, "disabled"))
+        btn_layout.addWidget(btn_skip)
+
+        layout.addLayout(btn_layout)
+
+        # Remember choice checkbox
+        self._startup_remember_checkbox = QCheckBox("Remember my choice")
+        layout.addWidget(self._startup_remember_checkbox)
+
+        dialog.setLayout(layout)
+        dialog.exec_()
+
+        # Handle the result
+        if self._startup_dialog_result is None:
+            return False
+
+        # Save setting if remember is checked
+        if self._startup_remember_checkbox.isChecked():
+            self.settings_manager.set_spotify_auto_start(self._startup_dialog_result)
+
+        if self._startup_dialog_result == "start_local":
+            # Pass the config so it auto-starts after Spotify is ready
+            if self._ensure_local_spotify(spotify_running, spotify_available, then_play_config):
+                return False  # Started - polling will handle the rest
+            return False
+
+        if self._startup_dialog_result == "use_remote":
+            if remote_devices:
+                # If multiple, let user choose
+                if len(remote_devices) > 1:
+                    device_names = [f"{d['name']} ({d['type']})" for d in remote_devices]
+                    from PyQt5.QtWidgets import QInputDialog
+                    choice, ok = QInputDialog.getItem(
+                        self, "Select Device", "Choose a Spotify device:",
+                        device_names, 0, False
+                    )
+                    if ok and choice:
+                        idx = device_names.index(choice)
+                        device = remote_devices[idx]
+                    else:
+                        return False
+                else:
+                    device = remote_devices[0]
+
+                if engine.transfer_to_device(device["id"], start_playback=False):
+                    self.statusBar().showMessage(f"Connected to {device['name']}")
+                    return True
+            return False
+
+        # "disabled" - continue without music
+        self.statusBar().showMessage("Continuing without music")
+        return False
+
+    def _startup_dialog_choose(self, dialog: "QDialog", choice: str) -> None:
+        """Handle choice from startup dialog."""
+        self._startup_dialog_result = choice
+        dialog.accept()
+
+    def _handle_spotify_no_device(self) -> None:
+        """Handle case where Spotify has no active device on this PC."""
+        auto_start = self.settings_manager.get_spotify_auto_start()
+
+        # If disabled, just silently continue without music
+        if auto_start == "disabled":
+            self.statusBar().showMessage("Running without music (Spotify disabled in settings)")
+            return
+
+        # Check what options are available
+        spotify_running = is_spotify_running()
+        spotify_available = is_spotify_in_path()
+
+        # Try to get remote devices for the "use remote" option
+        remote_devices = []
+        try:
+            engine = SpotifyEngine()
+            remote_devices = engine.get_remote_devices()
+        except:
+            pass
+
+        # Handle based on setting
+        if auto_start == "start_local":
+            self._do_start_local_spotify(spotify_running, spotify_available)
+            return
+
+        if auto_start == "use_remote":
+            self._do_use_remote_spotify(remote_devices)
+            return
+
+        # auto_start == "ask" - show dialog with options
+        self._show_spotify_options_dialog(spotify_running, spotify_available, remote_devices)
+
+    def _do_start_local_spotify(self, spotify_running: bool, spotify_available: bool) -> None:
+        """Try to start Spotify locally."""
+        if spotify_running:
+            QMessageBox.information(
+                self,
+                "Spotify Running",
+                "Spotify is running but not playing on this PC.\n\n"
+                "Please click on any track in Spotify to activate playback, "
+                "then try again."
+            )
+            return
+
+        if not spotify_available:
+            QMessageBox.warning(
+                self,
+                "Spotify Not Found",
+                "Spotify is not installed or not found in your PATH.\n\n"
+                "Please install Spotify or start it manually."
+            )
+            return
+
+        self.statusBar().showMessage("Starting Spotify...")
+        if start_spotify():
+            QMessageBox.information(
+                self,
+                "Spotify Starting",
+                "Spotify is starting. Please wait a moment for it to initialize, "
+                "then click on an environment again to start music."
+            )
+        else:
+            QMessageBox.warning(
+                self,
+                "Failed to Start Spotify",
+                "Could not start Spotify. Please start it manually."
+            )
+
+    def _do_use_remote_spotify(self, remote_devices: list) -> None:
+        """Try to use a remote Spotify device."""
+        if not remote_devices:
+            QMessageBox.warning(
+                self,
+                "No Remote Devices",
+                "No remote Spotify devices found.\n\n"
+                "Make sure Spotify is running on another device and try again."
+            )
+            return
+
+        # If only one device, use it directly
+        if len(remote_devices) == 1:
+            device = remote_devices[0]
+            try:
+                engine = SpotifyEngine()
+                if engine.transfer_to_device(device["id"], start_playback=False):
+                    self.statusBar().showMessage(f"Connected to {device['name']}")
+                    QMessageBox.information(
+                        self,
+                        "Connected",
+                        f"Connected to {device['name']}.\n\n"
+                        "Click on an environment again to start music."
+                    )
+                else:
+                    QMessageBox.warning(self, "Failed", f"Could not connect to {device['name']}")
+            except Exception as e:
+                QMessageBox.warning(self, "Error", f"Failed to connect: {e}")
+            return
+
+        # Multiple devices - let user choose
+        device_names = [f"{d['name']} ({d['type']})" for d in remote_devices]
+        from PyQt5.QtWidgets import QInputDialog
+        choice, ok = QInputDialog.getItem(
+            self,
+            "Select Device",
+            "Choose a Spotify device:",
+            device_names,
+            0,
+            False
+        )
+        if ok and choice:
+            idx = device_names.index(choice)
+            device = remote_devices[idx]
+            try:
+                engine = SpotifyEngine()
+                if engine.transfer_to_device(device["id"], start_playback=False):
+                    self.statusBar().showMessage(f"Connected to {device['name']}")
+                else:
+                    QMessageBox.warning(self, "Failed", f"Could not connect to {device['name']}")
+            except Exception as e:
+                QMessageBox.warning(self, "Error", f"Failed to connect: {e}")
+
+    def _show_spotify_options_dialog(self, spotify_running: bool, spotify_available: bool, remote_devices: list) -> None:
+        """Show dialog with Spotify connection options."""
+        from PyQt5.QtWidgets import QDialog, QDialogButtonBox
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Spotify - No Active Device")
+        dialog.setMinimumWidth(400)
+
+        layout = QVBoxLayout()
+
+        # Message
+        msg = QLabel(
+            "Spotify is not playing on this PC.\n\n"
+            "What would you like to do?"
+        )
+        msg.setWordWrap(True)
+        layout.addWidget(msg)
+
+        # Options as buttons
+        btn_layout = QVBoxLayout()
+
+        # Option 1: Start Spotify locally
+        btn_start = QPushButton("Start Spotify on this PC")
+        btn_start.setEnabled(spotify_available)
+        if not spotify_available:
+            btn_start.setToolTip("Spotify not found in PATH")
+        btn_start.clicked.connect(lambda: self._dialog_start_local(dialog, spotify_running, spotify_available))
+        btn_layout.addWidget(btn_start)
+
+        # Option 2: Use remote device
+        btn_remote = QPushButton(f"Connect to another device ({len(remote_devices)} available)")
+        btn_remote.setEnabled(len(remote_devices) > 0)
+        if not remote_devices:
+            btn_remote.setToolTip("No remote devices found")
+        btn_remote.clicked.connect(lambda: self._dialog_use_remote(dialog, remote_devices))
+        btn_layout.addWidget(btn_remote)
+
+        # Option 3: Continue without music
+        btn_skip = QPushButton("Continue without music")
+        btn_skip.clicked.connect(lambda: self._dialog_skip_music(dialog))
+        btn_layout.addWidget(btn_skip)
+
+        layout.addLayout(btn_layout)
+
+        # Remember choice checkbox
+        from PyQt5.QtWidgets import QCheckBox
+        self._remember_checkbox = QCheckBox("Remember my choice")
+        layout.addWidget(self._remember_checkbox)
+
+        dialog.setLayout(layout)
+        dialog.exec_()
+
+    def _dialog_start_local(self, dialog: "QDialog", spotify_running: bool, spotify_available: bool) -> None:
+        """Handle 'Start local' from options dialog."""
+        if self._remember_checkbox.isChecked():
+            self.settings_manager.set_spotify_auto_start("start_local")
+        dialog.accept()
+        self._do_start_local_spotify(spotify_running, spotify_available)
+
+    def _dialog_use_remote(self, dialog: "QDialog", remote_devices: list) -> None:
+        """Handle 'Use remote' from options dialog."""
+        if self._remember_checkbox.isChecked():
+            self.settings_manager.set_spotify_auto_start("use_remote")
+        dialog.accept()
+        self._do_use_remote_spotify(remote_devices)
+
+    def _dialog_skip_music(self, dialog: "QDialog") -> None:
+        """Handle 'Continue without music' from options dialog."""
+        if self._remember_checkbox.isChecked():
+            self.settings_manager.set_spotify_auto_start("disabled")
+        dialog.reject()
+        self.statusBar().showMessage("Continuing without music")
 
     def _is_dark_mode_enabled(self) -> bool:
         """Check if dark mode should be enabled based on settings."""
@@ -1394,6 +1920,7 @@ class EnvironmentLauncher(QMainWindow):
             runner.status_update.connect(self._on_status_update)
             runner.finished.connect(lambda: self._on_runner_finished(runner))
             runner.sound_finished.connect(lambda: self._on_sound_finished(config["name"]))
+            runner.spotify_no_device.connect(self._handle_spotify_no_device)
             runner.start()
 
             self.current_runner = runner
@@ -1483,11 +2010,9 @@ class EnvironmentLauncher(QMainWindow):
         if config_name in self.buttons:
             btn = self.buttons[config_name]
             self._pulse_button(btn)
+            # Set focus on button so Enter triggers it
             btn.setFocus()
-
-        # Return focus to main window
-        self.setFocus()
-        self.statusBar().showMessage(f"Found: {config_name}")
+            self.statusBar().showMessage(f"Found: {config_name} (press Enter to activate)")
 
     def _pulse_button(self, btn: QPushButton) -> None:
         """Make a button pulse with a green border glow for 3 seconds."""
@@ -1594,11 +2119,50 @@ class EnvironmentLauncher(QMainWindow):
                 # On exit, actually wait for cleanup
                 self.lights_runner.running = False
                 self.lights_runner.wait(2000)
+                self._cleanup_on_exit()
                 event.accept()
             else:
                 event.ignore()
         else:
+            self._cleanup_on_exit()
             event.accept()
+
+    def _cleanup_on_exit(self) -> None:
+        """Cleanup actions when exiting the app."""
+        import asyncio
+        from pywizlight import wizlight, PilotBuilder
+
+        # Stop Spotify playback
+        try:
+            engine = SpotifyEngine()
+            engine.stop()
+            self.statusBar().showMessage("Stopped Spotify")
+        except:
+            pass  # Spotify may not be configured
+
+        # Set all lights to soft white
+        wizbulb_config = WizBulbConfigManager()
+        if wizbulb_config.is_configured():
+            all_ips = []
+            for group in ["backdrop_bulbs", "overhead_bulbs", "battlefield_bulbs"]:
+                ips = wizbulb_config.get(group, "").split()
+                all_ips.extend([ip.strip() for ip in ips if ip.strip()])
+
+            if all_ips:
+                async def set_lights_soft_white():
+                    # Soft warm white: ~2700K equivalent
+                    pilot = PilotBuilder(rgb=(255, 244, 229), brightness=128)
+                    for ip in all_ips:
+                        try:
+                            bulb = wizlight(ip)
+                            await bulb.turn_on(pilot)
+                        except:
+                            pass  # Ignore unreachable bulbs
+
+                try:
+                    asyncio.run(set_lights_soft_white())
+                except:
+                    pass
 
 
 def detect_system_dark_mode() -> bool:

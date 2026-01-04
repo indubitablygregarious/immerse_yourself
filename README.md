@@ -41,7 +41,13 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 ### GUI Launcher
 
 - **File menu** (Alt+F) with Settings and Quit options
-- **Settings dialog** - configure appearance (Light/Dark/System theme)
+- **Settings dialog** with three configuration panels:
+  - **Appearance** - Light/Dark/System theme
+  - **Spotify** - API credentials (Client ID, Secret, Username, Redirect URI)
+  - **WIZ Bulbs** - IP addresses for backdrop/overhead/battlefield bulb groups
+  - Status indicators show [✓] configured or [!] needs setup
+  - Built-in "Discover Bulbs" button scans your network for WIZ bulbs
+  - Step-by-step setup instructions for new users
 - **Left sidebar navigation** - categories listed vertically (15% width)
 - **Dark mode support** - choose Light, Dark, or auto-detect from GNOME/KDE system theme
 - **Search bar** (Ctrl+L) - fuzzy search across all environments by name, description, and tags
@@ -66,12 +72,14 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 
 ## Requirements
 
-### Hardware
-- **WIZ smart bulbs** (3+ bulbs recommended)
+### Hardware (Optional)
+- **WIZ smart bulbs** (3+ bulbs recommended) - for lighting effects
   - Backdrop bulbs (ambiance)
   - Overhead bulbs (main lighting)
   - Battlefield bulbs (optional, for combat scenes)
-- **Spotify Premium account** (required for playback control)
+- **Spotify Premium account** - for music playback
+
+*Note: The app works without either! Sound effects play independently, and you can configure Spotify/bulbs later via Settings.*
 
 ### Software
 - Python 3.7+
@@ -91,47 +99,42 @@ cd immerse_yourself
 pip install -r requirements.txt
 ```
 
-### 3. Set up Spotify API
+### 3. Configure via Settings (Recommended)
+
+Launch the app and go to **File > Settings** to configure:
+
+**Spotify** (optional - for music playback):
 1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-2. Create a new app
-3. Note your **Client ID** and **Client Secret**
-4. Add `http://localhost:8888/callback` as a Redirect URI in app settings
+2. Create a new app and note your **Client ID** and **Client Secret**
+3. Add `http://localhost:8888/callback` as a Redirect URI in app settings
+4. Enter credentials in Settings > Spotify panel
+5. First environment click will open browser for OAuth authorization
 
-### 4. Create configuration files
+**WIZ Bulbs** (optional - for lighting effects):
+1. Click "Discover Bulbs on Network" in Settings > WIZ Bulbs panel
+2. Copy discovered IPs into the appropriate bulb groups
+3. Save settings
 
-Create `.spotify.ini` in the project root:
+### Alternative: Manual Configuration Files
+
+You can also create config files directly in the project root:
+
+`.spotify.ini`:
 ```ini
 [DEFAULT]
 username = your_spotify_username
-client_id = your_client_id_from_step_3
-client_secret = your_client_secret_from_step_3
+client_id = your_client_id
+client_secret = your_client_secret
 redirectURI = http://localhost:8888/callback
 ```
 
-Create `.wizbulb.ini` in the project root:
+`.wizbulb.ini`:
 ```ini
 [DEFAULT]
 backdrop_bulbs = 192.168.1.165 192.168.1.159 192.168.1.160
 overhead_bulbs = 192.168.1.161 192.168.1.162
 battlefield_bulbs = 192.168.1.163 192.168.1.164
 ```
-*(Replace with your actual bulb IP addresses)*
-
-### 5. Find your WIZ bulb IP addresses
-```bash
-# Install pywizlight if not already installed
-pip install pywizlight
-
-# Discover bulbs on your network
-python3 -c "import asyncio; from pywizlight import discovery; asyncio.run(discovery.discover_lights())"
-```
-
-### 6. First authentication
-Run any environment script to complete Spotify OAuth:
-```bash
-python3 environments/tavern.py
-```
-A browser will open - log in to Spotify and authorize the app. This creates a `.cache` file for future sessions.
 
 ## Usage
 
@@ -159,27 +162,31 @@ Press Ctrl+C to stop.
 
 ## Troubleshooting
 
-### "Failed to start" error
-**Cause**: Missing configuration files
-**Fix**: Ensure `.spotify.ini`, `.wizbulb.ini`, and `.cache` exist in project root
-
-### Script hangs waiting for URL input
-**Cause**: Spotify OAuth token expired or missing
-**Fix**: Run script from terminal, complete browser authentication to regenerate `.cache`
+### Music not playing
+**Cause**: Spotify not configured or OAuth expired
+**Fix**:
+1. Go to File > Settings > Spotify
+2. Ensure Client ID and Client Secret are entered
+3. Click an environment with music - browser will open for authorization
+4. If still failing, delete `.cache` file and re-authorize
 
 ### Lights don't respond
 **Causes**:
+- Bulbs not configured
 - Bulbs are offline or unreachable
-- Wrong IP addresses in `.wizbulb.ini`
+- Wrong IP addresses
 
 **Fix**:
-1. Verify bulbs are powered on
-2. Re-run bulb discovery to check IPs
-3. Update `.wizbulb.ini` with correct addresses
+1. Go to File > Settings > WIZ Bulbs
+2. Click "Discover Bulbs on Network"
+3. Copy discovered IPs to appropriate groups
+4. Verify bulbs are powered on and connected to WiFi
 
 ### No sound effects play
-**Cause**: Sound effect files missing
-**Fix**: Ensure .mp3/.wav/.opus files exist in project root (check individual scene scripts for filenames)
+**Cause**: Sound effect files missing or audio player not available
+**Fix**:
+- Ensure .mp3/.wav/.opus files exist in `sounds/` directory
+- Install ffmpeg for ffplay support: `sudo apt install ffmpeg`
 
 ### Deprecation warnings
 Warnings about `get_access_token(as_dict=True)` can be safely ignored - they're from the spotipy library.

@@ -1,0 +1,57 @@
+name: "Forest"
+category: "exploration"
+description: "Sunlit woodland with dappled light through the canopy"
+icon: "🌲"
+
+metadata:
+  tags: ["forest", "woods", "nature", "outdoor", "travel", "exploration"]
+  intensity: "low"
+  suitable_for: ["forest travel", "woodland exploration", "druid encounters", "ranger territory"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/chill.wav"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:3Vz5yr3PL1xIIAe89mPfT4"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 15  # Slow, peaceful
+      flash_variance: 30
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [45, 90, 40]  # Deep forest green
+            variance: [15, 25, 15]
+          brightness:
+            min: 80
+            max: 180
+          flash:
+            probability: 0.08  # Dappled sunlight
+            color: [255, 240, 180]  # Warm sunbeam
+            brightness: 220
+            duration: 1.5
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [120, 160, 80]  # Leafy canopy green
+            variance: [20, 30, 20]
+          brightness:
+            min: 150
+            max: 255
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [80, 60, 40]  # Forest floor brown
+            variance: [15, 15, 10]
+          brightness:
+            min: 60
+            max: 140

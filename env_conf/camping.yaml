@@ -26,21 +26,27 @@ engines:
         backdrop:
           type: "rgb"
           rgb:
-            base: [0, 0, 0]  # Backdrop turned off
+            base: [0, 0, 0]
             variance: [0, 0, 0]
           brightness:
             min: 0
             max: 0
 
         overhead:
+          type: "rgb"
+          rgb:
+            base: [0, 0, 0]
+            variance: [0, 0, 0]
+          brightness:
+            min: 0
+            max: 0
+
+        battlefield:
           type: "scene"
           scenes:
-            ids: [5]  # Fireplace scene
+            ids: [5]  # Fireplace scene - the campfire
             speed_min: 10
             speed_max: 190
           brightness:
             min: 44
             max: 55
-
-        battlefield:
-          type: "inherit_overhead"

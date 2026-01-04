@@ -15,12 +15,168 @@ from collections import defaultdict
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QGridLayout, QPushButton,
     QStatusBar, QMessageBox, QVBoxLayout, QTabWidget, QHBoxLayout,
-    QShortcut, QLabel, QFrame, QSizePolicy, QStyleFactory
+    QShortcut, QLabel, QFrame, QSizePolicy, QStyleFactory, QMenuBar,
+    QMenu, QAction, QDialog, QListWidget, QListWidgetItem, QStackedWidget,
+    QRadioButton, QButtonGroup, QGroupBox
 )
-from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal
-from PyQt5.QtGui import QKeySequence, QPalette, QColor, QPainter, QPen, QFont
+from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, QSize
+from PyQt5.QtGui import QKeySequence, QPalette, QColor, QPainter, QPen, QFont, QIcon
 
 from config_loader import ConfigLoader
+import configparser
+
+
+class SettingsManager:
+    """Manages application settings via settings.ini file."""
+
+    DEFAULT_SETTINGS = {
+        "appearance": {
+            "theme": "light"  # Options: "light", "dark", "system"
+        }
+    }
+
+    def __init__(self, settings_file: str = "settings.ini"):
+        self.settings_file = Path(settings_file)
+        self.config = configparser.ConfigParser()
+        self._load_or_create()
+
+    def _load_or_create(self) -> None:
+        """Load settings from file or create with defaults."""
+        if self.settings_file.exists():
+            self.config.read(self.settings_file)
+        else:
+            # Create default settings
+            for section, values in self.DEFAULT_SETTINGS.items():
+                self.config[section] = values
+            self._save()
+
+    def _save(self) -> None:
+        """Save settings to file."""
+        with open(self.settings_file, "w") as f:
+            self.config.write(f)
+
+    def get(self, section: str, key: str, fallback: str = "") -> str:
+        """Get a setting value."""
+        return self.config.get(section, key, fallback=fallback)
+
+    def set(self, section: str, key: str, value: str) -> None:
+        """Set a setting value and save."""
+        if section not in self.config:
+            self.config[section] = {}
+        self.config[section][key] = value
+        self._save()
+
+    def get_theme(self) -> str:
+        """Get the current theme setting."""
+        return self.get("appearance", "theme", "light")
+
+    def set_theme(self, theme: str) -> None:
+        """Set the theme setting."""
+        self.set("appearance", "theme", theme)
+
+
+class SettingsDialog(QDialog):
+    """Settings dialog with icon navigation and panels."""
+
+    def __init__(self, settings_manager: SettingsManager, parent=None):
+        super().__init__(parent)
+        self.settings_manager = settings_manager
+        self.setWindowTitle("Settings")
+        self.setMinimumSize(500, 350)
+        self._setup_ui()
+
+    def _setup_ui(self) -> None:
+        """Set up the dialog UI."""
+        layout = QHBoxLayout()
+
+        # Left navigation list
+        self.nav_list = QListWidget()
+        self.nav_list.setMaximumWidth(150)
+        self.nav_list.setIconSize(QSize(24, 24))
+
+        # Add navigation items
+        appearance_item = QListWidgetItem("🎨 Appearance")
+        self.nav_list.addItem(appearance_item)
+
+        self.nav_list.currentRowChanged.connect(self._on_nav_changed)
+
+        # Right panel stack
+        self.panel_stack = QStackedWidget()
+
+        # Add panels
+        self.panel_stack.addWidget(self._create_appearance_panel())
+
+        layout.addWidget(self.nav_list)
+        layout.addWidget(self.panel_stack, 1)
+
+        self.setLayout(layout)
+
+        # Select first item
+        self.nav_list.setCurrentRow(0)
+
+    def _create_appearance_panel(self) -> QWidget:
+        """Create the appearance settings panel."""
+        panel = QWidget()
+        layout = QVBoxLayout()
+
+        # Theme group
+        theme_group = QGroupBox("Theme")
+        theme_layout = QVBoxLayout()
+
+        self.theme_button_group = QButtonGroup()
+
+        self.light_radio = QRadioButton("Light mode")
+        self.dark_radio = QRadioButton("Dark mode")
+        self.system_radio = QRadioButton("Use OS setting")
+
+        self.theme_button_group.addButton(self.light_radio, 0)
+        self.theme_button_group.addButton(self.dark_radio, 1)
+        self.theme_button_group.addButton(self.system_radio, 2)
+
+        theme_layout.addWidget(self.light_radio)
+        theme_layout.addWidget(self.dark_radio)
+        theme_layout.addWidget(self.system_radio)
+        theme_group.setLayout(theme_layout)
+
+        # Set current theme
+        current_theme = self.settings_manager.get_theme()
+        if current_theme == "light":
+            self.light_radio.setChecked(True)
+        elif current_theme == "dark":
+            self.dark_radio.setChecked(True)
+        else:
+            self.system_radio.setChecked(True)
+
+        # Connect signal
+        self.theme_button_group.buttonClicked.connect(self._on_theme_changed)
+
+        layout.addWidget(theme_group)
+        layout.addStretch()
+
+        panel.setLayout(layout)
+        return panel
+
+    def _on_nav_changed(self, index: int) -> None:
+        """Handle navigation selection change."""
+        self.panel_stack.setCurrentIndex(index)
+
+    def _on_theme_changed(self) -> None:
+        """Handle theme selection change."""
+        if self.light_radio.isChecked():
+            self.settings_manager.set_theme("light")
+        elif self.dark_radio.isChecked():
+            self.settings_manager.set_theme("dark")
+        else:
+            self.settings_manager.set_theme("system")
+
+        # Show restart message
+        QMessageBox.information(
+            self,
+            "Theme Changed",
+            "Please restart the application for the theme change to take effect."
+        )
+
+
 from engines import SoundEngine, SpotifyEngine, LightsEngine
 
 
@@ -232,13 +388,14 @@ class EnvironmentLauncher(QMainWindow):
     DESC_STYLE = "font-size: 11px; color: #666; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px; background-color: #fafafa;"
     DESC_STYLE_DARK = "font-size: 11px; color: #aaa; padding: 2px 4px; border: 1px solid #555; border-radius: 3px; background-color: #2a2a2a;"
 
-    def __init__(self):
+    def __init__(self, settings_manager: SettingsManager):
         super().__init__()
+        self.settings_manager = settings_manager
         self.setWindowTitle("Immerse Yourself - Environment Launcher")
         self.setGeometry(100, 100, 1000, 600)
 
-        # Detect dark mode from system palette
-        self.is_dark_mode = self._detect_dark_mode()
+        # Detect dark mode based on settings
+        self.is_dark_mode = self._is_dark_mode_enabled()
 
         # Load configurations
         self.config_loader = ConfigLoader("env_conf")
@@ -255,8 +412,51 @@ class EnvironmentLauncher(QMainWindow):
         self.tab_configs: Dict[int, List[Dict[str, Any]]] = {}  # tab_index -> configs
 
         # Create UI
+        self._create_menu()
         self._create_ui()
         self._setup_tab_shortcuts()
+
+    def _is_dark_mode_enabled(self) -> bool:
+        """Check if dark mode should be enabled based on settings."""
+        theme = self.settings_manager.get_theme()
+        if theme == "dark":
+            return True
+        elif theme == "light":
+            return False
+        else:  # "system"
+            return self._detect_system_dark_mode()
+
+    def _detect_system_dark_mode(self) -> bool:
+        """Detect if the system is using dark mode."""
+        # This is called during init before palette may be set
+        # Use external detection
+        return detect_system_dark_mode()
+
+    def _create_menu(self) -> None:
+        """Create the application menu bar."""
+        menubar = self.menuBar()
+
+        # File menu (Ctrl+F, F underlined)
+        file_menu = menubar.addMenu("&File")
+
+        # Settings action (S underlined)
+        settings_action = QAction("&Settings", self)
+        settings_action.setShortcut("Ctrl+,")
+        settings_action.triggered.connect(self._show_settings)
+        file_menu.addAction(settings_action)
+
+        file_menu.addSeparator()
+
+        # Quit action (Q underlined)
+        quit_action = QAction("&Quit", self)
+        quit_action.setShortcut("Ctrl+Q")
+        quit_action.triggered.connect(self.close)
+        file_menu.addAction(quit_action)
+
+    def _show_settings(self) -> None:
+        """Show the settings dialog."""
+        dialog = SettingsDialog(self.settings_manager, self)
+        dialog.exec_()
 
     def _detect_dark_mode(self) -> bool:
         """Detect if the system is using dark mode based on window background color."""
@@ -697,11 +897,18 @@ def main():
     # Use Fusion style for consistent cross-platform appearance
     app.setStyle(QStyleFactory.create("Fusion"))
 
-    # Detect and apply dark mode if system prefers it
-    if detect_system_dark_mode():
-        apply_dark_palette(app)
+    # Load settings
+    settings_manager = SettingsManager()
 
-    launcher = EnvironmentLauncher()
+    # Apply theme based on settings
+    theme = settings_manager.get_theme()
+    if theme == "dark":
+        apply_dark_palette(app)
+    elif theme == "system" and detect_system_dark_mode():
+        apply_dark_palette(app)
+    # else: light mode, use default palette
+
+    launcher = EnvironmentLauncher(settings_manager)
     launcher.show()
     sys.exit(app.exec_())
 

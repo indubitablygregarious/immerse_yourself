@@ -1,4 +1,5 @@
 # Spotify and WIZ bulb configuration (contains credentials)
+settings.ini
 .spotify*
 .wizbulb*
 .cache

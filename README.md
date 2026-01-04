@@ -33,12 +33,17 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 ### GUI Launcher
 
 - **Tabbed interface** organized by category (Combat, Social, Exploration, Relaxation, Special)
-- **Keyboard shortcuts** (Q, W, E, R...) - automatically remap per tab
+- **Keyboard shortcuts** (Q, W, E, R...) - displayed as badges, remap per tab
 - **Tab navigation** with Ctrl+PgUp/PgDn
 - **Visual feedback** - active lights environment stays highlighted
 - **Sound effects** can trigger without interrupting current lights
 - **Stop button** to turn off lights
-- **Monospace button layout**: `(Q)  Name  📢` - hotkey, name, emoji indicators
+- **Scalable buttons** - expand automatically when window is resized
+- **Clear button layout** with:
+  - Shortcut key badge (top-left, random pastel background)
+  - Centered name and wrapped description
+  - Emoji indicators below button with pastel backgrounds:
+    - 🔊 Sound (peach) | 🎵 Spotify (mint) | 💡 Lights (yellow)
 
 ## Requirements
 
@@ -117,7 +122,7 @@ python3 launcher.py
 ```
 
 - Click any environment button to start
-- Press Q, W, E, R... keys for shortcuts (shown on buttons, remaps per tab)
+- Press Q, W, E, R... keys for shortcuts (shown as badges on buttons, remap per tab)
 - Use Ctrl+PgUp/PgDn to switch between category tabs
 - **Lights environments** replace each other (new lights stop old lights)
 - **Sound-only buttons** (📢) play sounds without stopping lights

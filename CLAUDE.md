@@ -42,7 +42,13 @@ The project has been refactored from individual Python scripts into a modular en
   - Per-tab keyboard shortcuts (Q, W, E, R... remap when switching tabs)
   - Ctrl+PgUp/PgDn to navigate between tabs
   - Stop button for stopping lights
-  - Monospace button layout: `(Q)  Name  📢` with wrapped description
+  - Scalable buttons that expand with window size (using `ButtonContainer` widget)
+  - Shortcut key displayed as badge in top-left corner with random pastel background
+  - Centered name with word-wrapped description (25 chars/line)
+  - Emoji indicators displayed below button (overlapping) with pastel backgrounds:
+    - 🔊/📢 Sound (peach #FFCBA4)
+    - 🎵 Spotify (mint #B4F0A8)
+    - 💡 Lights (yellow #FFF9B0)
   - Distinct handling of sound-only (📢) vs full environment (🔊🎵💡) buttons
 
 ### Key Innovation: Background Lighting Persistence
@@ -274,10 +280,11 @@ python3 launcher.py
 ```
 
 The launcher provides:
-- Grid layout of all available environments
-- Keyboard shortcuts (Q-N keys) for quick switching
+- Tabbed grid layout of all available environments (organized by category)
+- Keyboard shortcuts (Q-N keys) displayed as badges, remap per tab
 - Visual feedback showing which environment is active
-- Automatic process management (stops previous environment when starting new one)
+- Scalable buttons that grow with window size
+- Automatic process management (stops previous lights when starting new lights config)
 
 ### Run a Scene Directly
 ```bash

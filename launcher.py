@@ -7,20 +7,52 @@ A PyQt5 GUI for managing ambient environment configs with Spotify and smart ligh
 import sys
 import asyncio
 import threading
+import random
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 from collections import defaultdict
 
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QGridLayout, QPushButton,
-    QStatusBar, QMessageBox, QVBoxLayout, QTabWidget, QHBoxLayout
+    QStatusBar, QMessageBox, QVBoxLayout, QTabWidget, QHBoxLayout,
+    QShortcut, QLabel, QFrame, QSizePolicy
 )
 from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QShortcut
 
 from config_loader import ConfigLoader
 from engines import SoundEngine, SpotifyEngine, LightsEngine
+
+
+class ButtonContainer(QWidget):
+    """Container widget that handles dynamic resizing with overlapping emoji indicators."""
+
+    def __init__(self, btn: QPushButton, emoji_row: QWidget, shortcut_label: Optional[QLabel] = None):
+        super().__init__()
+        self.btn = btn
+        self.emoji_row = emoji_row
+        self.shortcut_label = shortcut_label
+        self.btn.setParent(self)
+        self.emoji_row.setParent(self)
+        if self.shortcut_label:
+            self.shortcut_label.setParent(self)
+        self.setMinimumHeight(100)
+        self.setMinimumWidth(180)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+    def resizeEvent(self, event):
+        w = self.width()
+        h = self.height()
+        # Button fills container except for 10px at bottom for emoji overlap
+        self.btn.setGeometry(0, 0, w, h - 10)
+        # Emoji row at bottom, overlapping button by 10px
+        self.emoji_row.setGeometry(0, h - 20, w, 20)
+        self.emoji_row.raise_()
+        # Shortcut label in top-left, overlapping button
+        if self.shortcut_label:
+            self.shortcut_label.setGeometry(5, 5, 33, 29)
+            self.shortcut_label.raise_()
+        super().resizeEvent(event)
 
 
 class EngineRunner(QThread):
@@ -118,8 +150,8 @@ class EnvironmentLauncher(QMainWindow):
         "Z", "X", "C", "V", "B", "N",
     ]
 
-    ACTIVE_STYLE = "background-color: #4CAF50; color: white; padding: 8px; font-family: monospace; font-size: 13px;"
-    INACTIVE_STYLE = "background-color: #f0f0f0; padding: 8px; font-family: monospace; font-size: 13px;"
+    ACTIVE_STYLE = "background-color: #4CAF50; color: white; padding: 8px; font-size: 14px;"
+    INACTIVE_STYLE = "background-color: #f0f0f0; padding: 8px; font-size: 14px;"
     STOP_STYLE = "background-color: #f44336; color: white; font-weight: bold; font-size: 12px;"
 
     def __init__(self):
@@ -221,11 +253,11 @@ class EnvironmentLauncher(QMainWindow):
             # Shortcut key based on position in this tab
             shortcut_key = self.KEYS[idx] if idx < len(self.KEYS) else ""
 
-            # Create button
-            btn = self._create_button(config, shortcut_key)
-            layout.addWidget(btn, row, col)
+            # Create button widget (returns container and button)
+            container, btn = self._create_button(config, shortcut_key)
+            layout.addWidget(container, row, col)
 
-            # Store button reference
+            # Store button reference for styling
             self.buttons[config["name"]] = btn
 
         tab_widget.setLayout(layout)
@@ -273,8 +305,20 @@ class EnvironmentLauncher(QMainWindow):
             )
             self.shortcuts.append(shortcut)
 
-    def _create_button(self, config: Dict[str, Any], shortcut_key: str) -> QPushButton:
-        """Create a button for an environment."""
+    def _generate_pastel_color(self) -> str:
+        """Generate a random pastel color as hex string."""
+        # Pastel colors have high lightness - RGB values between 180-255
+        r = random.randint(180, 255)
+        g = random.randint(180, 255)
+        b = random.randint(180, 255)
+        return f"#{r:02x}{g:02x}{b:02x}"
+
+    def _create_button(self, config: Dict[str, Any], shortcut_key: str):
+        """Create a button widget with emoji indicators below.
+
+        Returns:
+            Tuple of (container_widget, button) - container for layout, button for styling
+        """
         name = config["name"]
         description = config.get("description", "")
 
@@ -283,64 +327,86 @@ class EnvironmentLauncher(QMainWindow):
         spotify_enabled = config.get("engines", {}).get("spotify", {}).get("enabled", False)
         lights_enabled = config.get("engines", {}).get("lights", {}).get("enabled", False)
 
-        # Build emoji indicators - use distinct emoji for sound-only
-        emoji_indicators = ""
-        is_sound_only = sound_enabled and not spotify_enabled and not lights_enabled
-        if sound_enabled:
-            emoji_indicators += "📢" if is_sound_only else "🔊"
-        if spotify_enabled:
-            emoji_indicators += "🎵"
-        if lights_enabled:
-            emoji_indicators += "💡"
-
-        # Word wrap description to ~30 chars per line for 3 lines
-        desc_lines = []
+        # Build button text: name centered, description below (word-wrapped)
+        # Manually wrap description to ~25 chars per line
+        wrapped_desc = ""
         if description:
             words = description.split()
-            current_line = ""
+            line = ""
             for word in words:
-                if len(current_line) + len(word) + 1 <= 30:
-                    current_line += (" " if current_line else "") + word
+                if len(line) + len(word) + 1 <= 25:
+                    line += (" " if line else "") + word
                 else:
-                    if current_line:
-                        desc_lines.append(current_line)
-                    current_line = word
-                if len(desc_lines) >= 3:
-                    break
-            if current_line and len(desc_lines) < 3:
-                desc_lines.append(current_line)
+                    wrapped_desc += ("\n" if wrapped_desc else "") + line
+                    line = word
+            if line:
+                wrapped_desc += ("\n" if wrapped_desc else "") + line
 
-        # Build button text with fixed-width padding for alignment
-        # Header: "(key)      name      emoji"
-        hotkey_text = f"({shortcut_key})" if shortcut_key else "   "
+        btn_text = f"{name}\n\n{wrapped_desc}" if wrapped_desc else name
 
-        # Pad to create: hotkey (left) ... name (center) ... emoji (right)
-        total_width = 28
-        hotkey_part = hotkey_text.ljust(4)
-        emoji_part = emoji_indicators.rjust(4)
-        # Center the name in remaining space
-        center_width = total_width - 8
-        name_part = name.center(center_width)
-
-        header = f"{hotkey_part}{name_part}{emoji_part}"
-
-        # Combine: header, blank line, description
-        btn_text = header + "\n"
-        if desc_lines:
-            for line in desc_lines:
-                btn_text += "\n" + line.center(total_width)
-
-        # Create button
+        # Create button (will be parented to container)
         btn = QPushButton(btn_text)
-        btn.setMinimumHeight(130)
-        btn.setMinimumWidth(260)
         btn.setStyleSheet(self.INACTIVE_STYLE)
         btn.setToolTip(config.get("description", ""))
-
-        # Connect click
         btn.clicked.connect(lambda checked=False, c=config: self._start_environment(c))
 
-        return btn
+        # Create shortcut key badge (top-left corner)
+        shortcut_label = None
+        if shortcut_key:
+            shortcut_label = QLabel(shortcut_key.upper())
+            pastel_color = self._generate_pastel_color()
+            shortcut_label.setStyleSheet(
+                f"background-color: {pastel_color}; border: 1px solid gray; "
+                f"border-radius: 3px; font-size: 16px; font-weight: bold;"
+            )
+            shortcut_label.setAlignment(Qt.AlignCenter)
+            shortcut_label.setFixedSize(29, 25)
+
+        # Create emoji indicator row (will be parented to container)
+        emoji_row = QWidget()
+        emoji_layout = QHBoxLayout()
+        emoji_layout.setContentsMargins(0, 0, 0, 0)
+        emoji_layout.setSpacing(4)
+        emoji_layout.addStretch()
+
+        # Pastel colors for each indicator
+        is_sound_only = sound_enabled and not spotify_enabled and not lights_enabled
+
+        if sound_enabled:
+            sound_emoji = "📢" if is_sound_only else "🔊"
+            sound_label = QLabel(sound_emoji)
+            sound_label.setFixedHeight(18)
+            sound_label.setStyleSheet(
+                "background-color: #FFCBA4; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px;"
+            )
+            sound_label.setAlignment(Qt.AlignCenter)
+            emoji_layout.addWidget(sound_label)
+
+        if spotify_enabled:
+            spotify_label = QLabel("🎵")
+            spotify_label.setFixedHeight(18)
+            spotify_label.setStyleSheet(
+                "background-color: #B4F0A8; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px;"
+            )
+            spotify_label.setAlignment(Qt.AlignCenter)
+            emoji_layout.addWidget(spotify_label)
+
+        if lights_enabled:
+            lights_label = QLabel("💡")
+            lights_label.setFixedHeight(18)
+            lights_label.setStyleSheet(
+                "background-color: #FFF9B0; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px;"
+            )
+            lights_label.setAlignment(Qt.AlignCenter)
+            emoji_layout.addWidget(lights_label)
+
+        emoji_layout.addStretch()
+        emoji_row.setLayout(emoji_layout)
+
+        # Create container that handles resizing with overlap
+        container = ButtonContainer(btn, emoji_row, shortcut_label)
+
+        return container, btn
 
     def _start_environment(self, config: Dict[str, Any]) -> None:
         """Start an environment."""

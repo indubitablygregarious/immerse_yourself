@@ -41,12 +41,16 @@ The project has been refactored from individual Python scripts into a modular en
   - **File menu** (Alt+F): Settings (Ctrl+,) and Quit (Ctrl+Q)
   - **Settings dialog** (`SettingsDialog` class): Icon navigation on left, settings panels on right
   - **Settings persistence** (`SettingsManager` class): Reads/writes `settings.ini` file
-  - Tabbed interface organized by category (Combat, Social, Exploration, etc.)
+  - **Left sidebar navigation**: Categories in QListWidget (15% width), content in QStackedWidget
+  - **Search bar** (Ctrl+L): Fuzzy search across name, description, and metadata tags
+    - `FuzzySearchBar` class with `FuzzyFilterProxyModel` for matching
+    - Escape clears and unfocuses search
+    - Selected button pulses green for 3 seconds (`_pulse_button` method)
   - **Dark mode support**: Three options in Settings - Light, Dark, or Use OS setting
     - OS detection via `gsettings` (GNOME/GTK) and `kdeglobals` (KDE)
   - Uses Fusion style with custom dark palette when dark mode enabled
-  - Per-tab keyboard shortcuts (Q, W, E, R... remap when switching tabs)
-  - Ctrl+PgUp/PgDn to navigate between tabs
+  - Per-category keyboard shortcuts (Q, W, E, R... remap when switching categories)
+  - Ctrl+PgUp/PgDn to navigate between categories
   - **Two stop buttons**:
     - STOP LIGHTS (red) - stops light animations
     - STOP SOUND (orange, Spacebar shortcut with badge) - stops all playing sounds

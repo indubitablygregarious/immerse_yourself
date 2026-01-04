@@ -30,16 +30,21 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 - Town (Day/Night), Library, Shop, Summer Festival
 
 **Special**
-- Camping, Chill, Dungeon, Win Dungeon, Chill Jazz, Clowny
+- Camping, Chill, Dungeon, Win Dungeon, Chill Jazz, Clowny, Heaven
+
+**Intense**
+- Hell (infernal hellscape with chaotic fire)
 
 ### GUI Launcher
 
 - **File menu** (Alt+F) with Settings and Quit options
 - **Settings dialog** - configure appearance (Light/Dark/System theme)
-- **Tabbed interface** organized by category (Combat, Social, Exploration, Relaxation, Special)
+- **Left sidebar navigation** - categories listed vertically (15% width)
 - **Dark mode support** - choose Light, Dark, or auto-detect from GNOME/KDE system theme
+- **Search bar** (Ctrl+L) - fuzzy search across all environments by name, description, and tags
+  - Selected environment's button pulses green for 3 seconds
 - **Keyboard shortcuts** (Q, W, E, R...) - displayed as badges with white text and black outline
-- **Tab navigation** with Ctrl+PgUp/PgDn
+- **Category navigation** with Ctrl+PgUp/PgDn
 - **Visual feedback** - active lights environment stays highlighted
 - **Sound effects** can trigger without interrupting current lights
 - **Two stop buttons**:
@@ -131,12 +136,14 @@ python3 launcher.py
 ```
 
 - Click any environment button to start
-- Press Q, W, E, R... keys for shortcuts (shown as badges on buttons, remap per tab)
-- Use Ctrl+PgUp/PgDn to switch between category tabs
+- Press **Ctrl+L** to search environments (fuzzy match by name, description, tags)
+- Press Q, W, E, R... keys for shortcuts (shown as badges on buttons, remap per category)
+- Use Ctrl+PgUp/PgDn to switch between categories
 - **Lights environments** replace each other (new lights stop old lights)
 - **Sound-only buttons** (📢) play sounds without stopping lights
 - Press **STOP LIGHTS** or close window to stop lights
 - Press **Spacebar** or **STOP SOUND** button to stop playing sounds
+- Press **Escape** to clear search and return focus to main window
 
 ### Run scenes directly
 ```bash

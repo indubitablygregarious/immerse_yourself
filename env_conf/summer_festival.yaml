@@ -1,6 +1,7 @@
 name: "Summer Festival"
 category: "special"
 description: "Vibrant festival atmosphere with bright red lighting and occasional white flashes"
+icon: "🎉"
 
 metadata:
   tags: ["festival", "celebration", "summer", "outdoor", "festive", "colorful"]

@@ -1,6 +1,7 @@
 name: "D'oh!"
 category: "social"
 description: "Homer Simpson's iconic 'D'oh!' exclamation"
+icon: "🤦"
 
 metadata:
   tags: ["sound-effect", "one-shot", "meme", "reaction", "frustration", "comedic"]

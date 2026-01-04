@@ -1,6 +1,7 @@
 name: "Item Pickup"
 category: "special"
 description: "Game-style item collection sound effect"
+icon: "💎"
 
 metadata:
   tags: ["sound-effect", "one-shot", "game", "pickup", "collect"]

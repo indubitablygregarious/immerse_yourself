@@ -1,6 +1,7 @@
 name: "Dungeon"
 category: "special"
 description: "Dark dungeon atmosphere with flickering torches and mysterious shadows"
+icon: "🏰"
 
 metadata:
   tags: ["dungeon", "underground", "dark", "atmospheric", "exploration"]

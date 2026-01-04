@@ -1,6 +1,7 @@
 name: "Travel Night"
 category: "exploration"
 description: "Nighttime travel with very dark lighting, moonlight, and minimal illumination"
+icon: "🌙"
 
 metadata:
   tags: ["exploration", "travel", "nighttime", "dark", "mysterious", "moon"]

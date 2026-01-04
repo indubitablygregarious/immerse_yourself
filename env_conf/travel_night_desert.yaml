@@ -1,6 +1,7 @@
 name: "Travel Night Desert"
 category: "exploration"
 description: "Nighttime desert travel with dim fireplace lighting and minimal illumination"
+icon: "🌵"
 
 metadata:
   tags: ["exploration", "travel", "desert", "nighttime", "dark", "campfire"]

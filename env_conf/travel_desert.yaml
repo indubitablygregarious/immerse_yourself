@@ -1,6 +1,7 @@
 name: "Travel Desert"
 category: "exploration"
 description: "Desert travel atmosphere with desert scene backdrops, sun, and bright sky lighting"
+icon: "🏜️"
 
 metadata:
   tags: ["exploration", "travel", "desert", "outdoor", "daytime", "hot", "sandy"]

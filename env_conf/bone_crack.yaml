@@ -1,6 +1,7 @@
 name: "Bone Crack"
 category: "combat"
 description: "Disturbing bone cracking sound effect"
+icon: "💀"
 
 metadata:
   tags: ["sound-effect", "one-shot", "horror", "injury", "gruesome"]

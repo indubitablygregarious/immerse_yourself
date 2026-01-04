@@ -1,6 +1,7 @@
 name: "Camping"
 category: "relaxation"
 description: "Peaceful campfire atmosphere with fireplace scene and dim lighting"
+icon: "🏕️"
 
 metadata:
   tags: ["relaxation", "campfire", "outdoor", "peaceful", "night"]

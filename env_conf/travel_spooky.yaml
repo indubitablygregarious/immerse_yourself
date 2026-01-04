@@ -1,6 +1,7 @@
 name: "Travel Spooky"
 category: "exploration"
 description: "Eerie spooky travel atmosphere with campfire backdrops, sun, and mysterious lighting"
+icon: "👻"
 
 metadata:
   tags: ["exploration", "travel", "spooky", "mysterious", "eerie", "outdoor"]

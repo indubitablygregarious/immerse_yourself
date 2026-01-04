@@ -1,6 +1,7 @@
 name: "Win Dungeon"
 category: "special"
 description: "Victory celebration in dungeon with torch scenes and dark ambient lighting"
+icon: "🏆"
 
 metadata:
   tags: ["victory", "celebration", "dungeon", "special", "achievement"]

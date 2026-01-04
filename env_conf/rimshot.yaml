@@ -1,6 +1,7 @@
 name: "Rimshot"
 category: "social"
 description: "Classic comedy ba-dum-tss drum sting"
+icon: "🥁"
 
 metadata:
   tags: ["sound-effect", "one-shot", "comedy", "joke", "punchline"]

@@ -1,6 +1,7 @@
 name: "Elimination Confirmed"
 category: "combat"
 description: "Game-style successful kill confirmation sound"
+icon: "✅"
 
 metadata:
   tags: ["sound-effect", "one-shot", "game", "combat", "success", "achievement"]

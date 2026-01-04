@@ -1,6 +1,7 @@
 name: "Town"
 category: "social"
 description: "Bright daytime town atmosphere with torch backdrops, sun lighting, and vibrant sky colors"
+icon: "🏘️"
 
 metadata:
   tags: ["social", "outdoor", "town", "daytime", "bright", "medieval"]

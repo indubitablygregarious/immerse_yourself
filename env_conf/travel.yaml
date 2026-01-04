@@ -1,6 +1,7 @@
 name: "Travel"
 category: "exploration"
 description: "Daytime travel and exploration with ambient sounds"
+icon: "🚶"
 
 metadata:
   tags: ["travel", "exploration", "outdoor", "daytime", "journey"]

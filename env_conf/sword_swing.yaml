@@ -1,6 +1,7 @@
 name: "Sword Swing"
 category: "combat"
 description: "Fast metal sword swing whoosh sound"
+icon: "⚔️"
 
 metadata:
   tags: ["sound-effect", "one-shot", "combat", "sword", "weapon", "action"]

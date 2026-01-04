@@ -1,6 +1,7 @@
 name: "Bruh"
 category: "social"
 description: "Classic 'bruh' meme sound effect"
+icon: "😐"
 
 metadata:
   tags: ["sound-effect", "one-shot", "meme", "reaction", "comedic"]

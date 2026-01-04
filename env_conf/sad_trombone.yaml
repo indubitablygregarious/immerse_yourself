@@ -1,6 +1,7 @@
 name: "Sad Trombone"
 category: "social"
 description: "Classic womp-womp failure sound"
+icon: "🎺"
 
 metadata:
   tags: ["sound-effect", "one-shot", "comedic", "failure", "disappointment", "classic"]

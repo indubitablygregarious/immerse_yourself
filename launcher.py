@@ -62,6 +62,32 @@ class OutlinedLabel(QLabel):
         painter.drawText(int(x), int(y), self._text)
 
 
+class IconButton(QPushButton):
+    """QPushButton with a large background emoji icon."""
+
+    def __init__(self, text: str, icon_emoji: str = "", parent=None):
+        super().__init__(text, parent)
+        self.icon_emoji = icon_emoji
+
+    def paintEvent(self, event):
+        # First draw the default button
+        super().paintEvent(event)
+
+        if self.icon_emoji:
+            painter = QPainter(self)
+            painter.setRenderHint(QPainter.Antialiasing)
+
+            # Set up font for large emoji
+            font = painter.font()
+            font.setPointSize(48)
+            painter.setFont(font)
+
+            # Draw emoji centered with low opacity
+            painter.setOpacity(0.15)
+            rect = self.rect()
+            painter.drawText(rect, Qt.AlignCenter, self.icon_emoji)
+
+
 class ButtonContainer(QWidget):
     """Container widget that handles dynamic resizing with overlapping emoji indicators."""
 
@@ -390,8 +416,11 @@ class EnvironmentLauncher(QMainWindow):
         spotify_enabled = config.get("engines", {}).get("spotify", {}).get("enabled", False)
         lights_enabled = config.get("engines", {}).get("lights", {}).get("enabled", False)
 
-        # Button shows only the name (larger font)
-        btn = QPushButton(name)
+        # Get optional icon emoji from config
+        icon_emoji = config.get("icon", "")
+
+        # Button shows only the name (larger font) with background icon
+        btn = IconButton(name, icon_emoji)
         btn.setStyleSheet(self.INACTIVE_STYLE)
         btn.setToolTip(description)
         btn.clicked.connect(lambda checked=False, c=config: self._start_environment(c))
@@ -431,7 +460,7 @@ class EnvironmentLauncher(QMainWindow):
             sound_label = QLabel(sound_emoji)
             sound_label.setFixedHeight(18)
             sound_label.setStyleSheet(
-                "background-color: #FFCBA4; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px;"
+                "background-color: #FFCBA4; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px; color: black;"
             )
             sound_label.setAlignment(Qt.AlignCenter)
             emoji_layout.addWidget(sound_label)
@@ -440,7 +469,7 @@ class EnvironmentLauncher(QMainWindow):
             spotify_label = QLabel("🎵")
             spotify_label.setFixedHeight(18)
             spotify_label.setStyleSheet(
-                "background-color: #B4F0A8; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px;"
+                "background-color: #B4F0A8; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px; color: black;"
             )
             spotify_label.setAlignment(Qt.AlignCenter)
             emoji_layout.addWidget(spotify_label)
@@ -449,7 +478,7 @@ class EnvironmentLauncher(QMainWindow):
             lights_label = QLabel("💡")
             lights_label.setFixedHeight(18)
             lights_label.setStyleSheet(
-                "background-color: #FFF9B0; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px;"
+                "background-color: #FFF9B0; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px; color: black;"
             )
             lights_label.setAlignment(Qt.AlignCenter)
             emoji_layout.addWidget(lights_label)

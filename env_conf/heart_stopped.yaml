@@ -1,6 +1,7 @@
 name: "Heartbeat Stopped"
 category: "combat"
 description: "Heart flatline and medical alarm sound"
+icon: "💔"
 
 metadata:
   tags: ["sound-effect", "one-shot", "dramatic", "death", "medical", "tension"]

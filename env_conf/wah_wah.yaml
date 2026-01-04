@@ -1,6 +1,7 @@
 name: "Wah Wah"
 category: "social"
 description: "Descending wah-wah disappointment sound"
+icon: "😢"
 
 metadata:
   tags: ["sound-effect", "one-shot", "failure", "disappointment", "comedic", "classic"]

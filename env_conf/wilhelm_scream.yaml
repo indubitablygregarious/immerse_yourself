@@ -1,6 +1,7 @@
 name: "Wilhelm Scream"
 category: "combat"
 description: "Iconic Wilhelm scream sound effect"
+icon: "😱"
 
 metadata:
   tags: ["sound-effect", "one-shot", "classic", "scream", "death", "cinematic"]

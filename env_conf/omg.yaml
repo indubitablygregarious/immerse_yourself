@@ -1,6 +1,7 @@
 name: "Oh My God!"
 category: "special"
 description: "Viral 'Oh my god!' vine sound clip"
+icon: "😱"
 
 metadata:
   tags: ["sound-effect", "one-shot", "meme", "reaction", "shock", "surprise"]

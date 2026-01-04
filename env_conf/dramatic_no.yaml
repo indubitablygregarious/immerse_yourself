@@ -1,6 +1,7 @@
 name: "Dramatic No!"
 category: "special"
 description: "Over-the-top dramatic 'Nooo!' scream"
+icon: "❌"
 
 metadata:
   tags: ["sound-effect", "one-shot", "dramatic", "meme", "reaction", "despair"]

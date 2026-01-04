@@ -1,6 +1,7 @@
 name: "Chill"
 category: "relaxation"
 description: "Ultra-relaxed ambient atmosphere for meditation and peaceful downtime"
+icon: "😌"
 
 metadata:
   tags: ["relaxation", "ambient", "slow", "peaceful", "meditation"]

@@ -1,6 +1,7 @@
 name: "Crickets"
 category: "social"
 description: "Awkward silence with cricket chirping"
+icon: "🦗"
 
 metadata:
   tags: ["sound-effect", "one-shot", "awkward", "silence", "comedic", "nature"]

@@ -1,6 +1,7 @@
 name: "Laugh Track"
 category: "social"
 description: "Sitcom audience laughter track"
+icon: "😂"
 
 metadata:
   tags: ["sound-effect", "one-shot", "comedy", "sitcom", "audience", "reaction"]

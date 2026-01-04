@@ -1,6 +1,7 @@
 name: "Tavern"
 category: "social"
 description: "Cozy medieval tavern atmosphere with warm lighting and door sounds"
+icon: "🍺"
 
 metadata:
   tags: ["social", "indoor", "cozy", "medieval"]

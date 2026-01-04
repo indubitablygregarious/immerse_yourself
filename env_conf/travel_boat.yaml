@@ -1,6 +1,7 @@
 name: "Travel Boat"
 category: "exploration"
 description: "Ocean travel atmosphere with ocean wave scene backdrops, sun, and sky lighting"
+icon: "⛵"
 
 metadata:
   tags: ["exploration", "travel", "boat", "ocean", "water", "daytime", "outdoor"]

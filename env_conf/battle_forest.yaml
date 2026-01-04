@@ -1,6 +1,7 @@
 name: "Battle Forest"
 category: "combat"
 description: "Intense forest combat with green lighting and danger sounds"
+icon: "🌲"
 
 metadata:
   tags: ["combat", "forest", "battle", "intense", "nature", "outdoor"]

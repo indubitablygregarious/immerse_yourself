@@ -1,6 +1,7 @@
 name: "Travel Boat Night"
 category: "exploration"
 description: "Nighttime ocean travel with very dark lighting, moonlight, and minimal illumination"
+icon: "🚢"
 
 metadata:
   tags: ["exploration", "travel", "boat", "ocean", "water", "nighttime", "dark", "moon"]

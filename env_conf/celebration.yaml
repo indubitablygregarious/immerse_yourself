@@ -1,6 +1,7 @@
 name: "Celebration"
 category: "special"
 description: "Victory celebration with applause and bright golden lights"
+icon: "🎊"
 
 metadata:
   tags: ["celebration", "victory", "special", "one-shot", "achievement"]

@@ -1,6 +1,7 @@
 name: "Dark Tavern"
 category: "social"
 description: "Atmospheric dark tavern with dim torch lighting and door sounds"
+icon: "🌑"
 
 metadata:
   tags: ["social", "indoor", "dark", "mysterious", "medieval", "tavern"]

@@ -1,6 +1,7 @@
 name: "Battle Water"
 category: "combat"
 description: "Intense water combat with blue lighting and red danger flashes"
+icon: "🌊"
 
 metadata:
   tags: ["combat", "water", "battle", "intense", "ocean", "underwater"]

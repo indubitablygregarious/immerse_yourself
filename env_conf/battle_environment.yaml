@@ -1,6 +1,7 @@
 name: "Battle Environment"
 category: "combat"
 description: "Intense red-themed combat with danger sounds and white lightning flashes"
+icon: "🗡️"
 
 metadata:
   tags: ["combat", "battle", "intense", "fire", "red"]

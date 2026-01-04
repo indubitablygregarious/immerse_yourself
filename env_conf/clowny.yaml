@@ -1,6 +1,7 @@
 name: "Clowny"
 category: "special"
 description: "Playful party atmosphere with bright animated party scene lighting"
+icon: "🤡"
 
 metadata:
   tags: ["party", "playful", "fun", "celebration", "colorful"]

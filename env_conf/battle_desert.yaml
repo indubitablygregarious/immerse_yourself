@@ -1,6 +1,7 @@
 name: "Battle Desert"
 category: "combat"
 description: "Intense desert combat with sandy yellow-orange lighting and danger sounds"
+icon: "🏜️"
 
 metadata:
   tags: ["combat", "desert", "battle", "intense", "outdoor"]

@@ -1,6 +1,7 @@
 name: "Mountain Tavern"
 category: "social"
 description: "Minimal lighting mountain tavern with very dim torch scenes"
+icon: "⛰️"
 
 metadata:
   tags: ["social", "indoor", "minimal", "dark", "mysterious", "tavern", "mountain"]

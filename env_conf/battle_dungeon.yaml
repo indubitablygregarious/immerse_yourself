@@ -1,6 +1,7 @@
 name: "Battle Dungeon"
 category: "combat"
 description: "High-intensity dungeon combat with danger sounds and red flashing lights"
+icon: "⚔️"
 
 metadata:
   tags: ["combat", "intense", "dungeon", "underground", "battle"]

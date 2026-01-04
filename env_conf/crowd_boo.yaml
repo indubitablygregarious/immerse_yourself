@@ -1,6 +1,7 @@
 name: "Crowd Boo"
 category: "social"
 description: "Crowd booing and jeering disapproval"
+icon: "👎"
 
 metadata:
   tags: ["sound-effect", "one-shot", "crowd", "negative", "disapproval"]

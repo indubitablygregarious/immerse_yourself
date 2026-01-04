@@ -1,6 +1,7 @@
 name: "Gasp"
 category: "special"
 description: "Shocked gasp reaction sound"
+icon: "😮"
 
 metadata:
   tags: ["sound-effect", "one-shot", "shock", "surprise", "reaction", "dramatic"]

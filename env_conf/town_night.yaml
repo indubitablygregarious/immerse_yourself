@@ -1,6 +1,7 @@
 name: "Town Night"
 category: "social"
 description: "Nighttime town atmosphere with dim torch lighting, moonlight, and dark sky"
+icon: "🌙"
 
 metadata:
   tags: ["social", "outdoor", "town", "nighttime", "dark", "medieval", "moon"]

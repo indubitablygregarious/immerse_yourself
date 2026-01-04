@@ -1,6 +1,7 @@
 name: "Church Bells"
 category: "exploration"
 description: "Solemn church bell tolling"
+icon: "⛪"
 
 metadata:
   tags: ["sound-effect", "one-shot", "solemn", "religious", "memorial", "atmospheric"]

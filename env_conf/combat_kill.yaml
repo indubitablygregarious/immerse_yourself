@@ -1,6 +1,7 @@
 name: "Combat Elimination"
 category: "combat"
 description: "Tactical combat kill sound effect"
+icon: "☠️"
 
 metadata:
   tags: ["sound-effect", "one-shot", "combat", "tactical", "game", "elimination"]

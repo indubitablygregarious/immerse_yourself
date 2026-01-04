@@ -1,6 +1,7 @@
 name: "Crowd Cheer"
 category: "social"
 description: "Enthusiastic crowd woohoo celebration"
+icon: "👏"
 
 metadata:
   tags: ["sound-effect", "one-shot", "celebration", "crowd", "victory", "excitement"]

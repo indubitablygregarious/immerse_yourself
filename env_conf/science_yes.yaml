@@ -1,6 +1,7 @@
 name: "Science Success"
 category: "social"
 description: "Enthusiastic 'Yes! Science!' celebration"
+icon: "🔬"
 
 metadata:
   tags: ["sound-effect", "one-shot", "science", "celebration", "discovery", "achievement"]

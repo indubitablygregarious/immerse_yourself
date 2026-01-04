@@ -1,6 +1,7 @@
 name: "Chill Jazz"
 category: "relaxation"
 description: "Ultra-relaxed jazz atmosphere with soft warm lighting and gentle animations"
+icon: "🎷"
 
 metadata:
   tags: ["relaxation", "jazz", "ambient", "slow", "peaceful", "music"]

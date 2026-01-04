@@ -1,6 +1,7 @@
 name: "Fairy Magic"
 category: "special"
 description: "Magical sparkle and fairy dust sound effect"
+icon: "✨"
 
 metadata:
   tags: ["sound-effect", "one-shot", "magic", "fantasy", "whimsical", "transformation"]

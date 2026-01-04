@@ -1,6 +1,7 @@
 name: "Dramatic Sting"
 category: "special"
 description: "Dramatic musical sting for shocking moments"
+icon: "🎭"
 
 metadata:
   tags: ["sound-effect", "one-shot", "dramatic", "shock", "reveal", "tension"]

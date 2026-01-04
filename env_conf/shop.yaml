@@ -1,6 +1,7 @@
 name: "Shop"
 category: "social"
 description: "Cozy medieval shop atmosphere with warm lighting and door sounds"
+icon: "🛒"
 
 metadata:
   tags: ["social", "indoor", "shopping", "merchant", "medieval"]

@@ -76,14 +76,107 @@ class SettingsManager:
         self.set("appearance", "theme", theme)
 
 
+class SpotifyConfigManager:
+    """Manages Spotify configuration in .spotify.ini file."""
+
+    CONFIG_FILE = ".spotify.ini"
+
+    def __init__(self):
+        self.config_path = Path(self.CONFIG_FILE)
+        self.config = configparser.ConfigParser()
+        self._load()
+
+    def _load(self) -> None:
+        """Load config from file if it exists."""
+        if self.config_path.exists():
+            self.config.read(self.config_path)
+
+    def exists(self) -> bool:
+        """Check if config file exists."""
+        return self.config_path.exists()
+
+    def is_configured(self) -> bool:
+        """Check if Spotify is properly configured."""
+        if not self.exists():
+            return False
+        try:
+            return bool(self.get("client_id") and self.get("client_secret"))
+        except:
+            return False
+
+    def get(self, key: str, fallback: str = "") -> str:
+        """Get a config value."""
+        return self.config.get("DEFAULT", key, fallback=fallback)
+
+    def save(self, username: str, client_id: str, client_secret: str, redirect_uri: str) -> None:
+        """Save Spotify configuration."""
+        self.config["DEFAULT"] = {
+            "username": username,
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "redirectURI": redirect_uri
+        }
+        with open(self.config_path, "w") as f:
+            self.config.write(f)
+
+
+class WizBulbConfigManager:
+    """Manages WIZ bulb configuration in .wizbulb.ini file."""
+
+    CONFIG_FILE = ".wizbulb.ini"
+
+    def __init__(self):
+        self.config_path = Path(self.CONFIG_FILE)
+        self.config = configparser.ConfigParser()
+        self._load()
+
+    def _load(self) -> None:
+        """Load config from file if it exists."""
+        if self.config_path.exists():
+            self.config.read(self.config_path)
+
+    def exists(self) -> bool:
+        """Check if config file exists."""
+        return self.config_path.exists()
+
+    def is_configured(self) -> bool:
+        """Check if any bulbs are configured."""
+        if not self.exists():
+            return False
+        try:
+            return bool(
+                self.get("backdrop_bulbs") or
+                self.get("overhead_bulbs") or
+                self.get("battlefield_bulbs")
+            )
+        except:
+            return False
+
+    def get(self, key: str, fallback: str = "") -> str:
+        """Get a config value."""
+        return self.config.get("DEFAULT", key, fallback=fallback)
+
+    def save(self, backdrop: str, overhead: str, battlefield: str) -> None:
+        """Save WIZ bulb configuration."""
+        self.config["DEFAULT"] = {
+            "backdrop_bulbs": backdrop,
+            "overhead_bulbs": overhead,
+            "battlefield_bulbs": battlefield
+        }
+        with open(self.config_path, "w") as f:
+            self.config.write(f)
+
+
 class SettingsDialog(QDialog):
     """Settings dialog with icon navigation and panels."""
 
     def __init__(self, settings_manager: SettingsManager, parent=None):
         super().__init__(parent)
         self.settings_manager = settings_manager
+        self.spotify_config = SpotifyConfigManager()
+        self.wizbulb_config = WizBulbConfigManager()
         self.setWindowTitle("Settings")
-        self.setMinimumSize(500, 350)
+        self.setMinimumSize(600, 450)
         self._setup_ui()
 
     def _setup_ui(self) -> None:
@@ -95,9 +188,17 @@ class SettingsDialog(QDialog):
         self.nav_list.setMaximumWidth(150)
         self.nav_list.setIconSize(QSize(24, 24))
 
-        # Add navigation items
+        # Add navigation items with status indicators
         appearance_item = QListWidgetItem("🎨 Appearance")
         self.nav_list.addItem(appearance_item)
+
+        spotify_status = "✓" if self.spotify_config.is_configured() else "!"
+        spotify_item = QListWidgetItem(f"🎵 Spotify [{spotify_status}]")
+        self.nav_list.addItem(spotify_item)
+
+        bulb_status = "✓" if self.wizbulb_config.is_configured() else "!"
+        bulb_item = QListWidgetItem(f"💡 WIZ Bulbs [{bulb_status}]")
+        self.nav_list.addItem(bulb_item)
 
         self.nav_list.currentRowChanged.connect(self._on_nav_changed)
 
@@ -106,6 +207,8 @@ class SettingsDialog(QDialog):
 
         # Add panels
         self.panel_stack.addWidget(self._create_appearance_panel())
+        self.panel_stack.addWidget(self._create_spotify_panel())
+        self.panel_stack.addWidget(self._create_wizbulb_panel())
 
         layout.addWidget(self.nav_list)
         layout.addWidget(self.panel_stack, 1)
@@ -156,6 +259,282 @@ class SettingsDialog(QDialog):
 
         panel.setLayout(layout)
         return panel
+
+    def _create_spotify_panel(self) -> QWidget:
+        """Create the Spotify settings panel."""
+        from PyQt5.QtWidgets import QScrollArea, QTextBrowser
+
+        panel = QWidget()
+        layout = QVBoxLayout()
+
+        # Status indicator
+        if self.spotify_config.is_configured():
+            status_label = QLabel("✓ Spotify is configured")
+            status_label.setStyleSheet("color: green; font-weight: bold;")
+        else:
+            status_label = QLabel("! Spotify is not configured - music playback disabled")
+            status_label.setStyleSheet("color: orange; font-weight: bold;")
+        layout.addWidget(status_label)
+
+        # Credentials group
+        creds_group = QGroupBox("Spotify API Credentials")
+        creds_layout = QVBoxLayout()
+
+        # Username
+        username_layout = QHBoxLayout()
+        username_layout.addWidget(QLabel("Username:"))
+        self.spotify_username = QLineEdit()
+        self.spotify_username.setText(self.spotify_config.get("username"))
+        self.spotify_username.setPlaceholderText("Your Spotify username")
+        username_layout.addWidget(self.spotify_username)
+        creds_layout.addLayout(username_layout)
+
+        # Client ID
+        client_id_layout = QHBoxLayout()
+        client_id_layout.addWidget(QLabel("Client ID:"))
+        self.spotify_client_id = QLineEdit()
+        self.spotify_client_id.setText(self.spotify_config.get("client_id"))
+        self.spotify_client_id.setPlaceholderText("From Spotify Developer Dashboard")
+        client_id_layout.addWidget(self.spotify_client_id)
+        creds_layout.addLayout(client_id_layout)
+
+        # Client Secret
+        secret_layout = QHBoxLayout()
+        secret_layout.addWidget(QLabel("Client Secret:"))
+        self.spotify_client_secret = QLineEdit()
+        self.spotify_client_secret.setText(self.spotify_config.get("client_secret"))
+        self.spotify_client_secret.setPlaceholderText("From Spotify Developer Dashboard")
+        self.spotify_client_secret.setEchoMode(QLineEdit.Password)
+        secret_layout.addWidget(self.spotify_client_secret)
+        creds_layout.addLayout(secret_layout)
+
+        # Redirect URI
+        redirect_layout = QHBoxLayout()
+        redirect_layout.addWidget(QLabel("Redirect URI:"))
+        self.spotify_redirect = QLineEdit()
+        self.spotify_redirect.setText(self.spotify_config.get("redirectURI", "http://localhost:8888/callback"))
+        self.spotify_redirect.setPlaceholderText("http://localhost:8888/callback")
+        redirect_layout.addWidget(self.spotify_redirect)
+        creds_layout.addLayout(redirect_layout)
+
+        creds_group.setLayout(creds_layout)
+        layout.addWidget(creds_group)
+
+        # Save button
+        save_btn = QPushButton("Save Spotify Settings")
+        save_btn.clicked.connect(self._save_spotify_settings)
+        layout.addWidget(save_btn)
+
+        # Help section
+        help_group = QGroupBox("How to Get Spotify API Credentials")
+        help_layout = QVBoxLayout()
+
+        help_text = QTextBrowser()
+        help_text.setOpenExternalLinks(True)
+        help_text.setHtml("""
+        <p><b>To enable Spotify playback, you need a Spotify Developer account:</b></p>
+        <ol>
+            <li>Go to <a href="https://developer.spotify.com/dashboard">developer.spotify.com/dashboard</a></li>
+            <li>Log in with your Spotify account (Premium required for playback)</li>
+            <li>Click "Create App"</li>
+            <li>Fill in app name and description (anything works)</li>
+            <li>Copy the <b>Client ID</b> and <b>Client Secret</b> into the fields above</li>
+            <li>In your app settings, add the Redirect URI: <code>http://localhost:8888/callback</code></li>
+            <li>Save settings here, then restart the app</li>
+        </ol>
+        <p><b>First-time authentication:</b> When you first click an environment with music,
+        a browser will open for you to authorize the app. This creates a token cache file.</p>
+        <p><i>No Spotify account?</i> That's okay! The app still works for lights and sound effects.</p>
+        """)
+        help_text.setMaximumHeight(200)
+        help_layout.addWidget(help_text)
+        help_group.setLayout(help_layout)
+        layout.addWidget(help_group)
+
+        layout.addStretch()
+        panel.setLayout(layout)
+        return panel
+
+    def _create_wizbulb_panel(self) -> QWidget:
+        """Create the WIZ bulb settings panel."""
+        from PyQt5.QtWidgets import QTextBrowser, QTextEdit
+
+        panel = QWidget()
+        layout = QVBoxLayout()
+
+        # Status indicator
+        if self.wizbulb_config.is_configured():
+            status_label = QLabel("✓ WIZ bulbs are configured")
+            status_label.setStyleSheet("color: green; font-weight: bold;")
+        else:
+            status_label = QLabel("! No WIZ bulbs configured - lighting effects disabled")
+            status_label.setStyleSheet("color: orange; font-weight: bold;")
+        layout.addWidget(status_label)
+
+        # Bulb groups
+        bulbs_group = QGroupBox("Bulb IP Addresses (space-separated)")
+        bulbs_layout = QVBoxLayout()
+
+        # Backdrop bulbs
+        backdrop_layout = QVBoxLayout()
+        backdrop_layout.addWidget(QLabel("Backdrop Bulbs (ambient/background lighting):"))
+        self.backdrop_bulbs = QLineEdit()
+        self.backdrop_bulbs.setText(self.wizbulb_config.get("backdrop_bulbs"))
+        self.backdrop_bulbs.setPlaceholderText("192.168.1.100 192.168.1.101 192.168.1.102")
+        backdrop_layout.addWidget(self.backdrop_bulbs)
+        bulbs_layout.addLayout(backdrop_layout)
+
+        # Overhead bulbs
+        overhead_layout = QVBoxLayout()
+        overhead_layout.addWidget(QLabel("Overhead Bulbs (main room lighting):"))
+        self.overhead_bulbs = QLineEdit()
+        self.overhead_bulbs.setText(self.wizbulb_config.get("overhead_bulbs"))
+        self.overhead_bulbs.setPlaceholderText("192.168.1.103 192.168.1.104")
+        overhead_layout.addWidget(self.overhead_bulbs)
+        bulbs_layout.addLayout(overhead_layout)
+
+        # Battlefield bulbs
+        battlefield_layout = QVBoxLayout()
+        battlefield_layout.addWidget(QLabel("Battlefield Bulbs (dramatic/combat lighting):"))
+        self.battlefield_bulbs = QLineEdit()
+        self.battlefield_bulbs.setText(self.wizbulb_config.get("battlefield_bulbs"))
+        self.battlefield_bulbs.setPlaceholderText("192.168.1.105")
+        battlefield_layout.addWidget(self.battlefield_bulbs)
+        bulbs_layout.addLayout(battlefield_layout)
+
+        bulbs_group.setLayout(bulbs_layout)
+        layout.addWidget(bulbs_group)
+
+        # Discover button and save
+        button_layout = QHBoxLayout()
+
+        discover_btn = QPushButton("Discover Bulbs on Network")
+        discover_btn.clicked.connect(self._discover_bulbs)
+        button_layout.addWidget(discover_btn)
+
+        save_btn = QPushButton("Save Bulb Settings")
+        save_btn.clicked.connect(self._save_wizbulb_settings)
+        button_layout.addWidget(save_btn)
+
+        layout.addLayout(button_layout)
+
+        # Discovery results area
+        self.discovery_results = QTextEdit()
+        self.discovery_results.setReadOnly(True)
+        self.discovery_results.setMaximumHeight(100)
+        self.discovery_results.setPlaceholderText("Discovered bulbs will appear here...")
+        layout.addWidget(self.discovery_results)
+
+        # Help section
+        help_group = QGroupBox("About WIZ Smart Bulbs")
+        help_layout = QVBoxLayout()
+
+        help_text = QTextBrowser()
+        help_text.setOpenExternalLinks(True)
+        help_text.setHtml("""
+        <p><b>WIZ bulbs</b> are smart LED bulbs that connect to your WiFi network.</p>
+        <p><b>To find your bulb IPs:</b></p>
+        <ol>
+            <li>Make sure your WIZ bulbs are on and connected to WiFi</li>
+            <li>Click "Discover Bulbs on Network" above</li>
+            <li>Copy the discovered IPs into the appropriate groups</li>
+        </ol>
+        <p><b>Bulb Groups:</b></p>
+        <ul>
+            <li><b>Backdrop</b> - Side/background lighting for ambient mood</li>
+            <li><b>Overhead</b> - Main room lights (ceiling, lamps)</li>
+            <li><b>Battlefield</b> - Special accent lights for dramatic combat scenes</li>
+        </ul>
+        <p><i>No WIZ bulbs?</i> That's fine! The app still works for music and sound effects.</p>
+        <p><a href="https://www.wizconnected.com/">Get WIZ bulbs</a></p>
+        """)
+        help_text.setMaximumHeight(180)
+        help_layout.addWidget(help_text)
+        help_group.setLayout(help_layout)
+        layout.addWidget(help_group)
+
+        layout.addStretch()
+        panel.setLayout(layout)
+        return panel
+
+    def _save_spotify_settings(self) -> None:
+        """Save Spotify configuration."""
+        self.spotify_config.save(
+            username=self.spotify_username.text().strip(),
+            client_id=self.spotify_client_id.text().strip(),
+            client_secret=self.spotify_client_secret.text().strip(),
+            redirect_uri=self.spotify_redirect.text().strip() or "http://localhost:8888/callback"
+        )
+
+        # Update nav item status
+        self.nav_list.item(1).setText("🎵 Spotify [✓]")
+
+        QMessageBox.information(
+            self,
+            "Settings Saved",
+            "Spotify settings saved. You may need to restart the app and re-authenticate."
+        )
+
+    def _save_wizbulb_settings(self) -> None:
+        """Save WIZ bulb configuration."""
+        self.wizbulb_config.save(
+            backdrop=self.backdrop_bulbs.text().strip(),
+            overhead=self.overhead_bulbs.text().strip(),
+            battlefield=self.battlefield_bulbs.text().strip()
+        )
+
+        # Update nav item status
+        self.nav_list.item(2).setText("💡 WIZ Bulbs [✓]")
+
+        QMessageBox.information(
+            self,
+            "Settings Saved",
+            "WIZ bulb settings saved. Changes take effect on next environment activation."
+        )
+
+    def _discover_bulbs(self) -> None:
+        """Discover WIZ bulbs on the network."""
+        self.discovery_results.setText("Discovering bulbs... (this may take a few seconds)")
+        QApplication.processEvents()
+
+        try:
+            import asyncio
+            from pywizlight import discovery
+
+            async def do_discovery():
+                bulbs = await discovery.discover_lights(broadcast_space="192.168.1.255")
+                return bulbs
+
+            # Run discovery
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                bulbs = loop.run_until_complete(do_discovery())
+            finally:
+                loop.close()
+
+            if bulbs:
+                result_lines = ["Found {} bulb(s):".format(len(bulbs)), ""]
+                for bulb in bulbs:
+                    result_lines.append(f"  {bulb.ip}")
+                result_lines.append("")
+                result_lines.append("Copy these IPs to the fields above.")
+                self.discovery_results.setText("\n".join(result_lines))
+            else:
+                self.discovery_results.setText(
+                    "No bulbs found.\n\n"
+                    "Make sure:\n"
+                    "- Bulbs are powered on\n"
+                    "- Bulbs are connected to same WiFi network\n"
+                    "- Your firewall allows UDP broadcast"
+                )
+        except ImportError:
+            self.discovery_results.setText(
+                "pywizlight not installed.\n\n"
+                "Run: pip install pywizlight"
+            )
+        except Exception as e:
+            self.discovery_results.setText(f"Discovery failed:\n{str(e)}")
 
     def _on_nav_changed(self, index: int) -> None:
         """Handle navigation selection change."""

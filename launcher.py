@@ -997,6 +997,7 @@ class EnvironmentLauncher(QMainWindow):
         self.shortcuts: List[QShortcut] = []
         self._old_runners: List[EngineRunner] = []  # Keep refs until threads finish
         self.tab_configs: Dict[int, List[Dict[str, Any]]] = {}  # tab_index -> configs
+        self._pending_search_button: Optional[QPushButton] = None  # Button from search result
 
         # Store Spotify config manager for checking configuration
         self.spotify_config = SpotifyConfigManager()
@@ -1907,6 +1908,9 @@ class EnvironmentLauncher(QMainWindow):
 
     def _start_environment(self, config: Dict[str, Any]) -> None:
         """Start an environment."""
+        # Clear pending search button since we're starting an environment
+        self._pending_search_button = None
+
         has_lights = config["engines"]["lights"]["enabled"]
 
         # Only stop lights runner if new config has lights
@@ -2010,9 +2014,15 @@ class EnvironmentLauncher(QMainWindow):
         if config_name in self.buttons:
             btn = self.buttons[config_name]
             self._pulse_button(btn)
-            # Set focus on button so Enter triggers it
-            btn.setFocus()
-            self.statusBar().showMessage(f"Found: {config_name} (press Enter to activate)")
+            # Store pending button so Enter key can trigger it
+            # Delay activation to avoid Enter from search selection also triggering the button
+            self._pending_search_button = None  # Clear first
+            QTimer.singleShot(300, lambda: self._set_pending_button(btn, config_name))
+
+    def _set_pending_button(self, btn: QPushButton, config_name: str) -> None:
+        """Set the pending search button after a delay."""
+        self._pending_search_button = btn
+        self.statusBar().showMessage(f"Found: {config_name} (press Enter to activate)")
 
     def _pulse_button(self, btn: QPushButton) -> None:
         """Make a button pulse with a green border glow for 3 seconds."""
@@ -2104,6 +2114,16 @@ class EnvironmentLauncher(QMainWindow):
         """Reset all buttons to inactive state."""
         for btn in self.buttons.values():
             btn.setStyleSheet(self.INACTIVE_STYLE)
+
+    def keyPressEvent(self, event) -> None:
+        """Handle key press events."""
+        # Enter triggers pending search result button
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            if self._pending_search_button is not None:
+                self._pending_search_button.click()
+                self._pending_search_button = None
+                return
+        super().keyPressEvent(event)
 
     def closeEvent(self, event) -> None:
         """Handle window close event."""

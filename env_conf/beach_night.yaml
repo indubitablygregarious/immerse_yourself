@@ -24,41 +24,41 @@ engines:
 
       groups:
         backdrop:
-          # Dark ocean with moonlight reflections
+          # Near-black ocean with rare moonlight glints
           type: "rgb"
           rgb:
-            base: [20, 40, 70]  # Deep dark blue
-            variance: [10, 15, 20]
+            base: [5, 10, 20]
+            variance: [3, 5, 8]
           brightness:
-            min: 40
-            max: 80
+            min: 3
+            max: 10
           flash:
-            probability: 0.03  # Moonlight glinting on waves
-            color: [180, 200, 220]  # Pale moonlight
-            brightness: 120
+            probability: 0.02
+            color: [40, 50, 70]
+            brightness: 25
             duration: 2.0
 
         overhead:
-          # Soft moonlight
+          # Barely visible moonlight
           type: "rgb"
           rgb:
-            base: [140, 150, 180]  # Cool silvery moonlight
-            variance: [10, 10, 15]
+            base: [30, 35, 50]
+            variance: [5, 5, 10]
           brightness:
-            min: 60
-            max: 100
+            min: 5
+            max: 15
 
         battlefield:
-          # Wet sand reflecting moonlight
+          # Nearly black sand
           type: "rgb"
           rgb:
-            base: [40, 50, 70]  # Dark blue-grey
-            variance: [15, 15, 20]
+            base: [8, 10, 18]
+            variance: [3, 3, 5]
           brightness:
-            min: 30
-            max: 70
+            min: 2
+            max: 8
           flash:
-            probability: 0.02  # Gentle wave foam
-            color: [150, 160, 180]  # Pale foam
-            brightness: 100
+            probability: 0.02
+            color: [30, 35, 50]
+            brightness: 20
             duration: 1.5

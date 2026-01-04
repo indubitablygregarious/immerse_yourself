@@ -277,7 +277,7 @@ class ConfigLoader:
             )
 
         group_type = group_config["type"]
-        valid_types = ["rgb", "scene", "inherit_backdrop", "inherit_overhead"]
+        valid_types = ["rgb", "scene", "inherit_backdrop", "inherit_overhead", "off"]
 
         if group_type not in valid_types:
             raise ConfigValidationError(

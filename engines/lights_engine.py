@@ -168,6 +168,24 @@ class LightsEngine:
         else:
             return group_config
 
+    def _is_group_enabled(self, group_config: Dict[str, Any]) -> bool:
+        """
+        Check if a group is enabled.
+
+        Groups can be disabled with 'enabled: false' or 'type: off'.
+
+        Args:
+            group_config: Configuration for a single bulb group
+
+        Returns:
+            True if group should be animated, False if it should be off
+        """
+        if group_config.get("enabled") is False:
+            return False
+        if group_config.get("type") == "off":
+            return False
+        return True
+
     def _apply_to_group(self, group: LightBulbGroup, config: Dict[str, Any]) -> None:
         """
         Apply lighting configuration to a group (no sleep, fire-and-forget).
@@ -283,7 +301,11 @@ class LightsEngine:
         for group_name, group_config in resolved_configs.items():
             if group_name in self.bulb_groups:
                 group = self.bulb_groups[group_name]
-                self._apply_to_group(group, group_config)
+                if self._is_group_enabled(group_config):
+                    self._apply_to_group(group, group_config)
+                else:
+                    # Turn off disabled groups
+                    group.turn_off()
 
     async def run_animation_loop(self, animation_config: Dict[str, Any]) -> None:
         """
@@ -343,10 +365,10 @@ class LightsEngine:
                     group_config, groups_config
                 )
 
-        # Build list of all bulb groups for shuffling
+        # Build list of enabled bulb groups for shuffling
         all_groups = []
         for group_name, group_config in resolved_configs.items():
-            if group_name in self.bulb_groups:
+            if group_name in self.bulb_groups and self._is_group_enabled(group_config):
                 all_groups.append((self.bulb_groups[group_name], group_config))
 
         # Count total bulbs for timing
@@ -373,10 +395,10 @@ class LightsEngine:
                                 group_config, groups_config
                             )
 
-                    # Rebuild group list
+                    # Rebuild group list (only enabled groups)
                     all_groups = []
                     for group_name, group_config in resolved_configs.items():
-                        if group_name in self.bulb_groups:
+                        if group_name in self.bulb_groups and self._is_group_enabled(group_config):
                             all_groups.append((self.bulb_groups[group_name], group_config))
 
                     total_bulbs = sum(len(group.bulbs) for group, _ in all_groups)

@@ -24,22 +24,10 @@ engines:
 
       groups:
         backdrop:
-          type: "rgb"
-          rgb:
-            base: [0, 0, 0]
-            variance: [0, 0, 0]
-          brightness:
-            min: 0
-            max: 0
+          type: "off"
 
         overhead:
-          type: "rgb"
-          rgb:
-            base: [0, 0, 0]
-            variance: [0, 0, 0]
-          brightness:
-            min: 0
-            max: 0
+          type: "off"
 
         battlefield:
           type: "scene"

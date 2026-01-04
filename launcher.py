@@ -311,18 +311,18 @@ class EnvironmentLauncher(QMainWindow):
                 desc_lines.append(current_line)
 
         # Build button text with fixed-width padding for alignment
-        # Header: "emoji      name      (key)"
+        # Header: "(key)      name      emoji"
         hotkey_text = f"({shortcut_key})" if shortcut_key else "   "
 
-        # Pad to create: emoji (left) ... name (center) ... hotkey (right)
+        # Pad to create: hotkey (left) ... name (center) ... emoji (right)
         total_width = 28
-        emoji_part = emoji_indicators.ljust(4)
-        hotkey_part = hotkey_text.rjust(4)
+        hotkey_part = hotkey_text.ljust(4)
+        emoji_part = emoji_indicators.rjust(4)
         # Center the name in remaining space
         center_width = total_width - 8
         name_part = name.center(center_width)
 
-        header = f"{emoji_part}{name_part}{hotkey_part}"
+        header = f"{hotkey_part}{name_part}{emoji_part}"
 
         # Combine: header, blank line, description
         btn_text = header + "\n"

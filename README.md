@@ -32,10 +32,13 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 
 ### GUI Launcher
 
-- Keyboard shortcuts (Q-N keys) for instant scene switching
-- Visual feedback showing active environment
-- Automatic process management (stops old scene when starting new)
-- Grid layout organized by scene type
+- **Tabbed interface** organized by category (Combat, Social, Exploration, Relaxation, Special)
+- **Keyboard shortcuts** (Q, W, E, R...) - automatically remap per tab
+- **Tab navigation** with Ctrl+PgUp/PgDn
+- **Visual feedback** - active lights environment stays highlighted
+- **Sound effects** can trigger without interrupting current lights
+- **Stop button** to turn off lights
+- **Monospace button layout**: `(Q)  Name  📢` - hotkey, name, emoji indicators
 
 ## Requirements
 
@@ -114,9 +117,11 @@ python3 launcher.py
 ```
 
 - Click any environment button to start
-- Press Q-N keys for keyboard shortcuts (shown on buttons)
-- Only one environment runs at a time (new scenes auto-stop the previous)
-- Press Ctrl+C in terminal or close window to exit
+- Press Q, W, E, R... keys for shortcuts (shown on buttons, remaps per tab)
+- Use Ctrl+PgUp/PgDn to switch between category tabs
+- **Lights environments** replace each other (new lights stop old lights)
+- **Sound-only buttons** (📢) play sounds without stopping lights
+- Press the STOP button or close window to stop lights
 
 ### Run scenes directly
 ```bash
@@ -180,11 +185,18 @@ Each scene script controls lights via:
 ### Project Structure
 ```
 immerse_yourself/
-├── launcher.py              # PyQt5 GUI launcher
-├── environments/            # Scene scripts
-│   ├── tavern.py
-│   ├── battle_dungeon.py
+├── launcher.py              # PyQt5 GUI launcher (tabbed interface)
+├── engines/                 # Modular engine components
+│   ├── sound_engine.py     # Sound playback (sync and async)
+│   ├── spotify_engine.py   # Spotify API integration
+│   └── lights_engine.py    # WIZ bulb control (fire-and-forget)
+├── env_conf/               # YAML environment configurations
+│   ├── tavern.yaml
+│   ├── battle_dungeon.yaml
 │   └── ...
+├── config_loader.py        # YAML config loading and validation
+├── lighting_daemon.py      # Background lighting process
+├── environments/           # Legacy scene scripts
 ├── .spotify.ini            # Spotify credentials (not in git)
 ├── .wizbulb.ini            # Bulb IP addresses (not in git)
 ├── .cache                  # OAuth token cache (not in git)
@@ -193,10 +205,11 @@ immerse_yourself/
 ```
 
 ### How It Works
-1. Each scene is a standalone Python script
-2. Scripts authenticate with Spotify, connect to bulbs
-3. Async loops continuously animate lights while music plays
-4. Launcher manages scene processes via subprocess control
+1. Launcher loads YAML configs and displays tabbed button grid
+2. Clicking a button starts an EngineRunner (QThread)
+3. Engines run independently: sound (async), Spotify (sync), lights (async loop)
+4. Lights use fire-and-forget commands for instant response
+5. Sound-only configs overlay on running lights without stopping them
 
 ## Contributing
 

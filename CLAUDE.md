@@ -37,13 +37,33 @@ The project has been refactored from individual Python scripts into a modular en
   - Category filtering
 
 - **Launcher** (`launcher.py`):
-  - PyQt5 GUI for launching environments with keyboard shortcuts
-  - ⚠️ **Currently being refactored** to use new engine-based architecture
-  - Will add: Tabs, Stop button, Error viewer, Engine orchestrator
+  - PyQt5 GUI for launching environments
+  - Tabbed interface organized by category (Combat, Social, Exploration, etc.)
+  - Per-tab keyboard shortcuts (Q, W, E, R... remap when switching tabs)
+  - Ctrl+PgUp/PgDn to navigate between tabs
+  - Stop button for stopping lights
+  - Monospace button layout: `(Q)  Name  📢` with wrapped description
+  - Distinct handling of sound-only (📢) vs full environment (🔊🎵💡) buttons
 
 ### Key Innovation: Background Lighting Persistence
 
 The lighting daemon runs independently, allowing lights to continue animating while you switch between environments. Configuration updates are hot-swapped without turning lights off, resulting in smooth transitions.
+
+### Performance Optimizations
+
+The lights engine uses **fire-and-forget** for bulb commands:
+- `LightBulbGroup.apply_pilot()` creates async tasks without awaiting responses
+- Bulb commands are sent instantly; errors are logged via callbacks
+- Uses `asyncio.sleep()` (not `time.sleep()`) to allow event loop to process tasks
+- Light initialization is instant (no cycletime-based delays)
+
+### Sound-Only vs Lights Configs
+
+The launcher handles these differently:
+- **Lights configs**: Button stays highlighted, lights runner persists until stopped or replaced
+- **Sound-only configs**: Button highlights while sound plays, then reverts to showing active lights
+- Sound plays asynchronously via `SoundEngine.play_async()` with completion callback
+- Triggering a sound-only config does NOT stop running lights
 
 ## Architecture (Detailed)
 
@@ -121,7 +141,9 @@ python3 -c "from config_loader import ConfigLoader; ConfigLoader('env_conf').loa
 ```python
 from engines import SoundEngine
 engine = SoundEngine()
-engine.play("chill.wav")
+engine.play("chill.wav")  # Blocking
+engine.play_async("chill.wav")  # Non-blocking, fire-and-forget
+engine.play_async("chill.wav", on_complete=lambda: print("Done!"))  # With callback
 ```
 
 **Spotify Engine:**
@@ -305,12 +327,14 @@ To test light color/animation logic without Spotify or actual bulbs:
 
 ## Code Patterns to Maintain
 
-- **Async loops**: All scenes use `asyncio.run_until_complete()` for concurrent light updates
+- **Fire-and-forget bulb commands**: Use `asyncio.create_task()` without awaiting for bulb operations
+- **Async sleep only**: Use `await asyncio.sleep()` (never `time.sleep()`) in async contexts to allow event loop to process tasks
 - **Config reading**: Always read `.spotify.ini` first, then `.wizbulb.ini`
-- **Error handling**: Bare `except:` blocks for missing sound files are standard
+- **Error handling**: Use callbacks for async error logging, bare `except:` for sound files
 - **Randomization**: Use `random.random()` for variance in brightness, colors, and animation speeds
-- **Time control**: `time.sleep()` is used inside async loops for timing animations
 - **Bulb grouping**: Initialize backdrop, overhead, and battlefield bulbs separately for independent control
+- **QThread safety**: Keep references to QThread objects until `finished` signal to avoid "destroyed while running" crashes
+- **Sound callbacks**: Use `play_async(file, on_complete=callback)` when you need to know when sound finishes
 
 ## Debugging
 
@@ -333,8 +357,8 @@ If errors are suppressed, check `launcher.py:98-104` to ensure `stdout=subproces
 
 ## Known Issues / Quirks
 
-- Sound effects must exist as .wav/.mp3/.opus files; missing files are silently caught with a try/except
-- The WIZ bulb library may fail silently on network connection issues—ensure bulbs are on and reachable
-- `asyncio.get_event_loop()` is deprecated in newer Python versions; future refactors should use `asyncio.run()`
+- Sound effects must exist as .wav/.mp3/.opus files; missing files are logged but don't crash
+- The WIZ bulb library may fail silently on network connection issues—errors logged via callbacks
 - Spotify OAuth tokens expire periodically; if authentication fails, delete `.cache` and re-authenticate
-- The launcher manages only one environment at a time; starting a new one automatically stops the previous
+- Sound-only configs can run alongside lights configs; only lights configs replace each other
+- Button shortcuts are per-tab; same key triggers different buttons on different tabs

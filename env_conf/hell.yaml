@@ -1,0 +1,65 @@
+name: "Hell"
+category: "combat"
+description: "Infernal hellscape with chaotic fire and brimstone"
+icon: "🔥"
+
+metadata:
+  tags: ["hell", "infernal", "fire", "intense", "demonic", "underworld"]
+  intensity: "high"
+  suitable_for: ["boss fights", "demonic encounters", "descent into hell", "final battles"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/hell.m4a"
+
+  spotify:
+    enabled: true
+    context_uri: "spotify:playlist:7JK8c6NETQlnvZzFkmxBw6"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 1.5  # Very fast, chaotic
+
+      groups:
+        backdrop:
+          # Deep fire scenes - hellish flickering
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Fireplace, Torch scenes
+            speed_min: 150
+            speed_max: 200  # Maximum chaos
+          brightness:
+            min: 40
+            max: 120
+
+        overhead:
+          # Dark blood red with occasional bright bursts
+          type: "rgb"
+          rgb:
+            base: [80, 5, 0]  # Deep blood red, almost black
+            variance: [40, 5, 5]
+          brightness:
+            min: 20
+            max: 60
+          flash:
+            probability: 0.20  # Frequent hellfire bursts
+            color: [255, 50, 0]  # Bright hellfire orange-red
+            brightness: 255
+            duration: 0.3
+
+        battlefield:
+          # Intense pulsing inferno
+          type: "rgb"
+          rgb:
+            base: [120, 20, 0]  # Burning red-orange
+            variance: [60, 30, 10]
+          brightness:
+            min: 30
+            max: 100
+          flash:
+            probability: 0.35  # Very frequent flashes
+            color: [255, 100, 0]  # Hellfire orange
+            brightness: 255
+            duration: 0.5

@@ -105,6 +105,9 @@ class SpotifyEngine:
         """
         Start playback of a Spotify context (playlist, album, or episode).
 
+        Automatically enables shuffle and skips to next track for maximum
+        variability across sessions.
+
         Args:
             context_uri: Spotify URI in format:
                         - "spotify:playlist:XXXXXXXXXXXXXXXXXXXX" for playlists
@@ -130,7 +133,21 @@ class SpotifyEngine:
             return False
 
         try:
+            # Enable shuffle for variability
+            try:
+                self.spotify_client.shuffle(True)
+            except Exception:
+                pass  # Shuffle may fail if no active device yet
+
+            # Start playback
             self.spotify_client.start_playback(context_uri=context_uri)
+
+            # Skip to next track so each session starts differently
+            try:
+                self.spotify_client.next_track()
+            except Exception:
+                pass  # Next may fail briefly after starting playback
+
             return True
         except Exception as e:
             print(f"ERROR: Failed to start Spotify playback")

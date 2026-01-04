@@ -234,14 +234,17 @@ class IconButton(QPushButton):
             painter = QPainter(self)
             painter.setRenderHint(QPainter.Antialiasing)
 
-            # Set up font for large emoji
+            # Scale font size based on button dimensions (use smaller of width/height)
+            rect = self.rect()
+            min_dimension = min(rect.width(), rect.height())
+            font_size = max(24, int(min_dimension * 0.5))  # 50% of smaller dimension, min 24pt
+
             font = painter.font()
-            font.setPointSize(48)
+            font.setPointSize(font_size)
             painter.setFont(font)
 
             # Draw emoji centered with low opacity
             painter.setOpacity(0.15)
-            rect = self.rect()
             painter.drawText(rect, Qt.AlignCenter, self.icon_emoji)
 
 

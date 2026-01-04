@@ -1490,7 +1490,7 @@ class EnvironmentLauncher(QMainWindow):
         self.statusBar().showMessage(f"Found: {config_name}")
 
     def _pulse_button(self, btn: QPushButton) -> None:
-        """Make a button pulse green for 3 seconds."""
+        """Make a button pulse with a green border glow for 3 seconds."""
         # Find the config name for this button
         btn_config_name = None
         for name, b in self.buttons.items():
@@ -1498,15 +1498,22 @@ class EnvironmentLauncher(QMainWindow):
                 btn_config_name = name
                 break
 
-        # Pulse styles
-        pulse_styles = [
-            "background-color: #4CAF50; color: white; padding: 8px; font-size: 17px;",
-            "background-color: #81C784; color: white; padding: 8px; font-size: 17px;",
-            "background-color: #4CAF50; color: white; padding: 8px; font-size: 17px;",
-            "background-color: #A5D6A7; color: white; padding: 8px; font-size: 17px;",
-            "background-color: #4CAF50; color: white; padding: 8px; font-size: 17px;",
-            "background-color: #81C784; color: white; padding: 8px; font-size: 17px;",
+        # Pulse styles - border expands with color getting brighter, 3 quick pulses
+        # Border grows 1→6→1, color goes dark→bright→dark, radius shrinks as border grows
+        single_pulse = [
+            "border: 1px solid #004400; border-radius: 3px; padding: 8px; font-size: 17px;",
+            "border: 2px solid #005500; border-radius: 3px; padding: 8px; font-size: 17px;",
+            "border: 3px solid #007700; border-radius: 2px; padding: 8px; font-size: 17px;",
+            "border: 4px solid #009900; border-radius: 2px; padding: 8px; font-size: 17px;",
+            "border: 5px solid #00CC00; border-radius: 1px; padding: 8px; font-size: 17px;",
+            "border: 6px solid #00FF00; border-radius: 1px; padding: 8px; font-size: 17px;",
+            "border: 5px solid #00CC00; border-radius: 1px; padding: 8px; font-size: 17px;",
+            "border: 4px solid #009900; border-radius: 2px; padding: 8px; font-size: 17px;",
+            "border: 3px solid #007700; border-radius: 2px; padding: 8px; font-size: 17px;",
+            "border: 2px solid #005500; border-radius: 3px; padding: 8px; font-size: 17px;",
         ]
+        # Repeat 4 times
+        pulse_styles = single_pulse * 4
 
         # Create pulse animation using timers
         pulse_count = [0]
@@ -1516,7 +1523,7 @@ class EnvironmentLauncher(QMainWindow):
             if pulse_count[0] < total_pulses:
                 btn.setStyleSheet(pulse_styles[pulse_count[0]])
                 pulse_count[0] += 1
-                QTimer.singleShot(500, do_pulse)  # 500ms per pulse = 3 seconds total
+                QTimer.singleShot(20, do_pulse)  # ~0.6 seconds total for 3 pulses
             else:
                 # Check if this button is now the active lights button
                 if btn_config_name and btn_config_name == self.lights_config_name:

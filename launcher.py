@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (
     QStatusBar, QMessageBox, QVBoxLayout, QTabWidget, QHBoxLayout,
     QShortcut, QLabel, QFrame, QSizePolicy, QStyleFactory, QMenuBar,
     QMenu, QAction, QDialog, QListWidget, QListWidgetItem, QStackedWidget,
-    QRadioButton, QButtonGroup, QGroupBox
+    QRadioButton, QButtonGroup, QGroupBox, QSplitter
 )
 from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, QSize
 from PyQt5.QtGui import QKeySequence, QPalette, QColor, QPainter, QPen, QFont, QIcon
@@ -489,27 +489,98 @@ class EnvironmentLauncher(QMainWindow):
         return sorted_organized
 
     def _create_ui(self) -> None:
-        """Create the main UI layout with tabs."""
+        """Create the main UI layout with tabs on left side."""
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Create tab widget
-        self.tabs = QTabWidget()
-        self.tabs.setTabPosition(QTabWidget.North)
+        # Create splitter for left tabs and right content
+        self.splitter = QSplitter(Qt.Horizontal)
 
-        # Add a tab for each category
+        # Left side: category list (15% width)
+        self.category_list = QListWidget()
+        self.category_list.setMinimumWidth(120)
+        self.category_list.setMaximumWidth(200)
+
+        # Style based on dark mode
+        if self.is_dark_mode:
+            self.category_list.setStyleSheet("""
+                QListWidget {
+                    font-size: 14px;
+                    padding: 5px;
+                    background-color: #2d2d2d;
+                    border: none;
+                }
+                QListWidget::item {
+                    padding: 10px 8px;
+                    border-radius: 4px;
+                    margin: 2px 4px;
+                    color: white;
+                }
+                QListWidget::item:selected {
+                    background-color: #4CAF50;
+                    color: white;
+                }
+                QListWidget::item:hover:!selected {
+                    background-color: #404040;
+                }
+            """)
+        else:
+            self.category_list.setStyleSheet("""
+                QListWidget {
+                    font-size: 14px;
+                    padding: 5px;
+                    border: none;
+                }
+                QListWidget::item {
+                    padding: 10px 8px;
+                    border-radius: 4px;
+                    margin: 2px 4px;
+                }
+                QListWidget::item:selected {
+                    background-color: #4CAF50;
+                    color: white;
+                }
+                QListWidget::item:hover:!selected {
+                    background-color: #e0e0e0;
+                }
+            """)
+
+        # Right side: stacked widget for category content
+        self.category_stack = QStackedWidget()
+
+        # Add categories
         tab_index = 0
         for category, configs in self.configs.items():
+            # Add to list
+            item = QListWidgetItem(category.capitalize())
+            item.setSizeHint(QSize(0, 40))
+            self.category_list.addItem(item)
+
+            # Add content page
             tab_widget = self._create_category_tab(category, configs)
-            self.tabs.addTab(tab_widget, category.capitalize())
+            self.category_stack.addWidget(tab_widget)
             self.tab_configs[tab_index] = configs
             tab_index += 1
 
-        # Connect tab change to update shortcuts
-        self.tabs.currentChanged.connect(self._on_tab_changed)
+        # Connect list selection to stack
+        self.category_list.currentRowChanged.connect(self._on_tab_changed)
+        self.category_list.currentRowChanged.connect(self.category_stack.setCurrentIndex)
 
-        main_layout.addWidget(self.tabs)
+        # Select first category
+        self.category_list.setCurrentRow(0)
+
+        # Add to splitter
+        self.splitter.addWidget(self.category_list)
+        self.splitter.addWidget(self.category_stack)
+
+        # Set initial sizes (15% for list, 85% for content)
+        self.splitter.setSizes([150, 850])
+        self.splitter.setStretchFactor(0, 0)  # List doesn't stretch
+        self.splitter.setStretchFactor(1, 1)  # Content stretches
+
+        main_layout.addWidget(self.splitter)
 
         # Add control buttons (Stop buttons)
         control_layout = QHBoxLayout()
@@ -593,13 +664,13 @@ class EnvironmentLauncher(QMainWindow):
         """Setup tab navigation and per-tab button shortcuts."""
         # Tab navigation: Ctrl+PgUp/PgDn
         next_tab = QShortcut(QKeySequence("Ctrl+PgDown"), self)
-        next_tab.activated.connect(lambda: self.tabs.setCurrentIndex(
-            (self.tabs.currentIndex() + 1) % self.tabs.count()
+        next_tab.activated.connect(lambda: self.category_list.setCurrentRow(
+            (self.category_list.currentRow() + 1) % self.category_list.count()
         ))
 
         prev_tab = QShortcut(QKeySequence("Ctrl+PgUp"), self)
-        prev_tab.activated.connect(lambda: self.tabs.setCurrentIndex(
-            (self.tabs.currentIndex() - 1) % self.tabs.count()
+        prev_tab.activated.connect(lambda: self.category_list.setCurrentRow(
+            (self.category_list.currentRow() - 1) % self.category_list.count()
         ))
 
         # Spacebar to stop sounds

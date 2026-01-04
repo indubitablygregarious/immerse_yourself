@@ -39,14 +39,7 @@ engines:
             duration: 2.0
 
         overhead:
-          # Barely visible moonlight
-          type: "rgb"
-          rgb:
-            base: [30, 35, 50]
-            variance: [5, 5, 10]
-          brightness:
-            min: 5
-            max: 15
+          type: "off"
 
         battlefield:
           # Nearly black sand

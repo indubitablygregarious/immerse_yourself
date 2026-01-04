@@ -33,14 +33,13 @@ engines:
             max: 10
 
         overhead:
+          type: "off"
+
+        battlefield:
           type: "rgb"
           rgb:
-            base: [0, 0, 16]  # Very dark blue
-            variance: [10, 10, 10]
+            base: [0, 0, 10]
+            variance: [5, 5, 10]
           brightness:
             min: 0
             max: 10
-          # Note: One bulb uses moon (255, 255, 128) at brightness 100 - handled separately in code
-
-        battlefield:
-          type: "inherit_overhead"

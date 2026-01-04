@@ -33,14 +33,14 @@ engines:
             max: 0
 
         overhead:
+          type: "off"
+
+        battlefield:
           type: "scene"
           scenes:
-            ids: [5]  # Fireplace scene
+            ids: [5]  # Fireplace scene - campfire
             speed_min: 10
             speed_max: 190
           brightness:
             min: 44
             max: 55
-
-        battlefield:
-          type: "inherit_overhead"

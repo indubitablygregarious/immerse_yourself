@@ -1491,7 +1491,12 @@ class EnvironmentLauncher(QMainWindow):
 
     def _pulse_button(self, btn: QPushButton) -> None:
         """Make a button pulse green for 3 seconds."""
-        original_style = btn.styleSheet()
+        # Find the config name for this button
+        btn_config_name = None
+        for name, b in self.buttons.items():
+            if b is btn:
+                btn_config_name = name
+                break
 
         # Pulse styles
         pulse_styles = [
@@ -1513,8 +1518,11 @@ class EnvironmentLauncher(QMainWindow):
                 pulse_count[0] += 1
                 QTimer.singleShot(500, do_pulse)  # 500ms per pulse = 3 seconds total
             else:
-                # Restore original style
-                btn.setStyleSheet(original_style)
+                # Check if this button is now the active lights button
+                if btn_config_name and btn_config_name == self.lights_config_name:
+                    btn.setStyleSheet(self.ACTIVE_STYLE)
+                else:
+                    btn.setStyleSheet(self.INACTIVE_STYLE)
 
         do_pulse()
 

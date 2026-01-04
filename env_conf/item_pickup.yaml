@@ -4,7 +4,7 @@ description: "Game-style item collection sound effect"
 icon: "💎"
 
 metadata:
-  tags: ["sound-effect", "one-shot", "game", "pickup", "collect"]
+  tags: ["sound-effect", "one-shot", "game", "pickup", "collect", "zelda"]
   intensity: "low"
   suitable_for: ["reward moments", "item collection", "achievements", "game events"]
 

@@ -1,0 +1,20 @@
+name: "Woohoo"
+category: "social"
+description: "Excited celebratory woohoo cheer"
+icon: "🎉"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "celebration", "excitement", "cheer", "woohoo"]
+  intensity: "medium"
+  suitable_for: ["victories", "exciting moments", "celebrations", "hype"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/wooohoooouuuu.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

@@ -1,0 +1,20 @@
+name: "Applause"
+category: "social"
+description: "Enthusiastic clapping and applause"
+icon: "👏"
+
+metadata:
+  tags: ["sound-effect", "one-shot", "applause", "clapping", "approval", "audience"]
+  intensity: "medium"
+  suitable_for: ["achievements", "great moments", "approval", "standing ovation"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sounds/applause-4.mp3"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false

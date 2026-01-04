@@ -15,43 +15,92 @@ from collections import defaultdict
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QGridLayout, QPushButton,
     QStatusBar, QMessageBox, QVBoxLayout, QTabWidget, QHBoxLayout,
-    QShortcut, QLabel, QFrame, QSizePolicy
+    QShortcut, QLabel, QFrame, QSizePolicy, QStyleFactory
 )
 from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtGui import QKeySequence, QPalette, QColor, QPainter, QPen, QFont
 
 from config_loader import ConfigLoader
 from engines import SoundEngine, SpotifyEngine, LightsEngine
 
 
+class OutlinedLabel(QLabel):
+    """QLabel with outlined text for better readability."""
+
+    def __init__(self, text: str, outline_color: QColor = QColor(0, 0, 0),
+                 text_color: QColor = QColor(255, 255, 255), parent=None):
+        super().__init__(text, parent)
+        self.outline_color = outline_color
+        self.text_color = text_color
+        self._text = text
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        # Get the font and text rect
+        font = self.font()
+        font.setBold(True)
+        font.setPointSize(12)
+        painter.setFont(font)
+
+        # Calculate centered position
+        rect = self.rect()
+        text_rect = painter.fontMetrics().boundingRect(self._text)
+        x = (rect.width() - text_rect.width()) / 2
+        y = (rect.height() + text_rect.height()) / 2 - painter.fontMetrics().descent()
+
+        # Draw outline by drawing text multiple times with offset
+        painter.setPen(QPen(self.outline_color))
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                if dx != 0 or dy != 0:
+                    painter.drawText(int(x + dx), int(y + dy), self._text)
+
+        # Draw main text (white)
+        painter.setPen(QPen(self.text_color))
+        painter.drawText(int(x), int(y), self._text)
+
+
 class ButtonContainer(QWidget):
     """Container widget that handles dynamic resizing with overlapping emoji indicators."""
 
-    def __init__(self, btn: QPushButton, emoji_row: QWidget, shortcut_label: Optional[QLabel] = None):
+    def __init__(self, btn: QPushButton, emoji_row: QWidget,
+                 shortcut_label: Optional[QLabel] = None,
+                 desc_label: Optional[QLabel] = None):
         super().__init__()
         self.btn = btn
         self.emoji_row = emoji_row
         self.shortcut_label = shortcut_label
+        self.desc_label = desc_label
         self.btn.setParent(self)
         self.emoji_row.setParent(self)
         if self.shortcut_label:
             self.shortcut_label.setParent(self)
-        self.setMinimumHeight(100)
+        if self.desc_label:
+            self.desc_label.setParent(self)
+        self.setMinimumHeight(130)
         self.setMinimumWidth(180)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     def resizeEvent(self, event):
         w = self.width()
         h = self.height()
-        # Button fills container except for 10px at bottom for emoji overlap
-        self.btn.setGeometry(0, 0, w, h - 10)
-        # Emoji row at bottom, overlapping button by 10px
-        self.emoji_row.setGeometry(0, h - 20, w, 20)
+        # Reserve space for description at bottom
+        desc_height = 30 if self.desc_label else 0
+        btn_height = h - 10 - desc_height
+        # Button fills container except for overlap and description
+        self.btn.setGeometry(0, 0, w, btn_height)
+        # Emoji row at bottom of button, overlapping by 10px
+        self.emoji_row.setGeometry(0, btn_height - 10, w, 20)
         self.emoji_row.raise_()
         # Shortcut label in top-left, overlapping button
         if self.shortcut_label:
             self.shortcut_label.setGeometry(5, 5, 33, 29)
             self.shortcut_label.raise_()
+        # Description below emoji row
+        if self.desc_label:
+            self.desc_label.setGeometry(10, btn_height + 5, w - 20, desc_height)
         super().resizeEvent(event)
 
 
@@ -150,14 +199,20 @@ class EnvironmentLauncher(QMainWindow):
         "Z", "X", "C", "V", "B", "N",
     ]
 
-    ACTIVE_STYLE = "background-color: #4CAF50; color: white; padding: 8px; font-size: 14px;"
-    INACTIVE_STYLE = "background-color: #f0f0f0; padding: 8px; font-size: 14px;"
+    # Button styles (font-size 17px for larger name display)
+    ACTIVE_STYLE = "background-color: #4CAF50; color: white; padding: 8px; font-size: 17px;"
+    INACTIVE_STYLE = "padding: 8px; font-size: 17px;"
     STOP_STYLE = "background-color: #f44336; color: white; font-weight: bold; font-size: 12px;"
+    DESC_STYLE = "font-size: 11px; color: #666; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px; background-color: #fafafa;"
+    DESC_STYLE_DARK = "font-size: 11px; color: #aaa; padding: 2px 4px; border: 1px solid #555; border-radius: 3px; background-color: #2a2a2a;"
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Immerse Yourself - Environment Launcher")
         self.setGeometry(100, 100, 1000, 600)
+
+        # Detect dark mode from system palette
+        self.is_dark_mode = self._detect_dark_mode()
 
         # Load configurations
         self.config_loader = ConfigLoader("env_conf")
@@ -176,6 +231,14 @@ class EnvironmentLauncher(QMainWindow):
         # Create UI
         self._create_ui()
         self._setup_tab_shortcuts()
+
+    def _detect_dark_mode(self) -> bool:
+        """Detect if the system is using dark mode based on window background color."""
+        palette = self.palette()
+        bg_color = palette.color(palette.Window)
+        # If background luminance is low, we're in dark mode
+        luminance = (0.299 * bg_color.red() + 0.587 * bg_color.green() + 0.114 * bg_color.blue()) / 255
+        return luminance < 0.5
 
     def _load_and_organize_configs(self) -> Dict[str, List[Dict[str, Any]]]:
         """Load all configs and organize by category."""
@@ -327,40 +390,31 @@ class EnvironmentLauncher(QMainWindow):
         spotify_enabled = config.get("engines", {}).get("spotify", {}).get("enabled", False)
         lights_enabled = config.get("engines", {}).get("lights", {}).get("enabled", False)
 
-        # Build button text: name centered, description below (word-wrapped)
-        # Manually wrap description to ~25 chars per line
-        wrapped_desc = ""
-        if description:
-            words = description.split()
-            line = ""
-            for word in words:
-                if len(line) + len(word) + 1 <= 25:
-                    line += (" " if line else "") + word
-                else:
-                    wrapped_desc += ("\n" if wrapped_desc else "") + line
-                    line = word
-            if line:
-                wrapped_desc += ("\n" if wrapped_desc else "") + line
-
-        btn_text = f"{name}\n\n{wrapped_desc}" if wrapped_desc else name
-
-        # Create button (will be parented to container)
-        btn = QPushButton(btn_text)
+        # Button shows only the name (larger font)
+        btn = QPushButton(name)
         btn.setStyleSheet(self.INACTIVE_STYLE)
-        btn.setToolTip(config.get("description", ""))
+        btn.setToolTip(description)
         btn.clicked.connect(lambda checked=False, c=config: self._start_environment(c))
 
-        # Create shortcut key badge (top-left corner)
+        # Create shortcut key badge (top-left corner) with outlined text
         shortcut_label = None
         if shortcut_key:
-            shortcut_label = QLabel(shortcut_key.upper())
+            shortcut_label = OutlinedLabel(shortcut_key.upper())
             pastel_color = self._generate_pastel_color()
             shortcut_label.setStyleSheet(
                 f"background-color: {pastel_color}; border: 1px solid gray; "
-                f"border-radius: 3px; font-size: 16px; font-weight: bold;"
+                f"border-radius: 3px;"
             )
-            shortcut_label.setAlignment(Qt.AlignCenter)
             shortcut_label.setFixedSize(29, 25)
+
+        # Create description label (below emoji row)
+        desc_label = None
+        if description:
+            desc_label = QLabel(description)
+            desc_label.setAlignment(Qt.AlignCenter)
+            desc_label.setWordWrap(True)
+            desc_style = self.DESC_STYLE_DARK if self.is_dark_mode else self.DESC_STYLE
+            desc_label.setStyleSheet(desc_style)
 
         # Create emoji indicator row (will be parented to container)
         emoji_row = QWidget()
@@ -404,7 +458,7 @@ class EnvironmentLauncher(QMainWindow):
         emoji_row.setLayout(emoji_layout)
 
         # Create container that handles resizing with overlap
-        container = ButtonContainer(btn, emoji_row, shortcut_label)
+        container = ButtonContainer(btn, emoji_row, shortcut_label, desc_label)
 
         return container, btn
 
@@ -539,9 +593,85 @@ class EnvironmentLauncher(QMainWindow):
             event.accept()
 
 
+def detect_system_dark_mode() -> bool:
+    """Detect if the system is using dark mode."""
+    import subprocess
+    import os
+
+    # Check Linux GNOME/GTK dark mode
+    if os.environ.get("XDG_CURRENT_DESKTOP"):
+        try:
+            result = subprocess.run(
+                ["gsettings", "get", "org.gnome.desktop.interface", "color-scheme"],
+                capture_output=True, text=True, timeout=1
+            )
+            if "dark" in result.stdout.lower():
+                return True
+        except (subprocess.SubprocessError, FileNotFoundError):
+            pass
+
+        # Try GTK theme name as fallback
+        try:
+            result = subprocess.run(
+                ["gsettings", "get", "org.gnome.desktop.interface", "gtk-theme"],
+                capture_output=True, text=True, timeout=1
+            )
+            if "dark" in result.stdout.lower():
+                return True
+        except (subprocess.SubprocessError, FileNotFoundError):
+            pass
+
+    # Check KDE dark mode
+    kde_globals = Path.home() / ".config" / "kdeglobals"
+    if kde_globals.exists():
+        try:
+            content = kde_globals.read_text()
+            if "ColorScheme" in content and "Dark" in content:
+                return True
+        except Exception:
+            pass
+
+    return False
+
+
+def apply_dark_palette(app: QApplication) -> None:
+    """Apply a dark color palette to the application."""
+    dark_palette = QPalette()
+
+    # Base colors
+    dark_palette.setColor(QPalette.Window, QColor(53, 53, 53))
+    dark_palette.setColor(QPalette.WindowText, Qt.white)
+    dark_palette.setColor(QPalette.Base, QColor(25, 25, 25))
+    dark_palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
+    dark_palette.setColor(QPalette.ToolTipBase, Qt.white)
+    dark_palette.setColor(QPalette.ToolTipText, Qt.white)
+    dark_palette.setColor(QPalette.Text, Qt.white)
+    dark_palette.setColor(QPalette.Button, QColor(53, 53, 53))
+    dark_palette.setColor(QPalette.ButtonText, Qt.white)
+    dark_palette.setColor(QPalette.BrightText, Qt.red)
+    dark_palette.setColor(QPalette.Link, QColor(42, 130, 218))
+    dark_palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+    dark_palette.setColor(QPalette.HighlightedText, Qt.black)
+
+    # Disabled colors
+    dark_palette.setColor(QPalette.Disabled, QPalette.WindowText, QColor(127, 127, 127))
+    dark_palette.setColor(QPalette.Disabled, QPalette.Text, QColor(127, 127, 127))
+    dark_palette.setColor(QPalette.Disabled, QPalette.ButtonText, QColor(127, 127, 127))
+
+    app.setPalette(dark_palette)
+
+
 def main():
     """Entry point for the application."""
     app = QApplication(sys.argv)
+
+    # Use Fusion style for consistent cross-platform appearance
+    app.setStyle(QStyleFactory.create("Fusion"))
+
+    # Detect and apply dark mode if system prefers it
+    if detect_system_dark_mode():
+        apply_dark_palette(app)
+
     launcher = EnvironmentLauncher()
     launcher.show()
     sys.exit(app.exec_())

@@ -15,7 +15,7 @@ engines:
 
   spotify:
     enabled: true
-    context_uri: "spotify:episode:2JyrEMqpT6YWslJOLstB0F"
+    context_uri: "spotify:playlist:7kEDZnp2Zy56OatRijFSeE"
 
   lights:
     enabled: true

@@ -676,13 +676,15 @@ class ButtonContainer(QWidget):
         super().resizeEvent(event)
 
 
-class FuzzySearchBar(QWidget):
-    """Search widget with substring matching results list."""
+class FuzzySearchBar(QLineEdit):
+    """Search bar with substring matching results list."""
 
     environment_selected = pyqtSignal(str, int)  # (config_name, category_index)
 
     def __init__(self, configs: Dict[str, List[Dict[str, Any]]], parent=None):
         super().__init__(parent)
+        self.setPlaceholderText("Search environments... (Ctrl+L)")
+        self.setMinimumWidth(300)
 
         # Build search index: (display_text, search_text, name, category_index)
         self.items: List[tuple] = []
@@ -700,27 +702,17 @@ class FuzzySearchBar(QWidget):
                 self.items.append((display_text, search_text, name, category_index))
             category_index += 1
 
-        # Layout
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(2)
-
-        # Search input
-        self.input = QLineEdit()
-        self.input.setPlaceholderText("Search environments... (Ctrl+L)")
-        self.input.setMinimumWidth(300)
-        self.input.textChanged.connect(self._on_text_changed)
-        self.input.returnPressed.connect(self._select_first)
-        self.input.installEventFilter(self)
-        layout.addWidget(self.input)
-
-        # Results list (hidden by default)
+        # Results list - will be parented to top-level window
         self.results = QListWidget()
+        self.results.setWindowFlags(Qt.ToolTip)  # Lightweight overlay, not a full popup
         self.results.setMaximumHeight(200)
+        self.results.setMinimumWidth(400)
         self.results.hide()
         self.results.itemClicked.connect(self._on_item_clicked)
         self.results.itemActivated.connect(self._on_item_clicked)
-        layout.addWidget(self.results)
+
+        self.textChanged.connect(self._on_text_changed)
+        self.returnPressed.connect(self._select_first)
 
     def _on_text_changed(self, text: str) -> None:
         """Filter and show results."""
@@ -739,6 +731,10 @@ class FuzzySearchBar(QWidget):
                 item.setData(Qt.UserRole, (name, cat_idx))
                 self.results.addItem(item)
             self.results.setCurrentRow(0)
+            # Position below the search bar
+            pos = self.mapToGlobal(self.rect().bottomLeft())
+            self.results.move(pos)
+            self.results.setFixedWidth(max(400, self.width()))
             self.results.show()
         else:
             self.results.hide()
@@ -747,7 +743,7 @@ class FuzzySearchBar(QWidget):
         """Handle item selection."""
         name, cat_idx = item.data(Qt.UserRole)
         self.environment_selected.emit(name, cat_idx)
-        self.clear()
+        self._clear_and_hide()
 
     def _select_first(self) -> None:
         """Select first result on Enter."""
@@ -756,43 +752,39 @@ class FuzzySearchBar(QWidget):
             if current:
                 self._on_item_clicked(current)
 
-    def eventFilter(self, obj, event) -> bool:
-        """Handle arrow keys for result navigation."""
-        if obj == self.input and event.type() == event.KeyPress:
-            if event.key() == Qt.Key_Down and self.results.isVisible():
-                row = self.results.currentRow()
-                if row < self.results.count() - 1:
-                    self.results.setCurrentRow(row + 1)
-                return True
-            elif event.key() == Qt.Key_Up and self.results.isVisible():
-                row = self.results.currentRow()
-                if row > 0:
-                    self.results.setCurrentRow(row - 1)
-                return True
-            elif event.key() == Qt.Key_Escape:
-                self.clear()
-                return True
-        return super().eventFilter(obj, event)
-
-    # Delegate methods to input for compatibility
-    def setFocusPolicy(self, policy):
-        self.input.setFocusPolicy(policy)
-
-    def setStyleSheet(self, style):
-        self.input.setStyleSheet(style)
-
-    def setFocus(self):
-        self.input.setFocus()
-
-    def selectAll(self):
-        self.input.selectAll()
-
-    def clear(self):
-        self.input.clear()
+    def _clear_and_hide(self) -> None:
+        """Clear text and hide results."""
+        self.clear()
         self.results.hide()
+        self.clearFocus()
 
-    def clearFocus(self):
-        self.input.clearFocus()
+    def keyPressEvent(self, event) -> None:
+        """Handle arrow keys for result navigation."""
+        if event.key() == Qt.Key_Down and self.results.isVisible():
+            row = self.results.currentRow()
+            if row < self.results.count() - 1:
+                self.results.setCurrentRow(row + 1)
+            return
+        elif event.key() == Qt.Key_Up and self.results.isVisible():
+            row = self.results.currentRow()
+            if row > 0:
+                self.results.setCurrentRow(row - 1)
+            return
+        elif event.key() == Qt.Key_Escape:
+            self._clear_and_hide()
+            return
+        super().keyPressEvent(event)
+
+    def focusOutEvent(self, event) -> None:
+        """Hide results when focus is lost."""
+        # Small delay to allow click on results to register
+        QTimer.singleShot(150, self._maybe_hide_results)
+        super().focusOutEvent(event)
+
+    def _maybe_hide_results(self) -> None:
+        """Hide results if we don't have focus."""
+        if not self.hasFocus():
+            self.results.hide()
 
 
 class EngineRunner(QThread):
@@ -1017,8 +1009,11 @@ class EnvironmentLauncher(QMainWindow):
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(5, 5, 5, 5)
 
-        # Search bar at top
-        search_layout = QHBoxLayout()
+        # Search bar at top (fixed height container)
+        search_container = QWidget()
+        search_container.setFixedHeight(40)
+        search_layout = QHBoxLayout(search_container)
+        search_layout.setContentsMargins(0, 0, 0, 0)
         self.search_bar = FuzzySearchBar(self.configs)
         self.search_bar.environment_selected.connect(self._on_search_selected)
         # Only focus search bar when clicked or via Ctrl+L, not by default
@@ -1052,7 +1047,7 @@ class EnvironmentLauncher(QMainWindow):
         search_layout.addWidget(search_label)
         search_layout.addWidget(self.search_bar)
         search_layout.addStretch()
-        main_layout.addLayout(search_layout)
+        main_layout.addWidget(search_container)
 
         # Create splitter for left tabs and right content
         self.splitter = QSplitter(Qt.Horizontal)

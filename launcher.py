@@ -671,32 +671,40 @@ class OutlinedLabel(QLabel):
 
 
 class IconButton(QPushButton):
-    """QPushButton with a large background emoji icon."""
+    """QPushButton with a large background emoji icon and scaled text."""
 
     def __init__(self, text: str, icon_emoji: str = "", parent=None):
-        super().__init__(text, parent)
+        super().__init__("", parent)  # Empty text - we draw it ourselves
+        self._label_text = text
         self.icon_emoji = icon_emoji
 
     def paintEvent(self, event):
-        # First draw the default button
+        # Draw the default button (background, border) but without text
         super().paintEvent(event)
 
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        rect = self.rect()
+        min_dimension = min(rect.width(), rect.height())
+
+        # Draw background emoji if present
         if self.icon_emoji:
-            painter = QPainter(self)
-            painter.setRenderHint(QPainter.Antialiasing)
-
-            # Scale font size based on button dimensions (use smaller of width/height)
-            rect = self.rect()
-            min_dimension = min(rect.width(), rect.height())
-            font_size = max(24, int(min_dimension * 0.5))  # 50% of smaller dimension, min 24pt
-
+            emoji_font_size = max(24, int(min_dimension * 0.5))  # 50% of smaller dimension
             font = painter.font()
-            font.setPointSize(font_size)
+            font.setPointSize(emoji_font_size)
             painter.setFont(font)
-
-            # Draw emoji centered with low opacity
             painter.setOpacity(0.15)
             painter.drawText(rect, Qt.AlignCenter, self.icon_emoji)
+
+        # Draw label text with scaled font
+        painter.setOpacity(1.0)
+        label_font_size = max(10, min(24, int(min_dimension * 0.10)))  # 10% of smaller dim, 10-24px
+        font = painter.font()
+        font.setPointSize(label_font_size)
+        painter.setFont(font)
+        # Use palette color for text (respects dark/light mode)
+        painter.setPen(self.palette().color(self.palette().ButtonText))
+        painter.drawText(rect, Qt.AlignCenter | Qt.TextWordWrap, self._label_text)
 
 
 class ButtonContainer(QWidget):

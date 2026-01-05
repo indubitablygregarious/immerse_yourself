@@ -118,7 +118,7 @@ class ConfigLoader:
             )
 
         # Validate category
-        valid_categories = ["combat", "social", "exploration", "relaxation", "special"]
+        valid_categories = ["combat", "social", "exploration", "relaxation", "special", "hidden"]
         if config["category"] not in valid_categories:
             raise ConfigValidationError(
                 f"Field 'category' must be one of: {', '.join(valid_categories)}\n"

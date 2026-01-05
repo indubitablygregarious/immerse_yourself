@@ -1016,17 +1016,23 @@ class EnvironmentLauncher(QMainWindow):
         if not self.spotify_config.is_configured():
             return
 
-        # Find the "travel" config for startup
+        # Find the "startup" config (or fall back to "travel")
+        startup_config = None
         travel_config = None
         for category, configs in self.configs.items():
             for config in configs:
-                if config.get("name", "").lower() == "travel":
+                name = config.get("name", "").lower()
+                if name == "startup":
+                    startup_config = config
+                elif name == "travel":
                     travel_config = config
-                    break
-            if travel_config:
+            if startup_config:
                 break
 
-        if not travel_config:
+        # Use startup if found, otherwise fall back to travel
+        startup_config = startup_config or travel_config
+
+        if not startup_config:
             return
 
         # Check Spotify status FIRST before trying to play
@@ -1043,9 +1049,9 @@ class EnvironmentLauncher(QMainWindow):
             local_device = engine.get_local_computer_device()
 
             if local_device:
-                # Local device exists and ready - start travel
-                self.statusBar().showMessage("Spotify connected - starting Travel...")
-                self._start_environment(travel_config)
+                # Local device exists and ready - start startup environment
+                self.statusBar().showMessage("Spotify connected - starting...")
+                self._start_environment(startup_config)
                 return
 
             # No local device - need to handle based on settings
@@ -1054,8 +1060,8 @@ class EnvironmentLauncher(QMainWindow):
             remote_devices = engine.get_remote_devices()
 
             if auto_start == "start_local":
-                if self._ensure_local_spotify(spotify_running, spotify_available, travel_config):
-                    # Spotify starting - polling will auto-start travel when ready
+                if self._ensure_local_spotify(spotify_running, spotify_available, startup_config):
+                    # Spotify starting - polling will auto-start when ready
                     return
                 # Failed to start - fall through to show status
                 self.statusBar().showMessage("Ready (could not start Spotify)")
@@ -1066,17 +1072,17 @@ class EnvironmentLauncher(QMainWindow):
                     # Connect to first remote device and play
                     device = remote_devices[0]
                     if engine.transfer_to_device(device["id"], start_playback=False):
-                        self.statusBar().showMessage(f"Connected to {device['name']} - starting Travel...")
-                        self._start_environment(travel_config)
+                        self.statusBar().showMessage(f"Connected to {device['name']} - starting...")
+                        self._start_environment(startup_config)
                         return
                 self.statusBar().showMessage("Ready (no remote devices available)")
                 return
 
             # auto_start == "ask" - show dialog
-            if self._show_startup_spotify_dialog(spotify_running, spotify_available, remote_devices, engine, travel_config):
+            if self._show_startup_spotify_dialog(spotify_running, spotify_available, remote_devices, engine, startup_config):
                 # User chose an option that connected successfully
-                self.statusBar().showMessage("Spotify connected - starting Travel...")
-                self._start_environment(travel_config)
+                self.statusBar().showMessage("Spotify connected - starting...")
+                self._start_environment(startup_config)
 
         except FileNotFoundError:
             # Spotify not configured
@@ -1519,7 +1525,7 @@ class EnvironmentLauncher(QMainWindow):
 
         # Sort categories
         sorted_organized = {}
-        for category in ["combat", "social", "exploration", "relaxation", "special"]:
+        for category in ["combat", "social", "exploration", "relaxation", "special", "hidden"]:
             if category in organized:
                 # Sort configs within category by name
                 sorted_organized[category] = sorted(
@@ -1634,6 +1640,9 @@ class EnvironmentLauncher(QMainWindow):
         # Add categories
         tab_index = 0
         for category, configs in self.configs.items():
+            # Skip hidden category
+            if category == "hidden":
+                continue
             # Add to list
             item = QListWidgetItem(category.capitalize())
             item.setSizeHint(QSize(0, 40))

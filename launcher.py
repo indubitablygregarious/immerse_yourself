@@ -24,6 +24,7 @@ from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, QSize
 from PyQt5.QtGui import QKeySequence, QPalette, QColor, QPainter, QPen, QFont, QIcon
 
 from config_loader import ConfigLoader
+from status_bar import ImmersiveStatusBar
 import configparser
 
 
@@ -872,6 +873,11 @@ class EngineRunner(QThread):
     sound_finished = pyqtSignal()  # Signal when sound-only config finishes
     spotify_no_device = pyqtSignal()  # Signal when Spotify has no active device
 
+    # Signals for ImmersiveStatusBar
+    sound_started = pyqtSignal(str)   # sound filename
+    music_started = pyqtSignal(str)   # playlist name
+    lights_started = pyqtSignal(str)  # animation/config name
+
     def __init__(self, config: Dict[str, Any]):
         super().__init__()
         self.config = config
@@ -902,6 +908,7 @@ class EngineRunner(QThread):
 
             if sound_file:
                 self.status_update.emit(f"Playing sound: {sound_file}")
+                self.sound_started.emit(sound_file)
                 sound_engine = SoundEngine()
                 # For sound-only configs, use callback to signal when done
                 if not self.has_lights and sound_enabled:
@@ -917,6 +924,9 @@ class EngineRunner(QThread):
                     spotify_engine = SpotifyEngine()
                     spotify_engine.play_context_with_device_check(context_uri)
                     self.status_update.emit("Spotify playback started")
+                    # Try to get playlist name from Spotify API
+                    playlist_name = self._get_playlist_name(spotify_engine, context_uri)
+                    self.music_started.emit(playlist_name)
                 except SpotifyNoActiveDeviceError:
                     self.spotify_no_device.emit()
                 except Exception as e:
@@ -944,6 +954,21 @@ class EngineRunner(QThread):
         self._sound_done_event.set()
         self.sound_finished.emit()
 
+    def _get_playlist_name(self, spotify_engine: "SpotifyEngine", context_uri: str) -> str:
+        """Fetch playlist name from Spotify API. Falls back to config name on error."""
+        try:
+            # Extract playlist ID from URI (e.g., "spotify:playlist:5Q8DWZnPe7o7GA96SARmOK")
+            if context_uri.startswith("spotify:playlist:"):
+                playlist_id = context_uri.split(":")[-1]
+                playlist = spotify_engine.spotify_client.playlist(playlist_id, fields="name")
+                return playlist.get("name", self.config.get("name", "Unknown"))
+            else:
+                # Not a playlist (could be album, artist, etc.)
+                return self.config.get("name", "Unknown")
+        except Exception:
+            # Fallback to config name
+            return self.config.get("name", "Unknown")
+
     async def _run_lights(self):
         """Run the lights engine asynchronously."""
         self.lights_engine = LightsEngine()
@@ -952,6 +977,7 @@ class EngineRunner(QThread):
         await self.lights_engine.start(animation_config)
         config_name = self.config.get("name", "Unknown")
         self.status_update.emit(f"Light animation running: {config_name}")
+        self.lights_started.emit(config_name)
 
         # Keep running until stopped (check frequently for fast response)
         while self.running:
@@ -1010,6 +1036,12 @@ class EnvironmentLauncher(QMainWindow):
         # Store Spotify config manager for checking configuration
         self.spotify_config = SpotifyConfigManager()
 
+        # Store WIZ bulb config manager for checking configuration
+        self.wizbulb_config = WizBulbConfigManager()
+
+        # Create immersive status bar
+        self.immersive_status = ImmersiveStatusBar(self)
+
         # Create UI
         self._create_menu()
         self._create_ui()
@@ -1048,7 +1080,7 @@ class EnvironmentLauncher(QMainWindow):
 
         # If disabled, skip startup music entirely
         if auto_start == "disabled":
-            self.statusBar().showMessage("Ready (Spotify disabled in settings)")
+            self.immersive_status.set_message("Ready (Spotify disabled in settings)", timeout_ms=5000)
             return
 
         # Try to connect to Spotify and check for active device
@@ -1058,7 +1090,7 @@ class EnvironmentLauncher(QMainWindow):
 
             if local_device:
                 # Local device exists and ready - start startup environment
-                self.statusBar().showMessage("Spotify connected - starting...")
+                self.immersive_status.set_message("Spotify connected - starting...", timeout_ms=3000)
                 self._start_environment(startup_config)
                 return
 
@@ -1072,7 +1104,7 @@ class EnvironmentLauncher(QMainWindow):
                     # Spotify starting - polling will auto-start when ready
                     return
                 # Failed to start - fall through to show status
-                self.statusBar().showMessage("Ready (could not start Spotify)")
+                self.immersive_status.set_message("Ready (could not start Spotify)", timeout_ms=5000)
                 return
 
             if auto_start == "use_remote":
@@ -1080,24 +1112,24 @@ class EnvironmentLauncher(QMainWindow):
                     # Connect to first remote device and play
                     device = remote_devices[0]
                     if engine.transfer_to_device(device["id"], start_playback=False):
-                        self.statusBar().showMessage(f"Connected to {device['name']} - starting...")
+                        self.immersive_status.set_message(f"Connected to {device['name']} - starting...", timeout_ms=3000)
                         self._start_environment(startup_config)
                         return
-                self.statusBar().showMessage("Ready (no remote devices available)")
+                self.immersive_status.set_message("Ready (no remote devices available)", timeout_ms=5000)
                 return
 
             # auto_start == "ask" - show dialog
             if self._show_startup_spotify_dialog(spotify_running, spotify_available, remote_devices, engine, startup_config):
                 # User chose an option that connected successfully
-                self.statusBar().showMessage("Spotify connected - starting...")
+                self.immersive_status.set_message("Spotify connected - starting...", timeout_ms=3000)
                 self._start_environment(startup_config)
 
         except FileNotFoundError:
             # Spotify not configured
-            self.statusBar().showMessage("Ready (Spotify not configured)")
+            self.immersive_status.set_message("Ready (Spotify not configured)", timeout_ms=5000)
         except Exception as e:
             # Other error - just show ready
-            self.statusBar().showMessage(f"Ready (Spotify: {e})")
+            self.immersive_status.set_message(f"Ready (Spotify: {e})", timeout_ms=5000)
 
     def _ensure_local_spotify(self, spotify_running: bool, spotify_available: bool,
                                then_play_config: Optional[Dict[str, Any]] = None) -> bool:
@@ -1122,7 +1154,7 @@ class EnvironmentLauncher(QMainWindow):
         if not spotify_available:
             return False
 
-        self.statusBar().showMessage("Starting Spotify...")
+        self.immersive_status.set_message("Starting Spotify...", timeout_ms=0)
         if start_spotify():
             # Start polling for Spotify to be ready
             self._poll_for_spotify_ready(then_play_config)
@@ -1139,7 +1171,7 @@ class EnvironmentLauncher(QMainWindow):
             max_attempts: Maximum polling attempts (20 * 500ms = 10 seconds)
         """
         if attempts >= max_attempts:
-            self.statusBar().showMessage("Spotify started - click an environment to play music")
+            self.immersive_status.set_message("Spotify started - click an environment to play music", timeout_ms=5000)
             self.activateWindow()
             self.raise_()
             return
@@ -1151,14 +1183,14 @@ class EnvironmentLauncher(QMainWindow):
 
             if local_device:
                 # Device found! Wait 5 more seconds for stability, then proceed
-                self.statusBar().showMessage("Spotify ready - starting music in 5s...")
+                self.immersive_status.set_message("Spotify ready - starting music in 5s...", timeout_ms=0)
                 QTimer.singleShot(5000, lambda: self._spotify_ready_play(then_play_config))
                 return
         except:
             pass
 
         # Not ready yet - check again in 500ms
-        self.statusBar().showMessage(f"Waiting for Spotify... ({attempts + 1})")
+        self.immersive_status.set_message(f"Waiting for Spotify... ({attempts + 1})", timeout_ms=0)
         QTimer.singleShot(500, lambda: self._poll_for_spotify_ready(then_play_config, attempts + 1, max_attempts))
 
     def _spotify_ready_play(self, config: Optional[Dict[str, Any]]) -> None:
@@ -1168,7 +1200,7 @@ class EnvironmentLauncher(QMainWindow):
         self.raise_()
 
         if config:
-            self.statusBar().showMessage(f"Starting {config['name']}...")
+            self.immersive_status.set_message(f"Starting {config['name']}...", timeout_ms=3000)
             self._start_environment(config)
 
     def _show_startup_spotify_dialog(self, spotify_running: bool, spotify_available: bool,
@@ -1263,12 +1295,12 @@ class EnvironmentLauncher(QMainWindow):
                     device = remote_devices[0]
 
                 if engine.transfer_to_device(device["id"], start_playback=False):
-                    self.statusBar().showMessage(f"Connected to {device['name']}")
+                    self.immersive_status.set_message(f"Connected to {device['name']}", timeout_ms=3000)
                     return True
             return False
 
         # "disabled" - continue without music
-        self.statusBar().showMessage("Continuing without music")
+        self.immersive_status.set_message("Continuing without music", timeout_ms=3000)
         return False
 
     def _startup_dialog_choose(self, dialog: "QDialog", choice: str) -> None:
@@ -1282,7 +1314,7 @@ class EnvironmentLauncher(QMainWindow):
 
         # If disabled, just silently continue without music
         if auto_start == "disabled":
-            self.statusBar().showMessage("Running without music (Spotify disabled in settings)")
+            self.immersive_status.set_message("Running without music (Spotify disabled in settings)", timeout_ms=5000)
             return
 
         # Check what options are available
@@ -1330,7 +1362,7 @@ class EnvironmentLauncher(QMainWindow):
             )
             return
 
-        self.statusBar().showMessage("Starting Spotify...")
+        self.immersive_status.set_message("Starting Spotify...", timeout_ms=0)
         if start_spotify():
             QMessageBox.information(
                 self,
@@ -1362,7 +1394,7 @@ class EnvironmentLauncher(QMainWindow):
             try:
                 engine = SpotifyEngine()
                 if engine.transfer_to_device(device["id"], start_playback=False):
-                    self.statusBar().showMessage(f"Connected to {device['name']}")
+                    self.immersive_status.set_message(f"Connected to {device['name']}", timeout_ms=3000)
                     QMessageBox.information(
                         self,
                         "Connected",
@@ -1392,7 +1424,7 @@ class EnvironmentLauncher(QMainWindow):
             try:
                 engine = SpotifyEngine()
                 if engine.transfer_to_device(device["id"], start_playback=False):
-                    self.statusBar().showMessage(f"Connected to {device['name']}")
+                    self.immersive_status.set_message(f"Connected to {device['name']}", timeout_ms=3000)
                 else:
                     QMessageBox.warning(self, "Failed", f"Could not connect to {device['name']}")
             except Exception as e:
@@ -1469,7 +1501,7 @@ class EnvironmentLauncher(QMainWindow):
         if self._remember_checkbox.isChecked():
             self.settings_manager.set_spotify_auto_start("disabled")
         dialog.reject()
-        self.statusBar().showMessage("Continuing without music")
+        self.immersive_status.set_message("Continuing without music", timeout_ms=3000)
 
     def _is_dark_mode_enabled(self) -> bool:
         """Check if dark mode should be enabled based on settings."""
@@ -1745,8 +1777,8 @@ class EnvironmentLauncher(QMainWindow):
         # Set focus to main window so keyboard shortcuts work immediately
         self.setFocus()
 
-        # Status bar
-        self.statusBar().showMessage("Ready - Select an environment to start")
+        # Status bar - use our immersive status bar
+        self.setStatusBar(self.immersive_status.get_status_bar())
 
     def _create_category_tab(self, category: str, configs: List[Dict[str, Any]]) -> QWidget:
         """Create a tab widget for a category."""
@@ -1942,6 +1974,10 @@ class EnvironmentLauncher(QMainWindow):
             runner.finished.connect(lambda: self._on_runner_finished(runner))
             runner.sound_finished.connect(lambda: self._on_sound_finished(config["name"]))
             runner.spotify_no_device.connect(self._handle_spotify_no_device)
+            # Connect to immersive status bar
+            runner.sound_started.connect(self.immersive_status.on_sound_started)
+            runner.music_started.connect(self.immersive_status.on_music_started)
+            runner.lights_started.connect(self.immersive_status.on_lights_started)
             runner.start()
 
             self.current_runner = runner
@@ -1953,14 +1989,9 @@ class EnvironmentLauncher(QMainWindow):
                 self.lights_config_name = config["name"]
                 self._update_active_button(config["name"])
                 self.stop_button.setEnabled(True)
-                self.statusBar().showMessage(f"Running: {config['name']}")
             else:
                 # Sound-only config - highlight it while playing
                 self._update_active_button(config["name"])
-                status = f"Playing: {config['name']}"
-                if self.lights_config_name:
-                    status += f" (Lights: {self.lights_config_name})"
-                self.statusBar().showMessage(status)
 
         except Exception as e:
             QMessageBox.critical(
@@ -1968,7 +1999,7 @@ class EnvironmentLauncher(QMainWindow):
                 "Error",
                 f"Failed to start {config['name']}:\n{str(e)}"
             )
-            self.statusBar().showMessage("Error starting environment")
+            self.immersive_status.set_message("Error starting environment", timeout_ms=5000)
 
     def _stop_lights(self) -> None:
         """Stop the currently running lights."""
@@ -1980,6 +2011,7 @@ class EnvironmentLauncher(QMainWindow):
             old_runner.finished.connect(lambda: self._cleanup_old_runner(old_runner))
             self.lights_runner = None
             self.lights_config_name = None
+            self.immersive_status.clear_lights()
 
     def _stop_current(self) -> None:
         """Stop all running environments (lights)."""
@@ -1988,26 +2020,27 @@ class EnvironmentLauncher(QMainWindow):
         self.current_config_name = None
         self._reset_button_styles()
         self.stop_button.setEnabled(False)
-        self.statusBar().showMessage("Stopped")
 
     def _stop_sounds(self) -> None:
         """Stop all playing sound effects."""
         stopped = stop_all_sounds()
+        self.immersive_status.clear_sound()
         if stopped > 0:
-            self.statusBar().showMessage(f"Stopped {stopped} sound(s)")
+            self.immersive_status.set_message(f"Stopped {stopped} sound(s)", timeout_ms=3000)
         else:
-            self.statusBar().showMessage("No sounds playing")
+            self.immersive_status.set_message("No sounds playing", timeout_ms=3000)
 
     def _stop_spotify(self) -> None:
         """Stop Spotify playback."""
         try:
             spotify_engine = SpotifyEngine()
             if spotify_engine.stop():
-                self.statusBar().showMessage("Spotify playback stopped")
+                self.immersive_status.clear_music()
+                self.immersive_status.set_message("Spotify playback stopped", timeout_ms=3000)
             else:
-                self.statusBar().showMessage("Could not stop Spotify")
+                self.immersive_status.set_message("Could not stop Spotify", timeout_ms=3000)
         except Exception as e:
-            self.statusBar().showMessage(f"Spotify error: {str(e)}")
+            self.immersive_status.set_message(f"Spotify error: {str(e)}", timeout_ms=5000)
 
     def _focus_search(self) -> None:
         """Focus the search bar."""
@@ -2039,7 +2072,7 @@ class EnvironmentLauncher(QMainWindow):
     def _set_pending_button(self, btn: QPushButton, config_name: str) -> None:
         """Set the pending search button after a delay."""
         self._pending_search_button = btn
-        self.statusBar().showMessage(f"Found: {config_name} (press Enter to activate)")
+        self.immersive_status.set_message(f"Found: {config_name} (press Enter to activate)", timeout_ms=5000)
 
     def _pulse_button(self, btn: QPushButton) -> None:
         """Make a button pulse with a green border glow for 3 seconds."""
@@ -2093,27 +2126,27 @@ class EnvironmentLauncher(QMainWindow):
     def _on_error(self, error_msg: str) -> None:
         """Handle error from engine runner."""
         QMessageBox.warning(self, "Engine Error", error_msg)
-        self.statusBar().showMessage(f"Error: {error_msg}")
+        self.immersive_status.set_message(f"Error: {error_msg}", timeout_ms=5000)
 
     def _on_status_update(self, status: str) -> None:
         """Handle status update from engine runner."""
-        self.statusBar().showMessage(status)
+        # Legacy handler - status updates now go through immersive_status signals
+        pass
 
     def _on_sound_finished(self, sound_name: str) -> None:
         """Handle sound-only config finishing."""
+        self.immersive_status.clear_sound()
         if self.lights_config_name:
-            self.statusBar().showMessage(f"Sound '{sound_name}' finished - Lights: {self.lights_config_name}")
             # Re-highlight the active lights button
             self._update_active_button(self.lights_config_name)
         else:
-            self.statusBar().showMessage(f"Sound '{sound_name}' finished")
             self._reset_button_styles()
 
     def _on_runner_finished(self, runner: EngineRunner) -> None:
         """Handle runner thread finishing."""
         # Only update status if this was the lights runner
         if runner == self.lights_runner:
-            self.statusBar().showMessage(f"{self.lights_config_name} finished")
+            self.immersive_status.clear_lights()
             self.lights_runner = None
             self.lights_config_name = None
             self._reset_button_styles()
@@ -2173,7 +2206,7 @@ class EnvironmentLauncher(QMainWindow):
         try:
             engine = SpotifyEngine()
             engine.stop()
-            self.statusBar().showMessage("Stopped Spotify")
+            self.immersive_status.clear_music()
         except:
             pass  # Spotify may not be configured
 
@@ -2187,8 +2220,8 @@ class EnvironmentLauncher(QMainWindow):
 
             if all_ips:
                 async def set_lights_soft_white():
-                    # Soft warm white: ~2700K equivalent
-                    pilot = PilotBuilder(rgb=(255, 244, 229), brightness=128)
+                    # Soft warm white at max brightness: ~2700K equivalent
+                    pilot = PilotBuilder(rgb=(255, 244, 229), brightness=255)
                     for ip in all_ips:
                         try:
                             bulb = wizlight(ip)

@@ -10,7 +10,7 @@ import threading
 import random
 import subprocess
 from pathlib import Path
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Set
 from collections import defaultdict
 
 from PyQt5.QtWidgets import (
@@ -1242,22 +1242,24 @@ class EngineRunner(QThread):
             if config_path.exists():
                 return
 
-            # Create the config content
+            # Create the config content - freesounds are loop-capable
             display_name = sound_name.replace('_', ' ')
             config_content = f'''name: "{display_name}"
 category: "freesound"
 description: "Freesound by {creator}"
-icon: "🔊"
+icon: "🔁"
 
 metadata:
-  tags: ["freesound", "downloaded", "{creator}"]
+  tags: ["freesound", "downloaded", "{creator}", "loop"]
   intensity: "low"
-  suitable_for: ["ambient", "sound effect"]
+  suitable_for: ["ambient", "atmosphere", "loop"]
+  loop: true
 
 engines:
   sound:
     enabled: true
     file: "{url}"
+    loop: true
 
   spotify:
     enabled: false
@@ -1328,6 +1330,7 @@ class EnvironmentLauncher(QMainWindow):
 
     # Button styles (font-size 17px for larger name display)
     ACTIVE_STYLE = "background-color: #4CAF50; color: white; padding: 8px; font-size: 17px;"
+    ATMOSPHERE_ACTIVE_STYLE = "background-color: #5B9BD5; color: white; padding: 8px; font-size: 17px;"  # Blue for atmosphere members
     INACTIVE_STYLE = "padding: 8px; font-size: 17px;"
     STOP_STYLE = "background-color: #f44336; color: white; font-weight: bold; font-size: 12px;"
     DESC_STYLE = "font-size: 11px; color: #666; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px; background-color: #fafafa;"
@@ -1371,6 +1374,10 @@ class EnvironmentLauncher(QMainWindow):
         self.tab_configs: Dict[int, List[Dict[str, Any]]] = {}  # tab_index -> configs
         self._pending_search_button: Optional[QPushButton] = None  # Button from search result
 
+        # Track active atmosphere sounds (URLs currently playing in atmosphere)
+        self.active_atmosphere_urls: Set[str] = set()
+        self.url_to_config: Dict[str, Dict[str, Any]] = {}  # URL -> config mapping
+
         # Store Spotify config manager for checking configuration
         self.spotify_config = SpotifyConfigManager()
 
@@ -1384,6 +1391,9 @@ class EnvironmentLauncher(QMainWindow):
         self._create_menu()
         self._create_ui()
         self._setup_tab_shortcuts()
+
+        # Build URL to config mapping for atmosphere tracking
+        self._build_url_to_config_mapping()
 
         # Schedule startup Spotify check (after window is shown)
         QTimer.singleShot(500, self._check_startup_spotify)
@@ -1913,6 +1923,223 @@ class EnvironmentLauncher(QMainWindow):
 
         return sorted_organized
 
+    def _build_url_to_config_mapping(self) -> None:
+        """Build mapping from freesound URLs to config names for atmosphere tracking."""
+        self.url_to_config.clear()
+        for category, configs in self.configs.items():
+            for config in configs:
+                # Check if this config has a freesound URL as its sound file
+                sound_file = config.get("engines", {}).get("sound", {}).get("file", "")
+                if sound_file and "freesound.org" in sound_file:
+                    self.url_to_config[sound_file] = config
+
+    def _ensure_atmosphere_configs(self, mix: List[Dict[str, Any]]) -> bool:
+        """
+        Ensure individual configs exist for all freesound URLs in an atmosphere mix.
+
+        Creates config files, loads them, creates buttons, and updates mappings.
+
+        Args:
+            mix: List of sound configurations with 'url' keys
+
+        Returns:
+            True if any new configs were created
+        """
+        from freesound_manager import FreesoundManager, is_freesound_url
+
+        created_any = False
+        freesound_manager = FreesoundManager()
+        new_configs = []
+
+        for sound_config in mix:
+            url = sound_config.get("url", "")
+            if not url or not is_freesound_url(url):
+                continue
+
+            # Check if config already exists for this URL
+            if url in self.url_to_config:
+                continue
+
+            # Try to get metadata from FreesoundManager
+            try:
+                # get_sound returns (local_path, metadata) - uses cache if available
+                _, metadata = freesound_manager.get_sound(url)
+
+                # Create config file inline (same logic as EngineRunner._auto_create_freesound_config)
+                sound_name = metadata.get("sound_name", "Unknown")
+                creator = metadata.get("creator", "Unknown")
+                sound_id = metadata.get("sound_id", "0")
+
+                safe_name = sound_name.lower().replace(' ', '_').replace('-', '_')
+                safe_name = ''.join(c for c in safe_name if c.isalnum() or c == '_')
+                config_filename = f"freesound_{safe_name}_{sound_id}.yaml"
+                config_path = Path("env_conf") / config_filename
+
+                # Skip if config file already exists
+                if not config_path.exists():
+                    display_name = sound_name.replace('_', ' ')
+                    config_content = f'''name: "{display_name}"
+category: "freesound"
+description: "Freesound by {creator}"
+icon: "🔁"
+
+metadata:
+  tags: ["freesound", "downloaded", "{creator}", "loop"]
+  intensity: "low"
+  suitable_for: ["ambient", "atmosphere", "loop"]
+  loop: true
+
+engines:
+  sound:
+    enabled: true
+    file: "{url}"
+    loop: true
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false
+'''
+                    with open(config_path, 'w') as f:
+                        f.write(config_content)
+
+                # Load the new config
+                try:
+                    new_config = self.config_loader.load(config_filename)
+                    new_configs.append(new_config)
+                    created_any = True
+                except Exception as e:
+                    print(f"Warning: Could not load new config {config_filename}: {e}")
+
+            except Exception as e:
+                print(f"Warning: Could not create config for {url}: {e}")
+
+        # Add new configs to our data structures and create buttons
+        if new_configs:
+            for config in new_configs:
+                category = config.get("category", "freesound")
+                # Add to configs dict
+                if category not in self.configs:
+                    self.configs[category] = []
+                self.configs[category].append(config)
+
+                # Add to url_to_config mapping
+                sound_file = config.get("engines", {}).get("sound", {}).get("file", "")
+                if sound_file:
+                    self.url_to_config[sound_file] = config
+
+                # Create button for the new config (no shortcut key for dynamically added)
+                container, btn = self._create_button(config, "")
+                name = config["name"]
+                self.buttons[name] = btn
+
+                # Add to the freesound tab - create it if it doesn't exist
+                if "freesound" not in self.category_content_widgets:
+                    # Create the freesound tab dynamically
+                    tab_widget = QWidget()
+                    layout = QGridLayout()
+                    layout.setSpacing(10)
+                    tab_widget.setLayout(layout)
+
+                    # Add to category list and stack
+                    item = QListWidgetItem("Freesound")
+                    item.setSizeHint(QSize(0, 40))
+                    self.category_list.addItem(item)
+                    self.category_stack.addWidget(tab_widget)
+                    self.category_content_widgets["freesound"] = tab_widget
+
+                    # Update tab_configs
+                    new_tab_index = self.category_list.count() - 1
+                    self.tab_configs[new_tab_index] = []
+
+                content = self.category_content_widgets["freesound"]
+                # Find the grid layout
+                if content.layout():
+                    grid = content.layout()
+                    count = grid.count()
+                    cols = 4  # Match the column count from _create_category_tab
+                    row = count // cols
+                    col = count % cols
+                    grid.addWidget(container, row, col)
+
+        return created_any
+
+    def _update_atmosphere_buttons(self, urls: List[str], active: bool) -> None:
+        """Highlight or unhighlight buttons for atmosphere member sounds."""
+        for url in urls:
+            config = self.url_to_config.get(url)
+            if config:
+                config_name = config.get("name")
+                if config_name and config_name in self.buttons:
+                    btn = self.buttons[config_name]
+                    if active:
+                        btn.setStyleSheet(self.ATMOSPHERE_ACTIVE_STYLE)
+                    else:
+                        btn.setStyleSheet(self.INACTIVE_STYLE)
+                    btn.update()  # Force visual refresh
+
+    def _clear_atmosphere_buttons(self) -> None:
+        """Clear all atmosphere button highlights."""
+        for url in self.active_atmosphere_urls:
+            config = self.url_to_config.get(url)
+            if config:
+                config_name = config.get("name")
+                if config_name and config_name in self.buttons:
+                    btn = self.buttons[config_name]
+                    btn.setStyleSheet(self.INACTIVE_STYLE)
+                    btn.update()  # Force visual refresh
+        self.active_atmosphere_urls.clear()
+
+    def _toggle_loop_sound(self, config: Dict[str, Any]) -> None:
+        """Toggle a loop sound in/out of the atmosphere mix."""
+        from engines import AtmosphereEngine, is_atmosphere_playing
+
+        sound_url = config.get("engines", {}).get("sound", {}).get("file", "")
+        if not sound_url:
+            return
+
+        config_name = config.get("name", "")
+
+        if sound_url in self.active_atmosphere_urls:
+            # Sound is playing - fade it out and remove from atmosphere
+            atmosphere_engine = AtmosphereEngine()
+            atmosphere_engine.stop_single(sound_url, fade_out=True)
+            self.active_atmosphere_urls.discard(sound_url)
+            if config_name in self.buttons:
+                self.buttons[config_name].setStyleSheet(self.INACTIVE_STYLE)
+            self.immersive_status.set_message(f"Removed: {config_name}", timeout_ms=2000)
+
+            # Update status bar music display
+            if self.active_atmosphere_urls:
+                # Get display names for remaining sounds
+                remaining_names = []
+                for url in self.active_atmosphere_urls:
+                    cfg = self.url_to_config.get(url)
+                    if cfg:
+                        remaining_names.append(cfg.get("name", "Unknown"))
+                self.immersive_status.set_music(" + ".join(remaining_names), source="atmosphere")
+            else:
+                self.immersive_status.clear_music()
+        else:
+            # Sound is not playing - fade it in and add to atmosphere
+            atmosphere_engine = AtmosphereEngine()
+            if atmosphere_engine.start_single(sound_url, volume=100, fade_in=True):
+                self.active_atmosphere_urls.add(sound_url)
+                if config_name in self.buttons:
+                    self.buttons[config_name].setStyleSheet(self.ATMOSPHERE_ACTIVE_STYLE)
+                self.immersive_status.set_message(f"Added: {config_name}", timeout_ms=2000)
+
+                # Update status bar music display
+                all_names = []
+                for url in self.active_atmosphere_urls:
+                    cfg = self.url_to_config.get(url)
+                    if cfg:
+                        all_names.append(cfg.get("name", "Unknown"))
+                self.immersive_status.set_music(" + ".join(all_names), source="atmosphere")
+            else:
+                self.immersive_status.set_message(f"Failed to add: {config_name}", timeout_ms=3000)
+
     def _create_ui(self) -> None:
         """Create the main UI layout with tabs on left side."""
         central_widget = QWidget()
@@ -2020,6 +2247,9 @@ class EnvironmentLauncher(QMainWindow):
         # Right side: stacked widget for category content
         self.category_stack = QStackedWidget()
 
+        # Track category content widgets for dynamic button addition
+        self.category_content_widgets = {}
+
         # Add categories
         tab_index = 0
         for category, configs in self.configs.items():
@@ -2034,6 +2264,7 @@ class EnvironmentLauncher(QMainWindow):
             # Add content page
             tab_widget = self._create_category_tab(category, configs)
             self.category_stack.addWidget(tab_widget)
+            self.category_content_widgets[category] = tab_widget
             self.tab_configs[tab_index] = configs
             tab_index += 1
 
@@ -2196,9 +2427,19 @@ class EnvironmentLauncher(QMainWindow):
                 break
             key = self.KEYS[idx]
             shortcut = QShortcut(QKeySequence(key), self)
-            shortcut.activated.connect(
-                lambda c=config: self._start_environment(c)
-            )
+
+            # Check if this is a loop-capable sound
+            is_loop = config.get("metadata", {}).get("loop", False) or \
+                      config.get("engines", {}).get("sound", {}).get("loop", False)
+
+            if is_loop:
+                shortcut.activated.connect(
+                    lambda c=config: self._toggle_loop_sound(c)
+                )
+            else:
+                shortcut.activated.connect(
+                    lambda c=config: self._start_environment(c)
+                )
             self.shortcuts.append(shortcut)
 
     def _generate_pastel_color(self) -> str:
@@ -2223,6 +2464,8 @@ class EnvironmentLauncher(QMainWindow):
         spotify_enabled = config.get("engines", {}).get("spotify", {}).get("enabled", False)
         atmosphere_enabled = config.get("engines", {}).get("atmosphere", {}).get("enabled", False)
         lights_enabled = config.get("engines", {}).get("lights", {}).get("enabled", False)
+        # Check if this is a loop-capable sound (can be mixed into atmosphere)
+        is_loop = config.get("metadata", {}).get("loop", False) or config.get("engines", {}).get("sound", {}).get("loop", False)
 
         # Get optional icon emoji from config
         icon_emoji = config.get("icon", "")
@@ -2231,7 +2474,11 @@ class EnvironmentLauncher(QMainWindow):
         btn = IconButton(name, icon_emoji)
         btn.setStyleSheet(self.INACTIVE_STYLE)
         btn.setToolTip(description)
-        btn.clicked.connect(lambda checked=False, c=config: self._start_environment(c))
+        # Loop sounds toggle in/out of atmosphere; other configs start environment
+        if is_loop:
+            btn.clicked.connect(lambda checked=False, c=config: self._toggle_loop_sound(c))
+        else:
+            btn.clicked.connect(lambda checked=False, c=config: self._start_environment(c))
 
         # Create shortcut key badge (top-left corner) with outlined text
         shortcut_label = None
@@ -2300,6 +2547,15 @@ class EnvironmentLauncher(QMainWindow):
             lights_label.setAlignment(Qt.AlignCenter)
             emoji_layout.addWidget(lights_label)
 
+        if is_loop:
+            loop_label = QLabel("🔁")
+            loop_label.setFixedHeight(18)
+            loop_label.setStyleSheet(
+                "background-color: #E0B4F0; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px; color: black;"
+            )
+            loop_label.setAlignment(Qt.AlignCenter)
+            emoji_layout.addWidget(loop_label)
+
         emoji_layout.addStretch()
         emoji_row.setLayout(emoji_layout)
 
@@ -2339,6 +2595,26 @@ class EnvironmentLauncher(QMainWindow):
                 pass  # Spotify may not be configured
             # Also stop any previous atmosphere
             stop_all_atmosphere()
+            # Clear previous atmosphere button highlights
+            self._clear_atmosphere_buttons()
+
+            # Extract atmosphere URLs and ensure configs exist for them
+            atmosphere_mix = config.get("engines", {}).get("atmosphere", {}).get("mix", [])
+            atmosphere_urls = [item.get("url", "") for item in atmosphere_mix if item.get("url")]
+
+            # Create configs for any new freesound URLs in the mix
+            # This also creates buttons and updates url_to_config mapping
+            self._ensure_atmosphere_configs(atmosphere_mix)
+
+            # Rebuild mapping to ensure all URLs are included
+            # (handles case where configs existed but weren't in mapping)
+            self._build_url_to_config_mapping()
+
+            self.active_atmosphere_urls = set(atmosphere_urls)
+            self._update_atmosphere_buttons(atmosphere_urls, active=True)
+        elif has_spotify:
+            # Clear atmosphere buttons when switching to Spotify
+            self._clear_atmosphere_buttons()
 
         # Get the icon for this config (for NowPlayingWidget)
         config_icon = config.get("icon", "💡")
@@ -2458,6 +2734,8 @@ class EnvironmentLauncher(QMainWindow):
         atmosphere_stopped = stop_all_atmosphere()
         if atmosphere_stopped > 0:
             stopped_any = True
+            # Clear atmosphere button highlights
+            self._clear_atmosphere_buttons()
 
         # Stop Spotify
         try:
@@ -2584,10 +2862,20 @@ class EnvironmentLauncher(QMainWindow):
             self.stop_button.setEnabled(False)
 
     def _update_active_button(self, active_name: str) -> None:
-        """Highlight the active lights button."""
+        """Highlight the active lights button, preserving atmosphere button styles."""
+        # Build set of active atmosphere button names
+        atmosphere_button_names = set()
+        for url in self.active_atmosphere_urls:
+            cfg = self.url_to_config.get(url)
+            if cfg:
+                atmosphere_button_names.add(cfg.get("name"))
+
         for name, btn in self.buttons.items():
             if name == active_name:
                 btn.setStyleSheet(self.ACTIVE_STYLE)
+            elif name in atmosphere_button_names:
+                # Keep atmosphere members blue
+                btn.setStyleSheet(self.ATMOSPHERE_ACTIVE_STYLE)
             else:
                 btn.setStyleSheet(self.INACTIVE_STYLE)
 

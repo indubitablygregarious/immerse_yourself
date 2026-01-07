@@ -8,7 +8,7 @@ This package contains the three core engines for the Immerse Yourself system:
 """
 
 from .sound_engine import SoundEngine, stop_all_sounds, register_sound_process, unregister_sound_process
-from .atmosphere_engine import AtmosphereEngine, stop_all_atmosphere, is_atmosphere_playing
+from .atmosphere_engine import AtmosphereEngine, stop_all_atmosphere, is_atmosphere_playing, is_url_playing, get_active_urls
 from .spotify_engine import (
     SpotifyEngine,
     SpotifyNoActiveDeviceError,
@@ -29,6 +29,8 @@ __all__ = [
     "AtmosphereEngine",
     "stop_all_atmosphere",
     "is_atmosphere_playing",
+    "is_url_playing",
+    "get_active_urls",
     "SpotifyEngine",
     "SpotifyNoActiveDeviceError",
     "SpotifyNotRunningError",

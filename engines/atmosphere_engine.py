@@ -19,6 +19,9 @@ from freesound_manager import FreesoundManager, is_freesound_url
 _active_atmosphere_processes: List[subprocess.Popen] = []
 _atmosphere_lock = threading.Lock()
 
+# Global mapping of URL -> process for individual sound control
+_url_to_process: Dict[str, subprocess.Popen] = {}
+
 # Fade duration in seconds
 FADE_DURATION = 3
 
@@ -33,12 +36,13 @@ def stop_all_atmosphere(fade_out: bool = True) -> int:
     Returns:
         Number of sounds stopped
     """
-    global _active_atmosphere_processes
+    global _active_atmosphere_processes, _url_to_process
     stopped = 0
 
     with _atmosphere_lock:
         processes_to_stop = _active_atmosphere_processes[:]
         _active_atmosphere_processes.clear()
+        _url_to_process.clear()
 
     if not processes_to_stop:
         return 0
@@ -64,15 +68,49 @@ def stop_all_atmosphere(fade_out: bool = True) -> int:
     return stopped
 
 
-def register_atmosphere_process(proc: subprocess.Popen) -> None:
+def is_url_playing(url: str) -> bool:
+    """Check if a specific URL is currently playing."""
+    with _atmosphere_lock:
+        if url in _url_to_process:
+            proc = _url_to_process[url]
+            # Check if process is still running
+            if proc.poll() is None:
+                return True
+            else:
+                # Process ended, clean up
+                del _url_to_process[url]
+                if proc in _active_atmosphere_processes:
+                    _active_atmosphere_processes.remove(proc)
+        return False
+
+
+def get_active_urls() -> List[str]:
+    """Get list of currently playing atmosphere URLs."""
+    with _atmosphere_lock:
+        # Clean up dead processes while we're at it
+        dead_urls = []
+        for url, proc in _url_to_process.items():
+            if proc.poll() is not None:
+                dead_urls.append(url)
+                if proc in _active_atmosphere_processes:
+                    _active_atmosphere_processes.remove(proc)
+        for url in dead_urls:
+            del _url_to_process[url]
+        return list(_url_to_process.keys())
+
+
+def register_atmosphere_process(proc: subprocess.Popen, url: str = None) -> None:
     """
     Register an atmosphere process for tracking.
 
     Args:
         proc: The subprocess.Popen object to track
+        url: Optional URL to associate with this process for individual control
     """
     with _atmosphere_lock:
         _active_atmosphere_processes.append(proc)
+        if url:
+            _url_to_process[url] = proc
 
 
 def unregister_atmosphere_process(proc: subprocess.Popen) -> None:
@@ -248,7 +286,7 @@ class AtmosphereEngine:
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL
                 )
-                register_atmosphere_process(proc)
+                register_atmosphere_process(proc, url)
                 started_any = True
             except Exception as e:
                 print(f"WARNING: Failed to start atmosphere sound: {url}")
@@ -271,3 +309,88 @@ class AtmosphereEngine:
     def is_playing(self) -> bool:
         """Check if atmosphere is currently playing."""
         return is_atmosphere_playing()
+
+    def is_url_playing(self, url: str) -> bool:
+        """Check if a specific URL is currently playing."""
+        return is_url_playing(url)
+
+    def start_single(self, url: str, volume: int = 100, fade_in: bool = True) -> bool:
+        """
+        Start a single sound looping.
+
+        Args:
+            url: freesound.org URL or local file path
+            volume: 0-100, defaults to 100
+            fade_in: If True, fade in over 3 seconds
+
+        Returns:
+            True if sound started successfully
+        """
+        if not self._player_cmd:
+            print("WARNING: ffplay not found. Atmosphere requires ffplay (ffmpeg).")
+            return False
+
+        # Don't start if already playing
+        if is_url_playing(url):
+            return True
+
+        # Resolve to local path
+        sound_path = self._resolve_sound_path(url)
+        if not sound_path:
+            return False
+
+        # Build ffplay command with looping, volume, and optional fade-in
+        cmd = [
+            "ffplay",
+            "-nodisp",           # No display window
+            "-loglevel", "quiet",  # Suppress output
+            "-loop", "0",        # Infinite loop
+            "-volume", str(int(volume)),
+        ]
+
+        if fade_in:
+            cmd.extend(["-af", f"afade=t=in:st=0:d={FADE_DURATION}"])
+
+        cmd.append(str(sound_path))
+
+        try:
+            proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+            register_atmosphere_process(proc, url)
+            return True
+        except Exception as e:
+            print(f"WARNING: Failed to start atmosphere sound: {url}")
+            print(f"         Reason: {e}")
+            return False
+
+    def stop_single(self, url: str, fade_out: bool = True) -> bool:
+        """
+        Stop a single sound by URL.
+
+        Args:
+            url: freesound.org URL or local file path to stop
+            fade_out: If True, attempt graceful fade out (note: ffplay doesn't
+                     support runtime volume changes, so this just terminates)
+
+        Returns:
+            True if sound was stopped, False if not playing
+        """
+        global _url_to_process, _active_atmosphere_processes
+
+        with _atmosphere_lock:
+            if url not in _url_to_process:
+                return False
+
+            proc = _url_to_process[url]
+            del _url_to_process[url]
+            if proc in _active_atmosphere_processes:
+                _active_atmosphere_processes.remove(proc)
+
+        try:
+            proc.terminate()
+            return True
+        except Exception:
+            return False

@@ -21,7 +21,7 @@ from PyQt5.QtWidgets import (
     QRadioButton, QButtonGroup, QGroupBox, QSplitter, QLineEdit,
     QAbstractItemView
 )
-from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, QSize
+from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, QSize, QRect
 from PyQt5.QtGui import QKeySequence, QPalette, QColor, QPainter, QPen, QFont, QIcon
 
 from config_loader import ConfigLoader
@@ -675,6 +675,108 @@ class OutlinedLabel(QLabel):
         painter.drawText(int(x), int(y), self._text)
 
 
+class VolumeSlider(QWidget):
+    """Vertical volume slider with 10 segments for atmosphere sounds."""
+
+    volume_changed = pyqtSignal(int)  # Emits 10-100 in increments of 10
+
+    def __init__(self, initial_volume: int = 100, parent=None):
+        super().__init__(parent)
+        self._volume = max(10, min(100, (initial_volume // 10) * 10))  # Clamp to 10-100
+        self._segments = 10
+        self._hovered = False
+        self.setMouseTracking(True)
+        self.setCursor(Qt.PointingHandCursor)
+
+    def set_volume(self, vol: int) -> None:
+        """Set volume (0-100, will be rounded to nearest 10)."""
+        new_vol = max(10, min(100, ((vol + 5) // 10) * 10))
+        if new_vol != self._volume:
+            self._volume = new_vol
+            self.update()
+
+    def get_volume(self) -> int:
+        """Get current volume (10-100)."""
+        return self._volume
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        rect = self.rect()
+        w = rect.width()
+        h = rect.height()
+
+        # Reserve space for volume icon at top
+        icon_height = 16
+        segments_top = icon_height + 2
+        segments_height = h - segments_top
+
+        # Calculate segment dimensions
+        gap = 2
+        segment_height = (segments_height - (self._segments - 1) * gap) / self._segments
+        filled_segments = self._volume // 10
+
+        # Draw background
+        painter.fillRect(rect, QColor(51, 51, 51, 180))  # Semi-transparent dark
+
+        # Draw volume icon at top
+        painter.setPen(QPen(QColor(200, 200, 200), 1))
+        icon_font = QFont()
+        icon_font.setPointSize(10)
+        painter.setFont(icon_font)
+        painter.drawText(QRect(0, 0, w, icon_height), Qt.AlignCenter, "🔊")
+
+        # Draw segments from bottom to top
+        for i in range(self._segments):
+            segment_y = h - (i + 1) * segment_height - i * gap
+            segment_rect = QRect(2, int(segment_y), w - 4, int(segment_height))
+
+            if i < filled_segments:
+                # Filled segment - blue
+                painter.fillRect(segment_rect, QColor(91, 155, 213))  # #5B9BD5
+            else:
+                # Empty segment - dark gray
+                painter.fillRect(segment_rect, QColor(100, 100, 100))
+
+        # Draw border
+        painter.setPen(QPen(QColor(128, 128, 128), 1))
+        painter.drawRect(rect.adjusted(0, 0, -1, -1))
+
+    def mousePressEvent(self, event):
+        """Handle click - set volume based on click position."""
+        if event.button() == Qt.LeftButton:
+            # Account for icon at top
+            icon_height = 16 + 2
+            h = self.height()
+            y = event.y()
+
+            # Ignore clicks on the icon area
+            if y < icon_height:
+                return
+
+            # Calculate which segment was clicked (from bottom)
+            segments_height = h - icon_height
+            y_in_segments = y - icon_height
+            # Invert Y (0 at bottom, 10 at top)
+            segment = int((segments_height - y_in_segments) / segments_height * self._segments) + 1
+            segment = max(1, min(10, segment))
+            new_volume = segment * 10
+
+            if new_volume != self._volume:
+                self._volume = new_volume
+                self.update()
+                self.volume_changed.emit(self._volume)
+
+    def enterEvent(self, event):
+        self._hovered = True
+        self.update()
+
+    def leaveEvent(self, event):
+        self._hovered = False
+        self.update()
+
+
 class IconButton(QPushButton):
     """QPushButton with a large background emoji icon and scaled text."""
 
@@ -717,18 +819,22 @@ class ButtonContainer(QWidget):
 
     def __init__(self, btn: QPushButton, emoji_row: QWidget,
                  shortcut_label: Optional[QLabel] = None,
-                 desc_label: Optional[QLabel] = None):
+                 desc_label: Optional[QLabel] = None,
+                 volume_slider: Optional[QWidget] = None):
         super().__init__()
         self.btn = btn
         self.emoji_row = emoji_row
         self.shortcut_label = shortcut_label
         self.desc_label = desc_label
+        self.volume_slider = volume_slider
         self.btn.setParent(self)
         self.emoji_row.setParent(self)
         if self.shortcut_label:
             self.shortcut_label.setParent(self)
         if self.desc_label:
             self.desc_label.setParent(self)
+        if self.volume_slider:
+            self.volume_slider.setParent(self)
         self.setMinimumHeight(130)
         self.setMinimumWidth(180)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -752,6 +858,13 @@ class ButtonContainer(QWidget):
             badge_width = int(badge_size * 1.15)  # Slightly wider than tall
             self.shortcut_label.setGeometry(5, 5, badge_width, badge_size)
             self.shortcut_label.raise_()
+        # Volume slider on right edge of button (for atmosphere/loop buttons)
+        if self.volume_slider:
+            slider_width = 20
+            slider_x = w - slider_width - 3  # Right edge with small margin
+            slider_height = btn_height - 30  # Leave margin at top and bottom
+            self.volume_slider.setGeometry(slider_x, 10, slider_width, slider_height)
+            self.volume_slider.raise_()
         # Description below emoji row
         if self.desc_label:
             self.desc_label.setGeometry(10, btn_height + 5, w - 20, desc_height)
@@ -1377,6 +1490,10 @@ class EnvironmentLauncher(QMainWindow):
         # Track active atmosphere sounds (URLs currently playing in atmosphere)
         self.active_atmosphere_urls: Set[str] = set()
         self.url_to_config: Dict[str, Dict[str, Any]] = {}  # URL -> config mapping
+
+        # Volume tracking for atmosphere sounds
+        self.atmosphere_volumes: Dict[str, int] = {}  # URL -> volume (10-100)
+        self.volume_sliders: Dict[str, 'VolumeSlider'] = {}  # URL -> slider widget
 
         # Store Spotify config manager for checking configuration
         self.spotify_config = SpotifyConfigManager()
@@ -2124,7 +2241,8 @@ engines:
         else:
             # Sound is not playing - fade it in and add to atmosphere
             atmosphere_engine = AtmosphereEngine()
-            if atmosphere_engine.start_single(sound_url, volume=100, fade_in=True):
+            volume = self.atmosphere_volumes.get(sound_url, 100)
+            if atmosphere_engine.start_single(sound_url, volume=volume, fade_in=True):
                 self.active_atmosphere_urls.add(sound_url)
                 if config_name in self.buttons:
                     self.buttons[config_name].setStyleSheet(self.ATMOSPHERE_ACTIVE_STYLE)
@@ -2139,6 +2257,21 @@ engines:
                 self.immersive_status.set_music(" + ".join(all_names), source="atmosphere")
             else:
                 self.immersive_status.set_message(f"Failed to add: {config_name}", timeout_ms=3000)
+
+    def _on_volume_changed(self, url: str, volume: int) -> None:
+        """Handle volume slider change - adjust volume via PulseAudio."""
+        from engines import AtmosphereEngine
+
+        self.atmosphere_volumes[url] = volume
+
+        # If sound is currently playing, adjust volume via PulseAudio
+        if url in self.active_atmosphere_urls:
+            atmosphere_engine = AtmosphereEngine()
+            # Try PulseAudio first (no audio interruption)
+            if not atmosphere_engine.set_volume(url, volume):
+                # Fallback: restart with new volume if pactl fails
+                atmosphere_engine.stop_single(url, fade_out=False)
+                atmosphere_engine.start_single(url, volume=volume, fade_in=False)
 
     def _create_ui(self) -> None:
         """Create the main UI layout with tabs on left side."""
@@ -2559,8 +2692,20 @@ engines:
         emoji_layout.addStretch()
         emoji_row.setLayout(emoji_layout)
 
+        # Create volume slider for loop buttons
+        volume_slider = None
+        if is_loop:
+            sound_url = config.get("engines", {}).get("sound", {}).get("file", "")
+            if sound_url:
+                initial_vol = self.atmosphere_volumes.get(sound_url, 100)
+                volume_slider = VolumeSlider(initial_vol)
+                volume_slider.volume_changed.connect(
+                    lambda vol, url=sound_url: self._on_volume_changed(url, vol)
+                )
+                self.volume_sliders[sound_url] = volume_slider
+
         # Create container that handles resizing with overlap
-        container = ButtonContainer(btn, emoji_row, shortcut_label, desc_label)
+        container = ButtonContainer(btn, emoji_row, shortcut_label, desc_label, volume_slider)
 
         return container, btn
 
@@ -2609,6 +2754,16 @@ engines:
             # Rebuild mapping to ensure all URLs are included
             # (handles case where configs existed but weren't in mapping)
             self._build_url_to_config_mapping()
+
+            # Set volumes from preset config and update sliders
+            for item in atmosphere_mix:
+                url = item.get("url", "")
+                vol = item.get("volume", 100)
+                if url:
+                    self.atmosphere_volumes[url] = vol
+                    # Update slider if it exists
+                    if url in self.volume_sliders:
+                        self.volume_sliders[url].set_volume(vol)
 
             self.active_atmosphere_urls = set(atmosphere_urls)
             self._update_atmosphere_buttons(atmosphere_urls, active=True)

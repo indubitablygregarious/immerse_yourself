@@ -394,3 +394,66 @@ class AtmosphereEngine:
             return True
         except Exception:
             return False
+
+    def set_volume(self, url: str, volume: int) -> bool:
+        """
+        Set volume for a currently playing sound using PulseAudio.
+
+        Args:
+            url: freesound.org URL or local file path
+            volume: 0-100
+
+        Returns:
+            True if volume was set, False if sound not playing or pactl failed
+        """
+        with _atmosphere_lock:
+            if url not in _url_to_process:
+                return False
+            proc = _url_to_process[url]
+            pid = proc.pid
+
+        # Use pactl to find and adjust the sink input for this PID
+        try:
+            # Get list of sink inputs
+            result = subprocess.run(
+                ["pactl", "list", "sink-inputs"],
+                capture_output=True,
+                text=True,
+                timeout=2
+            )
+            if result.returncode != 0:
+                return False
+
+            # Parse output to find sink input with matching PID
+            lines = result.stdout.split('\n')
+            current_sink_input = None
+            found_pid = False
+
+            for line in lines:
+                if line.startswith("Sink Input #"):
+                    current_sink_input = line.split("#")[1].strip()
+                    found_pid = False
+                elif "application.process.id" in line and current_sink_input:
+                    # Extract PID from line like: application.process.id = "12345"
+                    try:
+                        line_pid = int(line.split('"')[1])
+                        if line_pid == pid:
+                            found_pid = True
+                            break
+                    except (IndexError, ValueError):
+                        pass
+
+            if not found_pid or not current_sink_input:
+                return False
+
+            # Set volume (pactl uses percentage or absolute values)
+            # Convert 0-100 to percentage string
+            subprocess.run(
+                ["pactl", "set-sink-input-volume", current_sink_input, f"{volume}%"],
+                capture_output=True,
+                timeout=2
+            )
+            return True
+
+        except (subprocess.SubprocessError, FileNotFoundError):
+            return False

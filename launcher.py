@@ -758,6 +758,156 @@ class ButtonContainer(QWidget):
         super().resizeEvent(event)
 
 
+class NowPlayingWidget(QWidget):
+    """Widget showing current playing state with icon and label overlay."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedHeight(60)
+
+        # Horizontal layout: "now playing:" on left, then icon section on right
+        main_layout = QHBoxLayout(self)
+        main_layout.setContentsMargins(8, 2, 8, 2)
+        main_layout.setSpacing(6)
+
+        # "now playing:" label always visible on the left
+        self.title_label = QLabel("now playing:")
+        self.title_label.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
+        self.title_label.setStyleSheet("font-size: 15px; color: #888; margin-top: 18px;")
+        main_layout.addWidget(self.title_label)
+
+        # Right section: status label on top, icon below (fixed width to prevent bouncing)
+        icon_section = QWidget()
+        icon_section.setFixedWidth(100)
+        icon_layout = QVBoxLayout(icon_section)
+        icon_layout.setContentsMargins(0, 0, 0, 0)
+        icon_layout.setSpacing(0)
+
+        # Status label on top (describes current state)
+        self.status_label = QLabel("idle")
+        self.status_label.setAlignment(Qt.AlignCenter)
+        self.status_label.setStyleSheet("font-size: 9px; color: #666; font-weight: bold;")
+        icon_layout.addWidget(self.status_label)
+
+        # Icon display below (visual indicator)
+        self.icon_label = QLabel("⏸")
+        self.icon_label.setAlignment(Qt.AlignCenter)
+        self.icon_label.setStyleSheet("font-size: 24px;")
+        icon_layout.addWidget(self.icon_label)
+
+        main_layout.addWidget(icon_section)
+
+        # State tracking
+        self._current_state = "idle"  # idle, lights, sound, downloading
+        self._lights_icon = ""
+        self._lights_name = ""
+        self._sound_icon = "🔊"
+        self._download_icon = "⬇️"
+        self._idle_icon = "⏸"
+
+        # Pulse animation for download
+        self._pulse_timer = QTimer(self)
+        self._pulse_timer.timeout.connect(self._pulse_download)
+        self._pulse_opacity = 1.0
+        self._pulse_direction = -1
+        self._download_count = 0  # Track concurrent downloads
+
+        self.setStyleSheet("""
+            NowPlayingWidget {
+                background-color: rgba(100, 100, 100, 0.1);
+                border: 1px solid rgba(100, 100, 100, 0.3);
+                border-radius: 4px;
+            }
+        """)
+
+    def set_lights(self, icon: str, name: str = "") -> None:
+        """Set lights as active with the given icon."""
+        self._lights_icon = icon
+        self._lights_name = name if name else "lights"
+        if self._current_state != "sound" and self._current_state != "downloading":
+            self._current_state = "lights"
+            self._stop_pulse()
+            self.icon_label.setStyleSheet("font-size: 24px;")
+            self.icon_label.setText(icon)
+            self.status_label.setText(self._lights_name)
+
+    def set_sound(self, active: bool = True, icon: str = "", name: str = "") -> None:
+        """Set sound as active (temporarily shows sound icon)."""
+        if active:
+            self._current_state = "sound"
+            self._stop_pulse()
+            self.icon_label.setStyleSheet("font-size: 24px;")
+            self.icon_label.setText(icon if icon else self._sound_icon)
+            self.status_label.setText(name if name else "sound")
+        else:
+            # Sound finished, return to lights if we have it
+            if self._lights_icon:
+                self._current_state = "lights"
+                self.icon_label.setStyleSheet("font-size: 24px;")
+                self.icon_label.setText(self._lights_icon)
+                self.status_label.setText(self._lights_name)
+            else:
+                self._current_state = "idle"
+                self.icon_label.setStyleSheet("font-size: 24px;")
+                self.icon_label.setText(self._idle_icon)
+                self.status_label.setText("idle")
+
+    def set_downloading(self, active: bool = True) -> None:
+        """Show downloading state with pulsing icon. Uses counter for concurrent downloads."""
+        if active:
+            self._download_count += 1
+            if self._download_count == 1:
+                # First download starting - show pulsing icon
+                self._current_state = "downloading"
+                self.icon_label.setText(self._download_icon)
+                self.status_label.setText("downloading")
+                self._start_pulse()
+        else:
+            self._download_count = max(0, self._download_count - 1)
+            if self._download_count == 0:
+                # All downloads complete - return to previous state
+                self._stop_pulse()
+                self.icon_label.setStyleSheet("font-size: 24px;")
+                if self._lights_icon:
+                    self._current_state = "lights"
+                    self.icon_label.setText(self._lights_icon)
+                    self.status_label.setText(self._lights_name)
+                else:
+                    self._current_state = "idle"
+                    self.icon_label.setText(self._idle_icon)
+                    self.status_label.setText("idle")
+
+    def clear(self) -> None:
+        """Clear the now playing widget."""
+        self._current_state = "idle"
+        self._lights_icon = ""
+        self._lights_name = ""
+        self._download_count = 0
+        self._stop_pulse()
+        self.icon_label.setStyleSheet("font-size: 24px;")
+        self.icon_label.setText(self._idle_icon)
+        self.status_label.setText("idle")
+
+    def _start_pulse(self) -> None:
+        """Start the pulse animation."""
+        self._pulse_timer.start(50)
+
+    def _stop_pulse(self) -> None:
+        """Stop the pulse animation."""
+        self._pulse_timer.stop()
+        self._pulse_opacity = 1.0
+
+    def _pulse_download(self) -> None:
+        """Animate the download icon opacity."""
+        self._pulse_opacity += self._pulse_direction * 0.05
+        if self._pulse_opacity <= 0.3:
+            self._pulse_direction = 1
+        elif self._pulse_opacity >= 1.0:
+            self._pulse_direction = -1
+        opacity_int = int(self._pulse_opacity * 255)
+        self.icon_label.setStyleSheet(f"font-size: 28px; color: rgba(0, 150, 255, {opacity_int});")
+
+
 class FuzzySearchBar(QLineEdit):
     """Search bar with substring matching results list."""
 
@@ -879,9 +1029,12 @@ class EngineRunner(QThread):
 
     # Signals for ImmersiveStatusBar
     sound_started = pyqtSignal(str)   # sound filename
+    sound_done = pyqtSignal()         # sound playback finished (always emitted)
     music_started = pyqtSignal(str)   # playlist name
     atmosphere_started = pyqtSignal(str)  # atmosphere sound names
     lights_started = pyqtSignal(str)  # animation/config name
+    download_started = pyqtSignal(str)  # download title
+    download_finished = pyqtSignal()    # download complete
 
     def __init__(self, config: Dict[str, Any]):
         super().__init__()
@@ -945,9 +1098,29 @@ class EngineRunner(QThread):
                     atmosphere_engine = AtmosphereEngine()
                     mix = self.config["engines"]["atmosphere"]["mix"]
 
-                    # Get display names for status bar
+                    # Check for uncached files and emit download signals
+                    freesound = FreesoundManager()
+                    needs_download = False
+                    for sound_config in mix:
+                        url = sound_config.get("url", "")
+                        if is_freesound_url(url):
+                            creator, sound_id = freesound.parse_url(url)
+                            if not freesound._find_cached_file(creator, sound_id):
+                                needs_download = True
+                                break
+
+                    if needs_download:
+                        self.download_started.emit("atmosphere sounds")
+                        self.status_update.emit("Downloading atmosphere sounds...")
+                        # Small delay to ensure UI updates before blocking download
+                        QThread.msleep(50)
+
+                    # Get display names for status bar (this will download if needed)
                     display_names = atmosphere_engine.get_display_names(mix)
                     combined_name = " + ".join(display_names)
+
+                    if needs_download:
+                        self.download_finished.emit()
 
                     # Start playback
                     if atmosphere_engine.play_mix(mix):
@@ -956,6 +1129,7 @@ class EngineRunner(QThread):
                     else:
                         self.error_occurred.emit("Failed to start atmosphere (ffplay required)")
                 except Exception as e:
+                    self.download_finished.emit()  # Clear download state on error
                     self.error_occurred.emit(f"Atmosphere error: {str(e)}")
 
             # Lights engine (asynchronous, continuous)
@@ -982,11 +1156,33 @@ class EngineRunner(QThread):
             if is_freesound_url(sound_file):
                 try:
                     freesound = FreesoundManager()
+
+                    # Check if we need to download (not cached)
+                    creator, sound_id = freesound.parse_url(sound_file)
+                    cached = freesound._find_cached_file(creator, sound_id)
+
+                    if not cached:
+                        # Need to download - emit signal
+                        sound_name = freesound._fetch_sound_name(sound_file)
+                        self.download_started.emit(sound_name.replace('_', ' '))
+                        self.status_update.emit(f"Downloading sound: {sound_name.replace('_', ' ')}")
+                        # Small delay to ensure UI updates before blocking download
+                        import time
+                        time.sleep(0.05)
+
                     local_path, metadata = freesound.get_sound(sound_file)
+
+                    if not cached:
+                        # Download finished
+                        self.download_finished.emit()
+                        # Auto-create YAML config for this freesound
+                        self._auto_create_freesound_config(sound_file, metadata)
+
                     # Sound name from title already includes "by creator"
                     sound_display = metadata["sound_name"].replace('_', ' ')
                     sound_file = str(local_path)
                 except Exception as e:
+                    self.download_finished.emit()  # Clear download state on error
                     self.error_occurred.emit(f"Freesound error: {str(e)}")
                     return
             else:
@@ -1019,11 +1215,63 @@ class EngineRunner(QThread):
                     except FileNotFoundError:
                         continue
 
-            # Signal completion for sound-only configs
+            # Always signal when sound playback finishes
+            self.sound_done.emit()
+
+            # Signal completion for sound-only configs (keeps existing behavior)
             if not self.has_lights and sound_enabled:
                 self._on_sound_complete()
         except Exception as e:
+            self.sound_done.emit()  # Clear sound state on error
             self.error_occurred.emit(f"Sound error: {str(e)}")
+
+    def _auto_create_freesound_config(self, url: str, metadata: Dict[str, str]) -> None:
+        """Auto-create a YAML config for a new freesound download."""
+        try:
+            sound_name = metadata.get("sound_name", "Unknown")
+            creator = metadata.get("creator", "Unknown")
+            sound_id = metadata.get("sound_id", "0")
+
+            # Create a safe filename
+            safe_name = sound_name.lower().replace(' ', '_').replace('-', '_')
+            safe_name = ''.join(c for c in safe_name if c.isalnum() or c == '_')
+            config_filename = f"freesound_{safe_name}_{sound_id}.yaml"
+            config_path = Path("env_conf") / config_filename
+
+            # Check if config already exists
+            if config_path.exists():
+                return
+
+            # Create the config content
+            display_name = sound_name.replace('_', ' ')
+            config_content = f'''name: "{display_name}"
+category: "freesound"
+description: "Freesound by {creator}"
+icon: "🔊"
+
+metadata:
+  tags: ["freesound", "downloaded", "{creator}"]
+  intensity: "low"
+  suitable_for: ["ambient", "sound effect"]
+
+engines:
+  sound:
+    enabled: true
+    file: "{url}"
+
+  spotify:
+    enabled: false
+
+  lights:
+    enabled: false
+'''
+            # Write the config file
+            with open(config_path, 'w') as f:
+                f.write(config_content)
+
+        except Exception as e:
+            # Don't fail the main operation if auto-config fails
+            print(f"Warning: Failed to auto-create freesound config: {e}")
 
     def _on_sound_complete(self):
         """Called when sound-only playback completes."""
@@ -1085,11 +1333,25 @@ class EnvironmentLauncher(QMainWindow):
     DESC_STYLE = "font-size: 11px; color: #666; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px; background-color: #fafafa;"
     DESC_STYLE_DARK = "font-size: 11px; color: #aaa; padding: 2px 4px; border: 1px solid #555; border-radius: 3px; background-color: #2a2a2a;"
 
+    # Global tooltip style for readability in both light and dark modes
+    TOOLTIP_STYLE = """
+        QToolTip {
+            background-color: #ffffcc;
+            color: #333333;
+            border: 1px solid #666666;
+            padding: 4px;
+            font-family: monospace;
+        }
+    """
+
     def __init__(self, settings_manager: SettingsManager):
         super().__init__()
         self.settings_manager = settings_manager
         self.setWindowTitle("Immerse Yourself - Environment Launcher")
         self.setGeometry(100, 100, 1000, 600)
+
+        # Apply tooltip style globally to all child widgets
+        self.setStyleSheet(self.TOOLTIP_STYLE)
 
         # Detect dark mode based on settings
         self.is_dark_mode = self._is_dark_mode_enabled()
@@ -1641,7 +1903,7 @@ class EnvironmentLauncher(QMainWindow):
 
         # Sort categories
         sorted_organized = {}
-        for category in ["combat", "social", "exploration", "relaxation", "special", "hidden"]:
+        for category in ["combat", "social", "exploration", "relaxation", "special", "hidden", "freesound"]:
             if category in organized:
                 # Sort configs within category by name
                 sorted_organized[category] = sorted(
@@ -1660,7 +1922,7 @@ class EnvironmentLauncher(QMainWindow):
 
         # Search bar at top (fixed height container)
         search_container = QWidget()
-        search_container.setFixedHeight(40)
+        search_container.setFixedHeight(65)
         search_layout = QHBoxLayout(search_container)
         search_layout.setContentsMargins(0, 0, 0, 0)
         self.search_bar = FuzzySearchBar(self.configs)
@@ -1696,6 +1958,11 @@ class EnvironmentLauncher(QMainWindow):
         search_layout.addWidget(search_label)
         search_layout.addWidget(self.search_bar)
         search_layout.addStretch()
+
+        # Now Playing widget on the right
+        self.now_playing = NowPlayingWidget()
+        search_layout.addWidget(self.now_playing)
+
         main_layout.addWidget(search_container)
 
         # Create splitter for left tabs and right content
@@ -2073,6 +2340,9 @@ class EnvironmentLauncher(QMainWindow):
             # Also stop any previous atmosphere
             stop_all_atmosphere()
 
+        # Get the icon for this config (for NowPlayingWidget)
+        config_icon = config.get("icon", "💡")
+
         # Create and start runner
         try:
             runner = EngineRunner(config)
@@ -2083,9 +2353,18 @@ class EnvironmentLauncher(QMainWindow):
             runner.spotify_no_device.connect(self._handle_spotify_no_device)
             # Connect to immersive status bar
             runner.sound_started.connect(self.immersive_status.on_sound_started)
+            runner.sound_done.connect(self.immersive_status.on_sound_finished)
             runner.music_started.connect(self.immersive_status.on_music_started)
             runner.atmosphere_started.connect(self.immersive_status.on_atmosphere_started)
             runner.lights_started.connect(self.immersive_status.on_lights_started)
+            # Connect to NowPlayingWidget
+            runner.download_started.connect(lambda _: self.now_playing.set_downloading(True))
+            runner.download_finished.connect(lambda: self.now_playing.set_downloading(False))
+            config_name = config["name"]
+            runner.sound_started.connect(lambda _, icon=config_icon, name=config_name: self.now_playing.set_sound(True, icon, name))
+            runner.sound_done.connect(lambda: self.now_playing.set_sound(False))
+            if has_lights:
+                runner.lights_started.connect(lambda _, icon=config_icon, name=config_name: self.now_playing.set_lights(icon, name))
             runner.start()
 
             self.current_runner = runner
@@ -2110,7 +2389,7 @@ class EnvironmentLauncher(QMainWindow):
             self.immersive_status.set_message("Error starting environment", timeout_ms=5000)
 
     def _stop_lights(self) -> None:
-        """Stop the currently running lights."""
+        """Stop the currently running lights and set bulbs to warm white."""
         if self.lights_runner is not None:
             old_runner = self.lights_runner
             old_runner.stop()
@@ -2120,6 +2399,38 @@ class EnvironmentLauncher(QMainWindow):
             self.lights_runner = None
             self.lights_config_name = None
             self.immersive_status.clear_lights()
+            self.now_playing.clear()
+
+        # Set all lights to warm white
+        self._set_lights_warm_white()
+
+    def _set_lights_warm_white(self) -> None:
+        """Set all configured lights to soft warm white at full brightness."""
+        import asyncio
+        from pywizlight import wizlight, PilotBuilder
+
+        wizbulb_config = WizBulbConfigManager()
+        if wizbulb_config.is_configured():
+            all_ips = []
+            for group in ["backdrop_bulbs", "overhead_bulbs", "battlefield_bulbs"]:
+                ips = wizbulb_config.get(group, "").split()
+                all_ips.extend([ip.strip() for ip in ips if ip.strip()])
+
+            if all_ips:
+                async def set_lights_soft_white():
+                    # Soft warm white at max brightness: ~2700K equivalent
+                    pilot = PilotBuilder(rgb=(255, 244, 229), brightness=255)
+                    for ip in all_ips:
+                        try:
+                            bulb = wizlight(ip)
+                            await bulb.turn_on(pilot)
+                        except:
+                            pass  # Ignore unreachable bulbs
+
+                try:
+                    asyncio.run(set_lights_soft_white())
+                except:
+                    pass
 
     def _stop_current(self) -> None:
         """Stop all running environments (lights)."""
@@ -2128,6 +2439,7 @@ class EnvironmentLauncher(QMainWindow):
         self.current_config_name = None
         self._reset_button_styles()
         self.stop_button.setEnabled(False)
+        self.now_playing.clear()
 
     def _stop_sounds(self) -> None:
         """Stop all playing sound effects."""
@@ -2249,8 +2561,8 @@ class EnvironmentLauncher(QMainWindow):
 
     def _on_status_update(self, status: str) -> None:
         """Handle status update from engine runner."""
-        # Legacy handler - status updates now go through immersive_status signals
-        pass
+        # Show status message temporarily (auto-clears after 3 seconds)
+        self.immersive_status.set_message(status, timeout_ms=3000)
 
     def _on_sound_finished(self, sound_name: str) -> None:
         """Handle sound-only config finishing."""
@@ -2318,9 +2630,6 @@ class EnvironmentLauncher(QMainWindow):
 
     def _cleanup_on_exit(self) -> None:
         """Cleanup actions when exiting the app."""
-        import asyncio
-        from pywizlight import wizlight, PilotBuilder
-
         # Stop Spotify playback
         try:
             engine = SpotifyEngine()
@@ -2329,29 +2638,14 @@ class EnvironmentLauncher(QMainWindow):
         except:
             pass  # Spotify may not be configured
 
+        # Stop atmosphere sounds
+        try:
+            stop_all_atmosphere(fade_out=False)  # No fade on exit, just stop
+        except:
+            pass
+
         # Set all lights to soft white
-        wizbulb_config = WizBulbConfigManager()
-        if wizbulb_config.is_configured():
-            all_ips = []
-            for group in ["backdrop_bulbs", "overhead_bulbs", "battlefield_bulbs"]:
-                ips = wizbulb_config.get(group, "").split()
-                all_ips.extend([ip.strip() for ip in ips if ip.strip()])
-
-            if all_ips:
-                async def set_lights_soft_white():
-                    # Soft warm white at max brightness: ~2700K equivalent
-                    pilot = PilotBuilder(rgb=(255, 244, 229), brightness=255)
-                    for ip in all_ips:
-                        try:
-                            bulb = wizlight(ip)
-                            await bulb.turn_on(pilot)
-                        except:
-                            pass  # Ignore unreachable bulbs
-
-                try:
-                    asyncio.run(set_lights_soft_white())
-                except:
-                    pass
+        self._set_lights_warm_white()
 
 
 def detect_system_dark_mode() -> bool:

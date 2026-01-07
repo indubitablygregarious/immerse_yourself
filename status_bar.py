@@ -37,6 +37,8 @@ class ImmersiveStatusBar(QWidget):
         # Internal state
         self._sound: Optional[str] = None
         self._music: Optional[str] = None
+        self._music_source: str = "spotify"  # "spotify" or "atmosphere"
+        self._music_raw: Optional[str] = None  # Raw name for tooltip
         self._lights: Optional[str] = None
         self._temp_message: Optional[str] = None
 
@@ -63,6 +65,7 @@ class ImmersiveStatusBar(QWidget):
         if self._temp_message:
             self._status_bar.showMessage(self._temp_message)
             self.status_changed.emit(self._temp_message)
+            self._update_tooltip()
             return
 
         # Build sections
@@ -85,6 +88,46 @@ class ImmersiveStatusBar(QWidget):
 
         self._status_bar.showMessage(status)
         self.status_changed.emit(status)
+        self._update_tooltip()
+
+    def _update_tooltip(self) -> None:
+        """Update the tooltip with detailed multi-line status information."""
+        lines = []
+
+        # Sound section
+        lines.append("═══ Sound ═══")
+        if self._sound:
+            lines.append(f"  🔊 {self._sound}")
+        else:
+            lines.append("  (not playing)")
+        lines.append("")
+
+        # Music/Atmosphere section
+        if self._music_source == "atmosphere":
+            lines.append("═══ Atmosphere ═══")
+            if self._music_raw:
+                # Split by " + " to show each sound on its own line
+                sounds = self._music_raw.split(" + ")
+                for sound in sounds:
+                    lines.append(f"  🌊 {sound}")
+            else:
+                lines.append("  (not playing)")
+        else:
+            lines.append("═══ Music ═══")
+            if self._music_raw:
+                lines.append(f"  🎵 {self._music_raw}")
+            else:
+                lines.append("  (not playing)")
+        lines.append("")
+
+        # Lights section
+        lines.append("═══ Lights ═══")
+        if self._lights:
+            lines.append(f"  💡 {self._lights}")
+        else:
+            lines.append("  (not active)")
+
+        self._status_bar.setToolTip("\n".join(lines))
 
     # --- Setters ---
 
@@ -105,6 +148,8 @@ class ImmersiveStatusBar(QWidget):
             name: Playlist name or sound names (joined with " + " for atmosphere)
             source: "spotify" or "atmosphere" - affects display prefix
         """
+        self._music_source = source
+        self._music_raw = name
         if name:
             if source == "atmosphere":
                 self._music = f"Atmosphere: {name}"
@@ -145,6 +190,7 @@ class ImmersiveStatusBar(QWidget):
     def clear_music(self) -> None:
         """Clear music status."""
         self._music = None
+        self._music_raw = None
         self._update_display()
 
     def clear_lights(self) -> None:
@@ -163,6 +209,7 @@ class ImmersiveStatusBar(QWidget):
         self._temp_timer.stop()
         self._sound = None
         self._music = None
+        self._music_raw = None
         self._lights = None
         self._temp_message = None
         self._update_display()

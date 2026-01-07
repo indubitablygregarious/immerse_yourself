@@ -4,6 +4,9 @@ settings.ini
 .wizbulb*
 .cache
 
+# Freesound.org cached downloads
+freesound.org/
+
 # Audio files (not royalty-free, avoid copyright issues)
 *.mp3
 *.wav

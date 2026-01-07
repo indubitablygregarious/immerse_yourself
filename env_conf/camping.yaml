@@ -14,8 +14,18 @@ engines:
     file: "sounds/dig.wav"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:37i9dQZF1DXaa8UmWJHYTU"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:37i9dQZF1DXaa8UmWJHYTU"
+    mix:
+      - url: "https://freesound.org/people/RyanKingArt/sounds/746365/"
+        volume: 100
+      - url: "https://freesound.org/people/klankbeeld/sounds/702233/"
+        volume: 100
+      - url: "https://freesound.org/people/WaveAdventurer/sounds/702240/"
+        volume: 70
 
   lights:
     enabled: true

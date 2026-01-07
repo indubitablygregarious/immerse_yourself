@@ -145,6 +145,18 @@ class ConfigLoader:
         if "lights" in engines:
             self._validate_lights_engine(engines["lights"])
 
+        # Validate atmosphere engine
+        if "atmosphere" in engines:
+            self._validate_atmosphere_engine(engines["atmosphere"])
+
+        # Check mutual exclusivity: can't have both spotify and atmosphere enabled
+        spotify_enabled = engines.get("spotify", {}).get("enabled", False)
+        atmosphere_enabled = engines.get("atmosphere", {}).get("enabled", False)
+        if spotify_enabled and atmosphere_enabled:
+            raise ConfigValidationError(
+                "Cannot enable both spotify and atmosphere engines. Choose one."
+            )
+
     def _validate_sound_engine(self, sound_config: Dict[str, Any]) -> None:
         """Validate sound engine configuration."""
         if not isinstance(sound_config, dict):
@@ -205,6 +217,69 @@ class ConfigLoader:
                     f"engines.spotify.context_uri must start with 'spotify:'\n"
                     f"Got: {uri}"
                 )
+
+    def _validate_atmosphere_engine(self, atmosphere_config: Dict[str, Any]) -> None:
+        """Validate atmosphere engine configuration."""
+        if not isinstance(atmosphere_config, dict):
+            raise ConfigValidationError(
+                "engines.atmosphere must be a dictionary"
+            )
+
+        if "enabled" not in atmosphere_config:
+            raise ConfigValidationError(
+                "engines.atmosphere.enabled is required"
+            )
+
+        if not isinstance(atmosphere_config["enabled"], bool):
+            raise ConfigValidationError(
+                "engines.atmosphere.enabled must be a boolean"
+            )
+
+        if atmosphere_config["enabled"]:
+            if "mix" not in atmosphere_config:
+                raise ConfigValidationError(
+                    "engines.atmosphere.mix is required when enabled=true"
+                )
+
+            mix = atmosphere_config["mix"]
+            if not isinstance(mix, list):
+                raise ConfigValidationError(
+                    "engines.atmosphere.mix must be a list"
+                )
+
+            if len(mix) == 0:
+                raise ConfigValidationError(
+                    "engines.atmosphere.mix must contain at least one sound"
+                )
+
+            # Validate each sound in the mix
+            for i, sound in enumerate(mix):
+                if not isinstance(sound, dict):
+                    raise ConfigValidationError(
+                        f"engines.atmosphere.mix[{i}] must be a dictionary"
+                    )
+
+                if "url" not in sound:
+                    raise ConfigValidationError(
+                        f"engines.atmosphere.mix[{i}].url is required"
+                    )
+
+                if not isinstance(sound["url"], str):
+                    raise ConfigValidationError(
+                        f"engines.atmosphere.mix[{i}].url must be a string"
+                    )
+
+                # Validate volume if present (optional, defaults to 100)
+                if "volume" in sound:
+                    vol = sound["volume"]
+                    if not isinstance(vol, (int, float)):
+                        raise ConfigValidationError(
+                            f"engines.atmosphere.mix[{i}].volume must be a number"
+                        )
+                    if vol < 0 or vol > 100:
+                        raise ConfigValidationError(
+                            f"engines.atmosphere.mix[{i}].volume must be 0-100"
+                        )
 
     def _validate_lights_engine(self, lights_config: Dict[str, Any]) -> None:
         """Validate lights engine configuration."""

@@ -33,6 +33,29 @@ def stop_all_sounds() -> int:
     return stopped
 
 
+def register_sound_process(proc: subprocess.Popen) -> None:
+    """
+    Register a sound process for tracking (so it can be stopped later).
+
+    Args:
+        proc: The subprocess.Popen object to track
+    """
+    with _process_lock:
+        _active_sound_processes.append(proc)
+
+
+def unregister_sound_process(proc: subprocess.Popen) -> None:
+    """
+    Unregister a sound process when it finishes.
+
+    Args:
+        proc: The subprocess.Popen object to remove
+    """
+    with _process_lock:
+        if proc in _active_sound_processes:
+            _active_sound_processes.remove(proc)
+
+
 class SoundEngine:
     """
     Manages sound effect playback with error tolerance.

@@ -97,9 +97,21 @@ class ImmersiveStatusBar(QWidget):
             self._sound = None
         self._update_display()
 
-    def set_music(self, playlist_name: Optional[str]) -> None:
-        """Set current music/Spotify status. Pass None to clear."""
-        self._music = playlist_name if playlist_name else None
+    def set_music(self, name: Optional[str], source: str = "spotify") -> None:
+        """
+        Set current music status. Pass None to clear.
+
+        Args:
+            name: Playlist name or sound names (joined with " + " for atmosphere)
+            source: "spotify" or "atmosphere" - affects display prefix
+        """
+        if name:
+            if source == "atmosphere":
+                self._music = f"Atmosphere: {name}"
+            else:
+                self._music = f"Spotify: {name}"
+        else:
+            self._music = None
         self._update_display()
 
     def set_lights(self, animation_name: Optional[str]) -> None:
@@ -193,11 +205,16 @@ class ImmersiveStatusBar(QWidget):
     @pyqtSlot(str)
     def on_music_started(self, playlist_name: str) -> None:
         """Slot: Spotify playback started."""
-        self.set_music(playlist_name)
+        self.set_music(playlist_name, source="spotify")
+
+    @pyqtSlot(str)
+    def on_atmosphere_started(self, sound_names: str) -> None:
+        """Slot: Atmosphere playback started."""
+        self.set_music(sound_names, source="atmosphere")
 
     @pyqtSlot()
     def on_music_stopped(self) -> None:
-        """Slot: Spotify playback stopped."""
+        """Slot: Spotify/Atmosphere playback stopped."""
         self.clear_music()
 
     @pyqtSlot(str)

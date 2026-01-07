@@ -8,6 +8,7 @@ import sys
 import asyncio
 import threading
 import random
+import subprocess
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 from collections import defaultdict
@@ -25,6 +26,7 @@ from PyQt5.QtGui import QKeySequence, QPalette, QColor, QPainter, QPen, QFont, Q
 
 from config_loader import ConfigLoader
 from status_bar import ImmersiveStatusBar
+from freesound_manager import FreesoundManager, is_freesound_url
 import configparser
 
 
@@ -625,6 +627,8 @@ class SettingsDialog(QDialog):
 
 from engines import (
     SoundEngine, SpotifyEngine, LightsEngine, stop_all_sounds,
+    register_sound_process, unregister_sound_process,
+    AtmosphereEngine, stop_all_atmosphere,
     SpotifyNoActiveDeviceError, is_spotify_running, is_spotify_in_path,
     start_spotify, wait_for_spotify_device
 )
@@ -876,6 +880,7 @@ class EngineRunner(QThread):
     # Signals for ImmersiveStatusBar
     sound_started = pyqtSignal(str)   # sound filename
     music_started = pyqtSignal(str)   # playlist name
+    atmosphere_started = pyqtSignal(str)  # atmosphere sound names
     lights_started = pyqtSignal(str)  # animation/config name
 
     def __init__(self, config: Dict[str, Any]):
@@ -884,6 +889,7 @@ class EngineRunner(QThread):
         self.lights_engine: Optional[LightsEngine] = None
         self.running = False
         self.has_lights = config["engines"]["lights"]["enabled"]
+        self.has_atmosphere = config["engines"].get("atmosphere", {}).get("enabled", False)
         self._sound_done_event = threading.Event()
 
     def run(self):
@@ -892,31 +898,31 @@ class EngineRunner(QThread):
             self.running = True
 
             # Sound engine (non-blocking, fire and forget)
-            # Default transition sound for environments with lights or spotify
-            DEFAULT_SOUND = "sounds/chill.wav"
+            # Default transition sound for environments with lights, spotify, or atmosphere
+            DEFAULT_SOUND = "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
             has_spotify = self.config["engines"]["spotify"]["enabled"]
+            has_atmosphere = self.config["engines"].get("atmosphere", {}).get("enabled", False)
             sound_enabled = self.config["engines"]["sound"]["enabled"]
 
             if sound_enabled:
                 sound_file = self.config["engines"]["sound"].get("file", DEFAULT_SOUND)
-            elif self.has_lights or has_spotify:
-                # Play default transition sound for lights/spotify environments without explicit sound
+            elif self.has_lights or has_spotify or has_atmosphere:
+                # Play default transition sound for lights/spotify/atmosphere environments without explicit sound
                 sound_file = DEFAULT_SOUND
             else:
                 sound_file = None
 
+            # Start sound in a separate thread so it doesn't block Spotify/lights
             if sound_file:
-                self.status_update.emit(f"Playing sound: {sound_file}")
-                self.sound_started.emit(sound_file)
-                sound_engine = SoundEngine()
-                # For sound-only configs, use callback to signal when done
-                if not self.has_lights and sound_enabled:
-                    sound_engine.play_async(sound_file, on_complete=self._on_sound_complete)
-                else:
-                    sound_engine.play_async(sound_file)
+                sound_thread = threading.Thread(
+                    target=self._play_sound_async,
+                    args=(sound_file, sound_enabled),
+                    daemon=True
+                )
+                sound_thread.start()
 
-            # Spotify engine (synchronous)
+            # Spotify engine (synchronous) - only if atmosphere is not enabled
             if self.config["engines"]["spotify"]["enabled"]:
                 context_uri = self.config["engines"]["spotify"]["context_uri"]
                 self.status_update.emit(f"Starting Spotify...")
@@ -931,6 +937,26 @@ class EngineRunner(QThread):
                     self.spotify_no_device.emit()
                 except Exception as e:
                     self.error_occurred.emit(f"Spotify error: {str(e)}")
+
+            # Atmosphere engine (alternative to Spotify - looping ambient sounds)
+            if has_atmosphere:
+                self.status_update.emit("Starting atmosphere...")
+                try:
+                    atmosphere_engine = AtmosphereEngine()
+                    mix = self.config["engines"]["atmosphere"]["mix"]
+
+                    # Get display names for status bar
+                    display_names = atmosphere_engine.get_display_names(mix)
+                    combined_name = " + ".join(display_names)
+
+                    # Start playback
+                    if atmosphere_engine.play_mix(mix):
+                        self.status_update.emit("Atmosphere playing")
+                        self.atmosphere_started.emit(combined_name)
+                    else:
+                        self.error_occurred.emit("Failed to start atmosphere (ffplay required)")
+                except Exception as e:
+                    self.error_occurred.emit(f"Atmosphere error: {str(e)}")
 
             # Lights engine (asynchronous, continuous)
             if self.config["engines"]["lights"]["enabled"]:
@@ -948,6 +974,56 @@ class EngineRunner(QThread):
             self.error_occurred.emit(f"Engine error: {str(e)}")
         finally:
             self.running = False
+
+    def _play_sound_async(self, sound_file: str, sound_enabled: bool) -> None:
+        """Handle sound download and playback in a separate thread."""
+        try:
+            # Check if this is a freesound.org URL
+            if is_freesound_url(sound_file):
+                try:
+                    freesound = FreesoundManager()
+                    local_path, metadata = freesound.get_sound(sound_file)
+                    # Sound name from title already includes "by creator"
+                    sound_display = metadata["sound_name"].replace('_', ' ')
+                    sound_file = str(local_path)
+                except Exception as e:
+                    self.error_occurred.emit(f"Freesound error: {str(e)}")
+                    return
+            else:
+                sound_display = sound_file
+
+            self.status_update.emit(f"Playing sound: {sound_display}")
+            self.sound_started.emit(sound_display)
+
+            # Play sound directly (we're already in a thread)
+            # Use subprocess for stoppable playback
+            sound_path = Path(sound_file)
+            if not sound_path.is_absolute():
+                sound_path = Path.cwd() / sound_file
+
+            if sound_path.exists():
+                # Try common audio players
+                for player in [["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet"], ["paplay"], ["aplay", "-q"]]:
+                    try:
+                        proc = subprocess.Popen(
+                            player + [str(sound_path)],
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL
+                        )
+                        # Register process so it can be stopped
+                        register_sound_process(proc)
+                        proc.wait()
+                        # Unregister when done
+                        unregister_sound_process(proc)
+                        break
+                    except FileNotFoundError:
+                        continue
+
+            # Signal completion for sound-only configs
+            if not self.has_lights and sound_enabled:
+                self._on_sound_complete()
+        except Exception as e:
+            self.error_occurred.emit(f"Sound error: {str(e)}")
 
     def _on_sound_complete(self):
         """Called when sound-only playback completes."""
@@ -1755,15 +1831,15 @@ class EnvironmentLauncher(QMainWindow):
 
         control_layout.addWidget(stop_sound_container)
 
-        # Stop Spotify button
-        self.stop_spotify_button = QPushButton("STOP SPOTIFY")
-        self.stop_spotify_button.setMinimumHeight(40)
-        self.stop_spotify_button.setStyleSheet(
+        # Stop Atmosphere button (stops both Spotify and atmosphere sounds)
+        self.stop_atmosphere_button = QPushButton("STOP ATMOSPHERE")
+        self.stop_atmosphere_button.setMinimumHeight(40)
+        self.stop_atmosphere_button.setStyleSheet(
             "background-color: #1DB954; color: white; font-weight: bold; font-size: 12px;"
         )
-        self.stop_spotify_button.clicked.connect(self._stop_spotify)
-        self.stop_spotify_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        control_layout.addWidget(self.stop_spotify_button)
+        self.stop_atmosphere_button.clicked.connect(self._stop_atmosphere_and_spotify)
+        self.stop_atmosphere_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        control_layout.addWidget(self.stop_atmosphere_button)
 
         # Equal width for all three stop buttons
         control_layout.setStretch(0, 1)
@@ -1878,6 +1954,7 @@ class EnvironmentLauncher(QMainWindow):
         # Determine which engines are enabled
         sound_enabled = config.get("engines", {}).get("sound", {}).get("enabled", False)
         spotify_enabled = config.get("engines", {}).get("spotify", {}).get("enabled", False)
+        atmosphere_enabled = config.get("engines", {}).get("atmosphere", {}).get("enabled", False)
         lights_enabled = config.get("engines", {}).get("lights", {}).get("enabled", False)
 
         # Get optional icon emoji from config
@@ -1917,7 +1994,7 @@ class EnvironmentLauncher(QMainWindow):
         emoji_layout.addStretch()
 
         # Pastel colors for each indicator
-        is_sound_only = sound_enabled and not spotify_enabled and not lights_enabled
+        is_sound_only = sound_enabled and not spotify_enabled and not atmosphere_enabled and not lights_enabled
 
         if sound_enabled:
             sound_emoji = "📢" if is_sound_only else "🔊"
@@ -1937,6 +2014,15 @@ class EnvironmentLauncher(QMainWindow):
             )
             spotify_label.setAlignment(Qt.AlignCenter)
             emoji_layout.addWidget(spotify_label)
+
+        if atmosphere_enabled:
+            atmosphere_label = QLabel("🌊")
+            atmosphere_label.setFixedHeight(18)
+            atmosphere_label.setStyleSheet(
+                "background-color: #B4E8F0; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px; color: black;"
+            )
+            atmosphere_label.setAlignment(Qt.AlignCenter)
+            emoji_layout.addWidget(atmosphere_label)
 
         if lights_enabled:
             lights_label = QLabel("💡")
@@ -1961,10 +2047,31 @@ class EnvironmentLauncher(QMainWindow):
         self._pending_search_button = None
 
         has_lights = config["engines"]["lights"]["enabled"]
+        has_spotify = config["engines"].get("spotify", {}).get("enabled", False)
+        has_atmosphere = config["engines"].get("atmosphere", {}).get("enabled", False)
 
         # Only stop lights runner if new config has lights
         if has_lights and self.lights_runner is not None:
             self._stop_lights()
+
+        # Stop any currently playing sounds when starting an environment with lights
+        if has_lights:
+            stop_all_sounds()
+            self.immersive_status.clear_sound()
+
+        # Handle atmosphere/spotify switching
+        # Stop atmosphere when switching to a Spotify environment
+        if has_spotify:
+            stop_all_atmosphere()
+
+        # Stop Spotify when switching to an atmosphere environment
+        if has_atmosphere:
+            try:
+                SpotifyEngine().stop()
+            except Exception:
+                pass  # Spotify may not be configured
+            # Also stop any previous atmosphere
+            stop_all_atmosphere()
 
         # Create and start runner
         try:
@@ -1977,6 +2084,7 @@ class EnvironmentLauncher(QMainWindow):
             # Connect to immersive status bar
             runner.sound_started.connect(self.immersive_status.on_sound_started)
             runner.music_started.connect(self.immersive_status.on_music_started)
+            runner.atmosphere_started.connect(self.immersive_status.on_atmosphere_started)
             runner.lights_started.connect(self.immersive_status.on_lights_started)
             runner.start()
 
@@ -2030,17 +2138,28 @@ class EnvironmentLauncher(QMainWindow):
         else:
             self.immersive_status.set_message("No sounds playing", timeout_ms=3000)
 
-    def _stop_spotify(self) -> None:
-        """Stop Spotify playback."""
+    def _stop_atmosphere_and_spotify(self) -> None:
+        """Stop both Spotify and atmosphere playback."""
+        stopped_any = False
+
+        # Stop atmosphere sounds
+        atmosphere_stopped = stop_all_atmosphere()
+        if atmosphere_stopped > 0:
+            stopped_any = True
+
+        # Stop Spotify
         try:
             spotify_engine = SpotifyEngine()
             if spotify_engine.stop():
-                self.immersive_status.clear_music()
-                self.immersive_status.set_message("Spotify playback stopped", timeout_ms=3000)
-            else:
-                self.immersive_status.set_message("Could not stop Spotify", timeout_ms=3000)
-        except Exception as e:
-            self.immersive_status.set_message(f"Spotify error: {str(e)}", timeout_ms=5000)
+                stopped_any = True
+        except Exception:
+            pass  # Spotify may not be configured
+
+        self.immersive_status.clear_music()
+        if stopped_any:
+            self.immersive_status.set_message("Atmosphere stopped", timeout_ms=3000)
+        else:
+            self.immersive_status.set_message("No atmosphere playing", timeout_ms=3000)
 
     def _focus_search(self) -> None:
         """Focus the search bar."""

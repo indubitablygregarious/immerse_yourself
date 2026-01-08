@@ -1,0 +1,75 @@
+name: "Swamp Morning"
+category: "forest"
+description: "Misty morning swamp with waking birds and lingering fog"
+icon: "🐸"
+
+metadata:
+  tags: ["outdoor", "swamp", "marsh", "morning", "mist", "birds"]
+  intensity: "low"
+  suitable_for: ["swamp travel", "exploration", "morning hunt", "fishing"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Morning marsh birds
+      - url: "https://freesound.org/people/klankbeeld/sounds/625333/"
+        volume: 60
+
+      # Light water sounds
+      - url: "https://freesound.org/people/Didi0508/sounds/541955/"
+        volume: 50
+
+      # Distant frogs (fewer in morning)
+      - url: "https://freesound.org/people/felix.blume/sounds/673259/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Rustling reeds
+      - url: "https://freesound.org/people/arpeggio1980/sounds/523389/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [120, 140, 100]  # Pale misty green
+            variance: [20, 25, 18]
+          brightness:
+            min: 100
+            max: 170
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [150, 160, 140]  # Foggy morning sky
+            variance: [25, 28, 22]
+          brightness:
+            min: 130
+            max: 200
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [70, 90, 60]  # Damp swamp floor
+            variance: [15, 18, 14]
+          brightness:
+            min: 70
+            max: 130

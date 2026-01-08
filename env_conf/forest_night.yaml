@@ -1,0 +1,87 @@
+name: "Forest Night"
+category: "forest"
+description: "Dark forest at night with owls, crickets, and mysterious shadows"
+icon: "🌲"
+
+metadata:
+  tags: ["forest", "woods", "nature", "outdoor", "night", "dark", "mysterious"]
+  intensity: "medium"
+  suitable_for: ["night travel", "woodland mystery", "ambush setup", "nocturnal creatures"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Night crickets (required)
+      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+        volume: 65
+
+      # Owl hooting (required)
+      - url: "https://freesound.org/people/Anthousai/sounds/398734/"
+        volume: 50
+
+      # Night frogs (optional)
+      - url: "https://freesound.org/people/klankbeeld/sounds/673259/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+      # Wind through trees at night (optional)
+      - url: "https://freesound.org/people/arpeggio1980/sounds/523389/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+      # Wolf howl distant (optional)
+      - url: "https://freesound.org/people/Taure/sounds/380156/"
+        volume: 30
+        optional: true
+        probability: 0.3
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 20
+      flash_variance: 20
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [15, 25, 35]  # Dark blue-black forest
+            variance: [10, 12, 15]
+          brightness:
+            min: 20
+            max: 80
+          flash:
+            probability: 0.03
+            color: [180, 200, 220]  # Moonbeam through trees
+            brightness: 120
+            duration: 2.5
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [20, 30, 50]  # Dark canopy with hints of moonlight
+            variance: [15, 18, 25]
+          brightness:
+            min: 30
+            max: 100
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [10, 12, 15]  # Very dark forest floor
+            variance: [8, 10, 12]
+          brightness:
+            min: 10
+            max: 50

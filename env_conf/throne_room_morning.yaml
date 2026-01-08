@@ -1,0 +1,71 @@
+name: "Throne Room Morning"
+category: "town"
+description: "Grand throne room in morning light with court preparing for the day"
+icon: "👑"
+
+metadata:
+  tags: ["indoor", "castle", "royal", "morning", "grand", "formal"]
+  intensity: "low"
+  suitable_for: ["morning court", "royal breakfast", "early audience", "dawn strategy"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 3
+    mix:
+      # Quiet indoor room tone
+      - url: "https://freesound.org/people/IENBA/sounds/761024/"
+        volume: 45
+
+      # Distant footsteps/preparation
+      - url: "https://freesound.org/people/Kostas17/sounds/536365/"
+        volume: 30
+        optional: true
+        probability: 0.5
+
+      # Morning birds through high windows
+      - url: "https://freesound.org/people/klankbeeld/sounds/625333/"
+        volume: 20
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [200, 180, 140]  # Warm morning through tall windows
+            variance: [28, 25, 20]
+          brightness:
+            min: 150
+            max: 220
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [220, 200, 165]  # Bright morning sun
+            variance: [32, 30, 25]
+          brightness:
+            min: 180
+            max: 245
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [175, 155, 115]  # Marble floor in morning light
+            variance: [24, 20, 16]
+          brightness:
+            min: 130
+            max: 195

@@ -1,0 +1,70 @@
+name: "Temple Night"
+category: "relaxation"
+description: "Candlelit temple sanctuary with soft flickering light and deep meditation"
+icon: "🛕"
+
+metadata:
+  tags: ["indoor", "temple", "shrine", "night", "candlelit", "meditation", "mystical"]
+  intensity: "low"
+  suitable_for: ["night vigil", "deep meditation", "divine visions", "secret rituals"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 3
+    mix:
+      # Deep singing bowl meditation
+      - url: "https://freesound.org/people/MichiJung/sounds/723722/"
+        volume: 65
+
+      # Singing bowl tones
+      - url: "https://freesound.org/people/hollajackz/sounds/573804/"
+        volume: 50
+
+      # Distant night crickets through walls
+      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+        volume: 15
+        optional: true
+        probability: 0.3
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 18
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [120, 100, 70]  # Warm candlelight
+            variance: [22, 20, 16]
+          brightness:
+            min: 60
+            max: 130
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Candle/flame scenes
+            speed_min: 10
+            speed_max: 80
+          brightness:
+            min: 90
+            max: 150
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [100, 85, 60]  # Dark stone floor
+            variance: [18, 16, 14]
+          brightness:
+            min: 40
+            max: 100

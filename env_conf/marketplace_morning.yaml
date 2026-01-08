@@ -1,0 +1,75 @@
+name: "Marketplace Morning"
+category: "town"
+description: "Early morning market with vendors setting up and first customers arriving"
+icon: "🏪"
+
+metadata:
+  tags: ["outdoor", "market", "town", "morning", "shopping", "setup"]
+  intensity: "low"
+  suitable_for: ["early shopping", "merchant deals", "town exploration", "gathering info"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Light crowd gathering
+      - url: "https://freesound.org/people/KEVOY/sounds/752092/"
+        volume: 50
+
+      # Cart wheels/setup sounds
+      - url: "https://freesound.org/people/craigsmith/sounds/437078/"
+        volume: 55
+
+      # Morning birds
+      - url: "https://freesound.org/people/klankbeeld/sounds/625333/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Coins/early commerce
+      - url: "https://freesound.org/people/husky70/sounds/161315/"
+        volume: 30
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [200, 170, 130]  # Warm morning gold
+            variance: [30, 25, 20]
+          brightness:
+            min: 130
+            max: 200
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [220, 200, 160]  # Soft morning sky
+            variance: [35, 30, 25]
+          brightness:
+            min: 160
+            max: 230
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [170, 150, 115]  # Cobblestone in morning light
+            variance: [25, 22, 18]
+          brightness:
+            min: 110
+            max: 170

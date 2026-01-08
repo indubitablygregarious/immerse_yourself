@@ -1,0 +1,75 @@
+name: "Swamp"
+category: "forest"
+description: "Murky swamp with croaking frogs, buzzing insects, and stagnant water"
+icon: "🐸"
+
+metadata:
+  tags: ["outdoor", "swamp", "marsh", "frogs", "insects", "nature"]
+  intensity: "medium"
+  suitable_for: ["swamp travel", "hag encounters", "lizardfolk territory", "exploration"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Frogs at night
+      - url: "https://freesound.org/people/felix.blume/sounds/673259/"
+        volume: 80
+
+      # More frogs
+      - url: "https://freesound.org/people/KrystianPawlowski/sounds/586933/"
+        volume: 60
+
+      # Pond frogs
+      - url: "https://freesound.org/people/Didi0508/sounds/541955/"
+        volume: 50
+        optional: true
+        probability: 0.6
+
+      # Crickets/insects
+      - url: "https://freesound.org/people/mesaiosound/sounds/594779/"
+        volume: 45
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [50, 80, 40]
+            variance: [15, 20, 15]
+          brightness:
+            min: 60
+            max: 120
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [40, 70, 50]
+            variance: [15, 25, 20]
+          brightness:
+            min: 80
+            max: 150
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [30, 60, 35]
+            variance: [10, 15, 10]
+          brightness:
+            min: 50
+            max: 100

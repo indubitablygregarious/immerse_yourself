@@ -1,0 +1,88 @@
+name: "Town Afternoon"
+category: "town"
+description: "Busy afternoon town with peak activity, warm sun, and bustling streets"
+icon: "🏘️"
+
+metadata:
+  tags: ["social", "outdoor", "town", "afternoon", "busy", "bright", "medieval"]
+  intensity: "medium"
+  suitable_for: ["town exploration", "social scenes", "shopping", "afternoon activities"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 6
+    mix:
+      # Town square crowd ambience
+      - url: "https://freesound.org/people/kevp888/sounds/752092/"
+        volume: 75
+
+      # Footsteps on cobblestone
+      - url: "https://freesound.org/people/YleArkisto/sounds/322565/"
+        volume: 60
+
+      # Medieval market vendors
+      - url: "https://freesound.org/people/bolkmar/sounds/424790/"
+        volume: 55
+        optional: true
+        probability: 0.6
+
+      # Cart wheels rolling
+      - url: "https://freesound.org/people/craigsmith/sounds/437078/"
+        volume: 45
+        optional: true
+        probability: 0.5
+
+      # Blacksmith hammering
+      - url: "https://freesound.org/people/Emmaproductions/sounds/254370/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Children playing
+      - url: "https://freesound.org/people/Libra222/sounds/165529/"
+        volume: 45
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 25
+
+      groups:
+        backdrop:
+          type: "scene"
+          scenes:
+            ids: [31]  # Torch scene
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 240
+            max: 255
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [70, 80, 170]  # Bright blue sky
+            variance: [50, 55, 55]
+          brightness:
+            min: 235
+            max: 255
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [200, 180, 140]  # Sun-baked cobblestone
+            variance: [35, 32, 28]
+          brightness:
+            min: 180
+            max: 250

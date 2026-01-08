@@ -1,0 +1,75 @@
+name: "Marketplace"
+category: "town"
+description: "Bustling outdoor market with merchants hawking wares and crowd chatter"
+icon: "🏪"
+
+metadata:
+  tags: ["outdoor", "market", "town", "crowd", "shopping", "busy"]
+  intensity: "medium"
+  suitable_for: ["shopping", "town exploration", "social encounters", "pickpocket scenes"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Medieval market crowd
+      - url: "https://freesound.org/people/BigGiantCircles/sounds/424790/"
+        volume: 80
+
+      # Outdoor crowd
+      - url: "https://freesound.org/people/KEVOY/sounds/752092/"
+        volume: 65
+
+      # Cart/wheels
+      - url: "https://freesound.org/people/craigsmith/sounds/437078/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Coins/commerce
+      - url: "https://freesound.org/people/husky70/sounds/161315/"
+        volume: 35
+        optional: true
+        probability: 0.6
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [200, 180, 140]
+            variance: [30, 25, 20]
+          brightness:
+            min: 150
+            max: 230
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [220, 200, 160]
+            variance: [35, 30, 25]
+          brightness:
+            min: 180
+            max: 250
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [180, 160, 120]
+            variance: [25, 22, 18]
+          brightness:
+            min: 130
+            max: 200

@@ -1,0 +1,81 @@
+name: "Marketplace Afternoon"
+category: "town"
+description: "Bustling afternoon market at peak activity with crowds and haggling"
+icon: "🏪"
+
+metadata:
+  tags: ["outdoor", "market", "town", "afternoon", "busy", "crowded", "shopping"]
+  intensity: "high"
+  suitable_for: ["shopping", "pickpocket scenes", "social encounters", "information gathering"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Busy medieval market crowd
+      - url: "https://freesound.org/people/BigGiantCircles/sounds/424790/"
+        volume: 85
+
+      # Outdoor crowd
+      - url: "https://freesound.org/people/KEVOY/sounds/752092/"
+        volume: 70
+
+      # Cart/wheels
+      - url: "https://freesound.org/people/craigsmith/sounds/437078/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+      # Coins/commerce
+      - url: "https://freesound.org/people/husky70/sounds/161315/"
+        volume: 40
+        optional: true
+        probability: 0.7
+
+      # Children playing
+      - url: "https://freesound.org/people/Libra222/sounds/165529/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 8
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [210, 190, 150]  # Bright afternoon
+            variance: [35, 30, 25]
+          brightness:
+            min: 180
+            max: 250
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [240, 220, 180]  # Hot afternoon sun
+            variance: [40, 35, 30]
+          brightness:
+            min: 210
+            max: 255
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [190, 170, 130]  # Sun-baked ground
+            variance: [30, 28, 22]
+          brightness:
+            min: 150
+            max: 220

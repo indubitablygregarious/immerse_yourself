@@ -1,0 +1,75 @@
+name: "Swamp Afternoon"
+category: "forest"
+description: "Hot humid swamp with buzzing insects and thick vegetation"
+icon: "🐸"
+
+metadata:
+  tags: ["outdoor", "swamp", "marsh", "afternoon", "humid", "insects"]
+  intensity: "medium"
+  suitable_for: ["swamp travel", "hag encounters", "lizardfolk territory", "exploration"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Hot afternoon insects/cicadas
+      - url: "https://freesound.org/people/kvv_audio_joosthogervorst/sounds/717893/"
+        volume: 70
+
+      # Swamp birds
+      - url: "https://freesound.org/people/klankbeeld/sounds/414907/"
+        volume: 50
+
+      # Water pond sounds
+      - url: "https://freesound.org/people/Didi0508/sounds/541955/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+      # Light frogs
+      - url: "https://freesound.org/people/KrystianPawlowski/sounds/586933/"
+        volume: 40
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [70, 100, 50]  # Warm humid green
+            variance: [18, 25, 16]
+          brightness:
+            min: 130
+            max: 200
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [100, 130, 80]  # Bright filtered light
+            variance: [22, 30, 20]
+          brightness:
+            min: 160
+            max: 230
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [50, 80, 40]  # Murky water reflection
+            variance: [14, 18, 12]
+          brightness:
+            min: 90
+            max: 150

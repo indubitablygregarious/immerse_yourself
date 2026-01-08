@@ -15,28 +15,42 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 
 ## Features
 
-### 26+ Pre-Built Environments
+### 90+ Pre-Built Environments
+
+Most environments include **morning/afternoon/night variants** with different lighting and sounds!
 
 **Battle Scenes** - High-intensity lighting with danger sounds
 - Battle Dungeon, Desert, Forest, Water, Environment
 
-**Taverns** - Cozy, social atmosphere
-- Standard Tavern, Dark Tavern, Mountain Tavern
+**Taverns & Indoor** - Cozy, social atmosphere
+- Tavern (Morning/Afternoon/Night), Dark Tavern, Mountain Tavern
+- Blacksmith (Morning/Afternoon/Night), Throne Room (Morning/Afternoon/Night)
 
 **Travel** - Journey ambiance
-- Desert, Boat, Night Travel, Spooky Routes, Dawn, Afternoon, Rainy, Storm
+- Desert, Boat (Morning/Afternoon/Night), Snow (Morning/Afternoon/Night)
+- Dawn, Afternoon, Rainy, Storm, Ship in Storm, Spooky Routes
 
 **Towns & Places**
-- Town (Day/Night), Library, Shop, Summer Festival
+- Town (Morning/Afternoon/Night), Marketplace (Morning/Afternoon/Night)
+- Library (Morning/Afternoon/Night), Shop (Morning/Afternoon/Night), Summer Festival
+
+**Dungeons & Dark Places**
+- Dungeon, Prison (Morning/Afternoon/Night), Sewer
+- Ancient Ruins (Morning/Afternoon/Night), Graveyard (Morning/Afternoon/Night)
+
+**Nature**
+- Forest (Morning/Afternoon/Night), Swamp (Morning/Afternoon/Night)
+- Beach (Day/Afternoon/Night), Blizzard
 
 **Relaxation**
-- Chill, Beach Day, Beach Afternoon, Beach Night, Heaven
+- Chill, Chill Jazz, Temple (Morning/Afternoon/Night)
+- Short Rest, Camping (Morning/Afternoon/Night), Heaven
+
+**Weather**
+- Travel Snow, Blizzard, Travel Storm, Travel Rainy
 
 **Special**
-- Camping, Dungeon, Win Dungeon, Chill Jazz, Clowny
-
-**Intense**
-- Hell (infernal hellscape with chaotic fire)
+- Win Dungeon, Celebration, Clowny, Hell
 
 ### GUI Launcher
 
@@ -59,7 +73,7 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 - **Keyboard shortcuts** (Q, W, E, R...) - displayed as badges with white text and black outline
 - **Category navigation** with Ctrl+PgUp/PgDn
 - **Visual feedback** - active lights environment stays highlighted
-- **Default transition sound** - `sounds/chill.wav` plays for any environment with lights or Spotify
+- **Randomized transition sounds** - sound_conf system provides variety (whooshes, door creaks, sword draws, etc.)
 - **Three stop buttons**:
   - **STOP LIGHTS** (red) - turn off light animations
   - **STOP SOUND** (orange, Spacebar) - stop all playing sound effects
@@ -205,18 +219,33 @@ Warnings about `get_access_token(as_dict=True)` can be safely ignored - they're 
 ## Customization
 
 ### Create Your Own Scene
-1. Copy an existing scene from `environments/`:
+1. Copy an existing YAML config from `env_conf/`:
    ```bash
-   cp environments/tavern.py environments/my_scene.py
+   cp env_conf/tavern.yaml env_conf/my_scene.yaml
    ```
 
 2. Edit the new file:
-   - Change `playlist` to your Spotify playlist URI
-   - Adjust `sound_effect` filename
-   - Modify RGB color values
+   - Change `name` and `description`
+   - Adjust `icon` emoji
+   - Modify `engines.lights.animation` RGB values and brightness
    - Adjust `cycletime` (lower = faster animations)
+   - Add/modify `engines.atmosphere.mix` with freesound.org URLs
 
 3. Restart the launcher to see your new scene
+
+### Create Time-of-Day Variants
+For immersive campaigns, create morning/afternoon/night versions:
+
+1. Name files with suffix: `my_scene_morning.yaml`, `my_scene_afternoon.yaml`, `my_scene_night.yaml`
+
+2. Adjust for each time:
+   | Time | Colors | Brightness | Sounds |
+   |------|--------|------------|--------|
+   | Morning | Warm gold/pink | Medium | Birds, roosters |
+   | Afternoon | Bright, saturated | High | Insects, activity |
+   | Night | Dark blue/purple | Low | Crickets, owls |
+
+3. See `env_conf/forest_morning.yaml` etc. for examples
 
 ### Modify Light Behavior
 Each scene script controls lights via:
@@ -239,15 +268,22 @@ immerse_yourself/
 │   ├── tavern.yaml
 │   ├── battle_dungeon.yaml
 │   └── ...
+├── sound_conf/             # Sound variation collections
+│   ├── transition.yaml     # Whooshes, chimes (14 sounds)
+│   ├── squeaky_door.yaml   # Door creaks (7 sounds)
+│   ├── battle_intro.yaml   # Sword draws, war drums (8 sounds)
+│   └── ...
+├── sound_conf_resolver.py  # Resolves sound_conf references
 ├── config_loader.py        # YAML config loading and validation
 ├── lighting_daemon.py      # Background lighting process
-├── environments/           # Legacy scene scripts
+├── freesound_manager.py    # Downloads sounds from freesound.org
+├── sounds/                 # Local sound effect files
+├── freesound.org/          # Cached freesound downloads
 ├── .spotify.ini            # Spotify credentials (not in git)
 ├── .wizbulb.ini            # Bulb IP addresses (not in git)
 ├── .cache                  # OAuth token cache (not in git)
 ├── settings.ini            # User preferences (auto-created)
-├── requirements.txt        # Python dependencies
-└── *.mp3, *.wav            # Sound effect files
+└── requirements.txt        # Python dependencies
 ```
 
 ### How It Works

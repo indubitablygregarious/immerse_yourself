@@ -1,0 +1,70 @@
+name: "Blacksmith Afternoon"
+category: "town"
+description: "Busy afternoon forge at peak heat with heavy hammering and glowing metal"
+icon: "⚒️"
+
+metadata:
+  tags: ["indoor", "craft", "forge", "afternoon", "fire", "busy", "hot"]
+  intensity: "high"
+  suitable_for: ["shopping", "crafting scenes", "weapon upgrades", "commission work"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Heavy blacksmith hammering
+      - url: "https://freesound.org/people/ldezem/sounds/386393/"
+        volume: 80
+
+      # Roaring forge fire
+      - url: "https://freesound.org/people/NickTayloe/sounds/813328/"
+        volume: 70
+
+      # Anvil hits
+      - url: "https://freesound.org/people/MrAuralization/sounds/274846/"
+        volume: 50
+        optional: true
+        probability: 0.7
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 6
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [200, 90, 35]  # Hot orange forge
+            variance: [35, 25, 12]
+          brightness:
+            min: 130
+            max: 210
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28]  # Fire scenes
+            speed_min: 80
+            speed_max: 180
+          brightness:
+            min: 180
+            max: 245
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [220, 120, 50]  # Hot glowing floor
+            variance: [45, 35, 18]
+          brightness:
+            min: 150
+            max: 230

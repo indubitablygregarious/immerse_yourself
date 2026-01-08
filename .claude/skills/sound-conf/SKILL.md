@@ -205,6 +205,43 @@ sounds:
 | Reactions | gasp, scream, groan, sigh, laugh |
 | Ambient | room tone, crowd murmur, tavern, market |
 
+## Time-of-Day Atmosphere Sounds
+
+Common freesound.org URLs used for time-variant environments:
+
+### Morning Sounds
+| Sound | URL | Use For |
+|-------|-----|---------|
+| Dawn chorus | `https://freesound.org/people/klankbeeld/sounds/625333/` | Morning bird sounds |
+| Rooster/morning | `https://freesound.org/people/Nightwatcher98/sounds/818470/` | Rural morning |
+| Forest spring morning | `https://freesound.org/people/klankbeeld/sounds/273162/` | Forest mornings |
+
+### Afternoon Sounds
+| Sound | URL | Use For |
+|-------|-----|---------|
+| Cicadas/insects | `https://freesound.org/people/kvv_audio_joosthogervorst/sounds/717893/` | Hot afternoon |
+| Afternoon birds | `https://freesound.org/people/klankbeeld/sounds/414907/` | Daytime outdoor |
+| Summer meadow | `https://freesound.org/people/brunoacaleto/sounds/810412/` | Peaceful afternoon |
+
+### Night Sounds
+| Sound | URL | Use For |
+|-------|-----|---------|
+| Night crickets | `https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/` | General night |
+| Owl hooting | `https://freesound.org/people/Anthousai/sounds/398734/` | Spooky/forest night |
+| Wolf howl | `https://freesound.org/people/Taure/sounds/380156/` | Wilderness night |
+| Night frogs | `https://freesound.org/people/felix.blume/sounds/673259/` | Swamp/pond night |
+| Night fields | `https://freesound.org/people/klankbeeld/sounds/583866/` | Open night areas |
+
+### Universal Sounds (work at any time)
+| Sound | URL | Use For |
+|-------|-----|---------|
+| Fireplace | `https://freesound.org/people/hansende/sounds/263994/` | Indoor warmth |
+| Fire crackling | `https://freesound.org/people/NickTayloe/sounds/813328/` | Campfire/forge |
+| Wind through trees | `https://freesound.org/people/klankbeeld/sounds/702233/` | Forest/outdoor |
+| Eerie wind | `https://freesound.org/people/Kinoton/sounds/558840/` | Ruins/spooky |
+| Tavern crowd | `https://freesound.org/people/Robinhood76/sounds/700022/` | Social indoor |
+| Torch crackling | `https://freesound.org/people/LordStirling/sounds/483692/` | Night torch ambience |
+
 ## Reference Files
 
 - `sound_conf/squeaky_door.yaml` - Example door sound collection

@@ -1,0 +1,74 @@
+name: "Prison Night"
+category: "dungeon"
+description: "Dark prison cells at night with only faint torchlight and haunting sounds"
+icon: "⛓️"
+
+metadata:
+  tags: ["indoor", "prison", "jail", "dungeon", "night", "dark", "captivity"]
+  intensity: "high"
+  suitable_for: ["night escape", "torture scenes", "dark imprisonment", "despair"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Chains rattling (echoes more at night)
+      - url: "https://freesound.org/people/MSHahen/sounds/267543/"
+        volume: 65
+
+      # Water dripping (prominent at night)
+      - url: "https://freesound.org/people/Sclolex/sounds/177958/"
+        volume: 60
+
+      # Dark dungeon ambience
+      - url: "https://freesound.org/people/Kinoton/sounds/516566/"
+        volume: 70
+
+      # Distant groans (more frequent at night)
+      - url: "https://freesound.org/people/mo-o/sounds/22262/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 16
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [35, 32, 28]  # Very dark
+            variance: [10, 9, 8]
+          brightness:
+            min: 15
+            max: 50
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28]  # Faint torch
+            speed_min: 10
+            speed_max: 60
+          brightness:
+            min: 30
+            max: 70
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [25, 22, 18]  # Nearly black floor
+            variance: [8, 7, 6]
+          brightness:
+            min: 10
+            max: 35

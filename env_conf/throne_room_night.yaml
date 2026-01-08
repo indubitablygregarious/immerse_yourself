@@ -1,0 +1,75 @@
+name: "Throne Room Night"
+category: "town"
+description: "Grand throne room at night lit by torches with shadows dancing on walls"
+icon: "👑"
+
+metadata:
+  tags: ["indoor", "castle", "royal", "night", "grand", "formal", "dramatic"]
+  intensity: "medium"
+  suitable_for: ["night audience", "secret meetings", "dramatic confrontations", "royal intrigue"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 3
+    mix:
+      # Quiet room tone
+      - url: "https://freesound.org/people/IENBA/sounds/761024/"
+        volume: 45
+
+      # Torch crackling (prominent at night)
+      - url: "https://freesound.org/people/LordStirling/sounds/483692/"
+        volume: 50
+
+      # Distant night sounds
+      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+        volume: 15
+        optional: true
+        probability: 0.3
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [130, 100, 60]  # Torch-lit gold
+            variance: [28, 22, 16]
+          brightness:
+            min: 70
+            max: 150
+          flash:
+            probability: 0.04
+            color: [255, 200, 120]  # Torch flicker
+            brightness: 180
+            duration: 0.8
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 20
+            speed_max: 120
+          brightness:
+            min: 120
+            max: 190
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [100, 80, 50]  # Dark marble floor
+            variance: [22, 18, 14]
+          brightness:
+            min: 50
+            max: 120

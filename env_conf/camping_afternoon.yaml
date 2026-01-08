@@ -1,0 +1,75 @@
+name: "Camping Afternoon"
+category: "relaxation"
+description: "Afternoon rest stop with pleasant weather and relaxed camp atmosphere"
+icon: "🏕️"
+
+metadata:
+  tags: ["relaxation", "outdoor", "afternoon", "rest", "peaceful"]
+  intensity: "low"
+  suitable_for: ["afternoon rest", "midday break", "setting up camp", "relaxation"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:camp_setup"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Afternoon insects/cicadas
+      - url: "https://freesound.org/people/kvv_audio_joosthogervorst/sounds/717893/"
+        volume: 55
+
+      # Afternoon birds
+      - url: "https://freesound.org/people/klankbeeld/sounds/414907/"
+        volume: 50
+
+      # Wind through trees
+      - url: "https://freesound.org/people/klankbeeld/sounds/702233/"
+        volume: 50
+        optional: true
+        probability: 0.6
+
+      # Light campfire starting
+      - url: "https://freesound.org/people/NickTayloe/sounds/813328/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [150, 170, 130]  # Dappled forest light
+            variance: [30, 35, 28]
+          brightness:
+            min: 150
+            max: 220
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [180, 200, 170]  # Bright sky through canopy
+            variance: [35, 40, 32]
+          brightness:
+            min: 180
+            max: 250
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [120, 140, 100]  # Forest floor in daylight
+            variance: [25, 28, 22]
+          brightness:
+            min: 110
+            max: 180

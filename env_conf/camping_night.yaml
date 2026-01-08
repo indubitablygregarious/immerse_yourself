@@ -1,0 +1,64 @@
+name: "Camping Night"
+category: "relaxation"
+description: "Peaceful night camp with crackling fire, stars above, and nocturnal sounds"
+icon: "🏕️"
+
+metadata:
+  tags: ["relaxation", "campfire", "outdoor", "night", "peaceful", "stars"]
+  intensity: "low"
+  suitable_for: ["night rest", "storytelling", "stargazing", "watch duty"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:camp_setup"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 4
+    mix:
+      # Campfire crackling (main focus)
+      - url: "https://freesound.org/people/NickTayloe/sounds/813328/"
+        volume: 80
+
+      # Night crickets
+      - url: "https://freesound.org/people/RyanKingArt/sounds/746365/"
+        volume: 65
+
+      # Wind through trees
+      - url: "https://freesound.org/people/klankbeeld/sounds/702233/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+      # Owl distant
+      - url: "https://freesound.org/people/Anthousai/sounds/398734/"
+        volume: 30
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "off"
+
+        overhead:
+          type: "off"
+
+        battlefield:
+          type: "scene"
+          scenes:
+            ids: [5]  # Fireplace scene - the campfire
+            speed_min: 20
+            speed_max: 190
+          brightness:
+            min: 50
+            max: 80

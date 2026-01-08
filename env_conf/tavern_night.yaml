@@ -1,0 +1,81 @@
+name: "Tavern Night"
+category: "tavern"
+description: "Lively evening tavern with full crowd, music, and roaring fire"
+icon: "🍺"
+
+metadata:
+  tags: ["social", "indoor", "night", "lively", "busy", "medieval"]
+  intensity: "medium"
+  suitable_for: ["evening revelry", "social scenes", "information gathering", "roleplay"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Roaring fireplace
+      - url: "https://freesound.org/people/hansende/sounds/263994/"
+        volume: 70
+
+      # Busy tavern crowd
+      - url: "https://freesound.org/people/Robinhood76/sounds/700022/"
+        volume: 85
+
+      # Glasses clinking
+      - url: "https://freesound.org/people/EpicWizard/sounds/325194/"
+        volume: 45
+        optional: true
+        probability: 0.7
+
+      # Crowd laughter
+      - url: "https://freesound.org/people/deleted_user_2104797/sounds/346688/"
+        volume: 40
+        optional: true
+        probability: 0.6
+
+      # Medieval lute music
+      - url: "https://freesound.org/people/f-r-a-g-i-l-e/sounds/506266/"
+        volume: 35
+        optional: true
+        pool: "music"
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [140, 100, 60]  # Warm firelit evening
+            variance: [25, 22, 18]
+          brightness:
+            min: 60
+            max: 140
+          flash:
+            probability: 0.05
+            color: [255, 200, 100]  # Fire flicker
+            brightness: 180
+            duration: 0.8
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 20
+            speed_max: 190
+          brightness:
+            min: 130
+            max: 180
+
+        battlefield:
+          type: "inherit_overhead"

@@ -1,0 +1,71 @@
+name: "Travel Snow Morning"
+category: "travel"
+description: "Early morning winter journey with crisp air and frost-covered landscape"
+icon: "❄️"
+
+metadata:
+  tags: ["outdoor", "travel", "snow", "winter", "morning", "cold", "crisp"]
+  intensity: "low"
+  suitable_for: ["winter travel", "morning departure", "mountain passes", "cold weather"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Cold winter wind
+      - url: "https://freesound.org/people/klankbeeld/sounds/413365/"
+        volume: 55
+
+      # Morning winter birds (sparse)
+      - url: "https://freesound.org/people/klankbeeld/sounds/625333/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Wind through trees
+      - url: "https://freesound.org/people/klankbeeld/sounds/702233/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [200, 190, 210]  # Pale pink dawn over snow
+            variance: [25, 22, 28]
+          brightness:
+            min: 140
+            max: 210
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [220, 210, 230]  # Soft morning sky
+            variance: [30, 28, 35]
+          brightness:
+            min: 170
+            max: 235
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [180, 185, 200]  # Frost-covered ground
+            variance: [20, 22, 25]
+          brightness:
+            min: 120
+            max: 180

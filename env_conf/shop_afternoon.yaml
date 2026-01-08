@@ -1,0 +1,70 @@
+name: "Shop Afternoon"
+category: "town"
+description: "Busy afternoon shop with customers browsing and warm atmosphere"
+icon: "🛒"
+
+metadata:
+  tags: ["social", "indoor", "afternoon", "shopping", "merchant", "busy", "medieval"]
+  intensity: "low"
+  suitable_for: ["shopping", "merchant encounters", "browsing", "afternoon errands"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Room tone
+      - url: "https://freesound.org/people/IENBA/sounds/761024/"
+        volume: 45
+
+      # Fireplace (cozy shop)
+      - url: "https://freesound.org/people/NickTayloe/sounds/813328/"
+        volume: 40
+
+      # Coins clinking
+      - url: "https://freesound.org/people/husky70/sounds/161315/"
+        volume: 35
+        optional: true
+        probability: 0.6
+
+      # Wood floor creaking
+      - url: "https://freesound.org/people/Kostas17/sounds/536365/"
+        volume: 25
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [170, 155, 120]  # Warm afternoon
+            variance: [28, 25, 20]
+          brightness:
+            min: 110
+            max: 180
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 10
+            speed_max: 150
+          brightness:
+            min: 160
+            max: 220
+
+        battlefield:
+          type: "inherit_overhead"

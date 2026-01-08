@@ -1,0 +1,53 @@
+name: "Short Rest"
+category: "relaxation"
+description: "Quick rest by a campfire - just crackling flames, no setup sounds"
+icon: "🔥"
+
+metadata:
+  tags: ["relaxation", "campfire", "rest", "peaceful", "fire"]
+  intensity: "low"
+  suitable_for: ["short rest", "brief pause", "warming up", "quiet moment"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 1
+    max_sounds: 2
+    mix:
+      # Just campfire crackling sounds
+      - url: "https://freesound.org/people/daenerys/sounds/260713/"
+        volume: 85
+
+      - url: "https://freesound.org/people/SKrafft/sounds/681366/"
+        volume: 70
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "off"
+
+        overhead:
+          type: "off"
+
+        battlefield:
+          type: "scene"
+          scenes:
+            ids: [5]  # Fireplace scene - the campfire
+            speed_min: 10
+            speed_max: 190
+          brightness:
+            min: 44
+            max: 55

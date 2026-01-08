@@ -1,0 +1,78 @@
+name: "Library Night"
+category: "town"
+description: "Late night library by candlelight with deep shadows and quiet solitude"
+icon: "📚"
+
+metadata:
+  tags: ["social", "indoor", "quiet", "night", "study", "candlelit", "medieval"]
+  intensity: "low"
+  suitable_for: ["late night research", "secret study", "forbidden texts", "quiet mystery"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Very quiet library ambience
+      - url: "https://freesound.org/people/xkeril/sounds/620683/"
+        volume: 45
+
+      # Clock ticking (prominent at night)
+      - url: "https://freesound.org/people/OwlStorm/sounds/212181/"
+        volume: 40
+        optional: true
+        probability: 0.7
+
+      # Distant owl through window
+      - url: "https://freesound.org/people/Anthousai/sounds/398734/"
+        volume: 20
+        optional: true
+        probability: 0.3
+
+      # Page turning
+      - url: "https://freesound.org/people/lartti/sounds/513779/"
+        volume: 25
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [80, 70, 50]  # Dim candlelight
+            variance: [20, 18, 15]
+          brightness:
+            min: 40
+            max: 100
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Candle/torch scenes
+            speed_min: 10
+            speed_max: 100
+          brightness:
+            min: 80
+            max: 140
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [60, 50, 35]  # Dark wood floor
+            variance: [15, 14, 12]
+          brightness:
+            min: 30
+            max: 80

@@ -1,0 +1,85 @@
+name: "Forest Afternoon"
+category: "forest"
+description: "Warm afternoon forest with buzzing insects and dappled sunlight"
+icon: "🌳"
+
+metadata:
+  tags: ["forest", "woods", "nature", "outdoor", "afternoon", "warm", "insects"]
+  intensity: "low"
+  suitable_for: ["forest travel", "woodland exploration", "afternoon rest", "nature walk"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Summer afternoon insects/cicadas (required)
+      - url: "https://freesound.org/people/kvv_audio_joosthogervorst/sounds/717893/"
+        volume: 65
+
+      # Afternoon birds (required)
+      - url: "https://freesound.org/people/klankbeeld/sounds/414907/"
+        volume: 55
+
+      # Rustling leaves in warm breeze (required)
+      - url: "https://freesound.org/people/arpeggio1980/sounds/523389/"
+        volume: 50
+
+      # Forest stream (optional)
+      - url: "https://freesound.org/people/cher1101/sounds/671883/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Woodpecker (optional)
+      - url: "https://freesound.org/people/KVV_Audio/sounds/800712/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 15
+      flash_variance: 30
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [60, 100, 45]  # Rich forest green
+            variance: [18, 28, 18]
+          brightness:
+            min: 120
+            max: 220
+          flash:
+            probability: 0.1
+            color: [255, 245, 200]  # Bright afternoon sunbeam
+            brightness: 250
+            duration: 1.2
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [140, 180, 100]  # Bright leafy canopy
+            variance: [25, 35, 25]
+          brightness:
+            min: 180
+            max: 255
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [90, 75, 50]  # Warm forest floor
+            variance: [18, 18, 12]
+          brightness:
+            min: 80
+            max: 160

@@ -1,0 +1,89 @@
+name: "Ship in Storm"
+category: "coastal"
+description: "Sailing ship battling a fierce storm with crashing waves and howling wind"
+icon: "⛵"
+
+metadata:
+  tags: ["outdoor", "ship", "storm", "ocean", "sea", "danger"]
+  intensity: "high"
+  suitable_for: ["sea battles", "dangerous voyages", "storm encounters", "dramatic moments"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Storm thunder
+      - url: "https://freesound.org/people/Foad/sounds/243614/"
+        volume: 80
+
+      # Ship creaking
+      - url: "https://freesound.org/people/WolfMagicMedia/sounds/588310/"
+        volume: 70
+
+      # Storm wind
+      - url: "https://freesound.org/people/juskiddink/sounds/136287/"
+        volume: 75
+
+      # Ocean waves
+      - url: "https://freesound.org/people/lucas_schacht/sounds/534916/"
+        volume: 65
+        optional: true
+        probability: 0.7
+
+      # Rain
+      - url: "https://freesound.org/people/newtone/sounds/836410/"
+        volume: 50
+        optional: true
+        probability: 0.6
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 4
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [40, 50, 70]
+            variance: [25, 30, 40]
+          brightness:
+            min: 60
+            max: 150
+          flash:
+            probability: 0.15
+            color: [255, 255, 255]
+            brightness: 255
+            duration: 0.3
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [50, 60, 80]
+            variance: [30, 35, 45]
+          brightness:
+            min: 80
+            max: 180
+          flash:
+            probability: 0.15
+            color: [255, 255, 255]
+            brightness: 255
+            duration: 0.3
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [35, 45, 65]
+            variance: [20, 25, 35]
+          brightness:
+            min: 50
+            max: 120

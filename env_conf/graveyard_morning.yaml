@@ -1,0 +1,75 @@
+name: "Graveyard Morning"
+category: "spooky"
+description: "Misty graveyard at dawn with soft light and morning birds"
+icon: "🪦"
+
+metadata:
+  tags: ["spooky", "outdoor", "morning", "cemetery", "mist", "quiet"]
+  intensity: "low"
+  suitable_for: ["exploration", "investigation", "morning visit", "peaceful mourning"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Morning birds
+      - url: "https://freesound.org/people/klankbeeld/sounds/625333/"
+        volume: 50
+
+      # Light wind
+      - url: "https://freesound.org/people/Kinoton/sounds/558840/"
+        volume: 40
+
+      # Ravens distant
+      - url: "https://freesound.org/people/SoundsLikeYuk/sounds/723570/"
+        volume: 30
+        optional: true
+        probability: 0.4
+
+      # Rustling leaves
+      - url: "https://freesound.org/people/MaiaSN/sounds/609333/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [140, 130, 120]  # Pale misty morning
+            variance: [20, 18, 15]
+          brightness:
+            min: 100
+            max: 170
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [160, 155, 150]  # Soft overcast morning sky
+            variance: [25, 22, 20]
+          brightness:
+            min: 130
+            max: 200
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [100, 95, 85]  # Dew-covered ground
+            variance: [15, 14, 12]
+          brightness:
+            min: 70
+            max: 130

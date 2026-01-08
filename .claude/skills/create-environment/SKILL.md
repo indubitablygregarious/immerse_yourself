@@ -74,6 +74,27 @@ Search freesound.org for appropriate ambient sounds. Use 3-6 sounds in the mix.
 - Wind: search "wind howling ambient"
 - Dungeon: search "dungeon dripping echo"
 
+## Entry Sound (sound_conf)
+
+Use predefined sound_conf collections for entry sounds. These randomly select from multiple variations.
+
+### Available sound_confs:
+| Reference | Description | Use For |
+|-----------|-------------|---------|
+| `sound_conf:transition` | Whooshes, magic chimes, swooshes (14 sounds) | General scene changes, travel |
+| `sound_conf:squeaky_door` | Door creaks and squeaks (7 sounds) | Entering buildings, taverns, shops |
+| `sound_conf:battle_intro` | Sword draws, war drums, danger stings (8 sounds) | Combat encounters |
+| `sound_conf:camp_setup` | Digging, shoveling, setup sounds (7 sounds) | Camping, making camp |
+| `sound_conf:victory` | Fanfares, triumph sounds (7 sounds) | Winning, celebrations |
+| `sound_conf:applause` | Crowd clapping, cheering (7 sounds) | Performances, celebrations |
+
+### Selecting Entry Sound:
+- **Indoor/buildings**: `sound_conf:squeaky_door`
+- **Travel/outdoor**: `sound_conf:transition`
+- **Combat**: `sound_conf:battle_intro`
+- **Camping/rest**: `sound_conf:camp_setup`
+- **Victory/celebration**: `sound_conf:victory` or `sound_conf:applause`
+
 ## YAML Template
 
 ```yaml
@@ -89,7 +110,7 @@ metadata:
 engines:
   sound:
     enabled: true
-    file: "sounds/transition.wav"  # Entry sound effect
+    file: "sound_conf:transition"  # Use appropriate sound_conf for entry
 
   spotify:
     enabled: false
@@ -157,10 +178,69 @@ engines:
 - Warm orange/red lighting, slow cycle (12s)
 - Medium brightness
 
+## Time-of-Day Variants
+
+Most environments should have morning/afternoon/night variants for immersive campaigns.
+
+### Naming Convention
+```
+{base_name}_morning.yaml
+{base_name}_afternoon.yaml
+{base_name}_night.yaml
+```
+
+### Time-Specific Adjustments
+
+| Time | RGB Colors | Brightness | Cycletime | Sounds |
+|------|------------|------------|-----------|--------|
+| Morning | Warm gold `[200, 170, 130]`, pink `[200, 160, 150]` | min: 120-150, max: 200-230 | 12-16s (slower) | Dawn chorus, roosters, morning birds |
+| Afternoon | Bright saturated, sky blue `[70, 90, 180]` | min: 170-200, max: 235-255 | 8-12s (medium) | Cicadas, insects, busy activity |
+| Night | Dark blue `[30, 40, 70]`, purple `[50, 40, 80]` | min: 20-60, max: 80-120 | 14-20s (slow) | Crickets, owls, wolves, frogs |
+
+### Typical freesound.org sounds by time:
+
+**Morning sounds:**
+- Dawn chorus: search "dawn chorus birds"
+- Rooster: search "rooster morning"
+- Morning birds: `https://freesound.org/people/klankbeeld/sounds/625333/`
+
+**Afternoon sounds:**
+- Cicadas/insects: `https://freesound.org/people/kvv_audio_joosthogervorst/sounds/717893/`
+- Afternoon birds: `https://freesound.org/people/klankbeeld/sounds/414907/`
+
+**Night sounds:**
+- Crickets: `https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/`
+- Owl: `https://freesound.org/people/Anthousai/sounds/398734/`
+- Wolf howl: `https://freesound.org/people/Taure/sounds/380156/`
+- Night frogs: `https://freesound.org/people/felix.blume/sounds/673259/`
+
+### Night-specific lighting effects
+
+Add occasional moonbeam flashes for night environments:
+```yaml
+flash:
+  probability: 0.03
+  color: [180, 200, 220]  # Pale moonlight
+  brightness: 120
+  duration: 2.0
+```
+
+### Example: Creating forest variants
+
+If user asks for "forest environment", create all three:
+
+1. `forest_morning.yaml` - Golden dawn light, bird chorus, misty feel
+2. `forest_afternoon.yaml` - Bright dappled sunlight, insects buzzing
+3. `forest_night.yaml` - Dark with moonbeams, crickets, owls
+
 ## Reference Files
 
 Read existing environments for patterns:
 - `env_conf/tavern.yaml` - Indoor social example
-- `env_conf/forest.yaml` - Nature example
+- `env_conf/forest.yaml` - Nature example (base)
+- `env_conf/forest_morning.yaml` - Morning variant example
+- `env_conf/forest_afternoon.yaml` - Afternoon variant example
+- `env_conf/forest_night.yaml` - Night variant example
 - `env_conf/dungeon.yaml` - Dark/enclosed example
 - `env_conf/travel_storm.yaml` - Weather example
+- `env_conf/graveyard_night.yaml` - Spooky night example

@@ -1,0 +1,85 @@
+name: "Blizzard"
+category: "weather"
+description: "Intense snowstorm with howling winds and whiteout conditions"
+icon: "🌨️"
+
+metadata:
+  tags: ["outdoor", "storm", "blizzard", "snow", "winter", "dangerous", "cold"]
+  intensity: "high"
+  suitable_for: ["survival scenarios", "harsh weather", "dramatic moments", "wilderness danger"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Intense blizzard wind
+      - url: "https://freesound.org/people/daveincamas/sounds/558664/"
+        volume: 85
+
+      # Howling winter storm
+      - url: "https://freesound.org/people/DBlover/sounds/505999/"
+        volume: 75
+
+      # Wind gusts
+      - url: "https://freesound.org/people/giddster/sounds/719561/"
+        volume: 60
+        optional: true
+        probability: 0.7
+
+      # Eerie wind
+      - url: "https://freesound.org/people/Kinoton/sounds/558840/"
+        volume: 50
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 4
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [200, 210, 230]
+            variance: [40, 45, 50]
+          brightness:
+            min: 100
+            max: 200
+          flash:
+            probability: 0.08
+            color: [255, 255, 255]
+            brightness: 255
+            duration: 0.2
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [220, 230, 250]
+            variance: [50, 55, 60]
+          brightness:
+            min: 130
+            max: 230
+          flash:
+            probability: 0.08
+            color: [255, 255, 255]
+            brightness: 255
+            duration: 0.2
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [180, 190, 210]
+            variance: [35, 40, 45]
+          brightness:
+            min: 80
+            max: 170

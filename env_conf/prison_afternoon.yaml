@@ -1,0 +1,78 @@
+name: "Prison Afternoon"
+category: "dungeon"
+description: "Prison cells with afternoon light casting bars of shadow through windows"
+icon: "⛓️"
+
+metadata:
+  tags: ["indoor", "prison", "jail", "dungeon", "afternoon", "captivity"]
+  intensity: "medium"
+  suitable_for: ["prison visit", "interrogation", "waiting", "captivity"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Chains rattling
+      - url: "https://freesound.org/people/MSHahen/sounds/267543/"
+        volume: 55
+
+      # Water dripping
+      - url: "https://freesound.org/people/Sclolex/sounds/177958/"
+        volume: 50
+
+      # Dungeon ambience
+      - url: "https://freesound.org/people/Kinoton/sounds/516566/"
+        volume: 55
+
+      # Distant groans
+      - url: "https://freesound.org/people/mo-o/sounds/22262/"
+        volume: 20
+        optional: true
+        probability: 0.3
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [110, 100, 80]  # Warmer afternoon through bars
+            variance: [18, 16, 14]
+          brightness:
+            min: 70
+            max: 140
+          flash:
+            probability: 0.03
+            color: [180, 170, 140]  # Sunbeam through bars
+            brightness: 180
+            duration: 2.0
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [130, 115, 95]  # Afternoon light
+            variance: [20, 18, 15]
+          brightness:
+            min: 90
+            max: 160
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [75, 68, 55]  # Lit stone floor
+            variance: [14, 13, 11]
+          brightness:
+            min: 50
+            max: 100

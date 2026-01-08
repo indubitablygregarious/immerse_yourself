@@ -1,0 +1,75 @@
+name: "Ancient Ruins Morning"
+category: "dungeon"
+description: "Ancient ruins at dawn with mist rising and birds beginning to stir"
+icon: "🏛️"
+
+metadata:
+  tags: ["outdoor", "ruins", "ancient", "mysterious", "morning", "dawn", "mist"]
+  intensity: "low"
+  suitable_for: ["exploration", "treasure hunting", "early expedition", "archaeology"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Morning birds in ruins
+      - url: "https://freesound.org/people/klankbeeld/sounds/625333/"
+        volume: 55
+
+      # Wind through ancient stones
+      - url: "https://freesound.org/people/Kinoton/sounds/558840/"
+        volume: 50
+
+      # Distant wind chimes
+      - url: "https://freesound.org/people/Adelantemos/sounds/222893/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+      # Rustling leaves in ruins
+      - url: "https://freesound.org/people/MaiaSN/sounds/609333/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [160, 140, 110]  # Warm sandstone in morning light
+            variance: [25, 22, 18]
+          brightness:
+            min: 100
+            max: 180
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [200, 180, 150]  # Soft morning sky
+            variance: [30, 28, 24]
+          brightness:
+            min: 140
+            max: 220
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [130, 115, 95]  # Dusty stone floor
+            variance: [20, 18, 15]
+          brightness:
+            min: 80
+            max: 150

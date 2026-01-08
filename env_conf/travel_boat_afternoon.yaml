@@ -1,0 +1,82 @@
+name: "Travel Boat Afternoon"
+category: "coastal"
+description: "Bright afternoon sailing with sparkling blue water and fair winds"
+icon: "⛵"
+
+metadata:
+  tags: ["exploration", "travel", "boat", "ocean", "water", "afternoon", "bright", "outdoor"]
+  intensity: "medium"
+  suitable_for: ["afternoon sailing", "ocean crossing", "trade voyage", "exploration"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Ocean waves (more active)
+      - url: "https://freesound.org/people/Lucas_Schacht/sounds/534916/"
+        volume: 70
+
+      # Ship creaking under sail
+      - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
+        volume: 55
+
+      # Seagulls
+      - url: "https://freesound.org/people/felix.blume/sounds/155747/"
+        volume: 50
+        optional: true
+        probability: 0.6
+
+      # Strong wind in rigging
+      - url: "https://freesound.org/people/iainmccurdy/sounds/645974/"
+        volume: 60
+        optional: true
+        probability: 0.8
+
+      # Rattling rigging
+      - url: "https://freesound.org/people/klankbeeld/sounds/170545/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 5
+
+      groups:
+        backdrop:
+          type: "scene"
+          scenes:
+            ids: [23]  # Ocean scene
+            speed_min: 30
+            speed_max: 190
+          brightness:
+            min: 240
+            max: 255
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [70, 90, 180]  # Bright blue sky
+            variance: [55, 60, 55]
+          brightness:
+            min: 235
+            max: 255
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [60, 100, 160]  # Sparkling blue water
+            variance: [30, 40, 50]
+          brightness:
+            min: 180
+            max: 250

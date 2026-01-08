@@ -1,0 +1,76 @@
+name: "Tavern Afternoon"
+category: "tavern"
+description: "Relaxed afternoon tavern with moderate crowd and warm atmosphere"
+icon: "🍺"
+
+metadata:
+  tags: ["social", "indoor", "afternoon", "relaxed", "medieval"]
+  intensity: "low"
+  suitable_for: ["afternoon drinks", "social encounters", "downtime", "roleplay"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Fireplace crackling
+      - url: "https://freesound.org/people/hansende/sounds/263994/"
+        volume: 55
+
+      # Moderate tavern murmur
+      - url: "https://freesound.org/people/Robinhood76/sounds/700022/"
+        volume: 60
+
+      # Glasses clinking
+      - url: "https://freesound.org/people/EpicWizard/sounds/325194/"
+        volume: 35
+        optional: true
+        probability: 0.6
+
+      # Medieval lute music
+      - url: "https://freesound.org/people/f-r-a-g-i-l-e/sounds/506266/"
+        volume: 25
+        optional: true
+        probability: 0.4
+
+      # Wood floor creaking
+      - url: "https://freesound.org/people/Kostas17/sounds/536365/"
+        volume: 25
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [160, 140, 100]  # Warm afternoon
+            variance: [25, 22, 18]
+          brightness:
+            min: 100
+            max: 180
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes (lower intensity afternoon)
+            speed_min: 10
+            speed_max: 150
+          brightness:
+            min: 140
+            max: 200
+
+        battlefield:
+          type: "inherit_overhead"

@@ -1,0 +1,76 @@
+name: "Shop Night"
+category: "town"
+description: "Cozy evening shop lit by fireplace and candles with late customers"
+icon: "🛒"
+
+metadata:
+  tags: ["social", "indoor", "night", "shopping", "merchant", "cozy", "medieval"]
+  intensity: "low"
+  suitable_for: ["late shopping", "after hours deals", "special items", "evening browse"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Fireplace crackling (prominent at night)
+      - url: "https://freesound.org/people/NickTayloe/sounds/813328/"
+        volume: 55
+
+      # Quiet room tone
+      - url: "https://freesound.org/people/IENBA/sounds/761024/"
+        volume: 35
+
+      # Coins clinking
+      - url: "https://freesound.org/people/husky70/sounds/161315/"
+        volume: 30
+        optional: true
+        probability: 0.5
+
+      # Distant night crickets through walls
+      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+        volume: 15
+        optional: true
+        probability: 0.3
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [120, 100, 70]  # Warm firelight
+            variance: [25, 22, 18]
+          brightness:
+            min: 60
+            max: 130
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch/candle scenes
+            speed_min: 10
+            speed_max: 120
+          brightness:
+            min: 100
+            max: 160
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [100, 80, 55]  # Dark floor
+            variance: [20, 18, 14]
+          brightness:
+            min: 50
+            max: 110

@@ -1,0 +1,74 @@
+name: "Temple Afternoon"
+category: "relaxation"
+description: "Sunlit temple sanctuary with warm light streaming through windows"
+icon: "🛕"
+
+metadata:
+  tags: ["indoor", "temple", "shrine", "afternoon", "peaceful", "meditation"]
+  intensity: "low"
+  suitable_for: ["afternoon meditation", "temple visit", "seeking wisdom", "quiet contemplation"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 3
+    mix:
+      # Singing bowl meditation
+      - url: "https://freesound.org/people/MichiJung/sounds/723722/"
+        volume: 70
+
+      # Crystal bowl
+      - url: "https://freesound.org/people/RedwoodRunner/sounds/460416/"
+        volume: 55
+
+      # Singing bowl tones
+      - url: "https://freesound.org/people/hollajackz/sounds/573804/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [200, 180, 140]  # Warm afternoon light
+            variance: [28, 28, 22]
+          brightness:
+            min: 150
+            max: 220
+          flash:
+            probability: 0.03
+            color: [255, 245, 200]  # Sunbeam through stained glass
+            brightness: 245
+            duration: 2.0
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [220, 200, 160]  # Bright afternoon sun
+            variance: [35, 32, 28]
+          brightness:
+            min: 180
+            max: 250
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [180, 160, 120]  # Stone floor
+            variance: [25, 22, 18]
+          brightness:
+            min: 130
+            max: 195

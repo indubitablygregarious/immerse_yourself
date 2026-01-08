@@ -1,0 +1,70 @@
+name: "Blacksmith"
+category: "town"
+description: "Hot forge with hammer on anvil, bellows, and crackling fire"
+icon: "⚒️"
+
+metadata:
+  tags: ["indoor", "craft", "forge", "metal", "fire"]
+  intensity: "medium"
+  suitable_for: ["shopping", "crafting scenes", "weapon upgrades", "town services"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Blacksmith hammering
+      - url: "https://freesound.org/people/ldezem/sounds/386393/"
+        volume: 75
+
+      # Forge fire crackling
+      - url: "https://freesound.org/people/NickTayloe/sounds/813328/"
+        volume: 60
+
+      # Anvil hits
+      - url: "https://freesound.org/people/MrAuralization/sounds/274846/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 8
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [180, 80, 30]
+            variance: [30, 20, 10]
+          brightness:
+            min: 100
+            max: 180
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28]  # Fire scenes
+            speed_min: 50
+            speed_max: 150
+          brightness:
+            min: 150
+            max: 220
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [200, 100, 40]
+            variance: [40, 30, 15]
+          brightness:
+            min: 120
+            max: 200

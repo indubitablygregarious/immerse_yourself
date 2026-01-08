@@ -1,0 +1,69 @@
+name: "Temple"
+category: "relaxation"
+description: "Peaceful temple sanctuary with singing bowls and meditative atmosphere"
+icon: "🛕"
+
+metadata:
+  tags: ["indoor", "temple", "shrine", "meditation", "peaceful", "religious"]
+  intensity: "low"
+  suitable_for: ["temple visits", "meditation", "divine encounters", "healing rest"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 3
+    mix:
+      # Singing bowl meditation
+      - url: "https://freesound.org/people/MichiJung/sounds/723722/"
+        volume: 70
+
+      # Crystal bowl
+      - url: "https://freesound.org/people/RedwoodRunner/sounds/460416/"
+        volume: 55
+
+      # Singing bowl tones
+      - url: "https://freesound.org/people/hollajackz/sounds/573804/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [200, 180, 140]
+            variance: [25, 25, 20]
+          brightness:
+            min: 120
+            max: 200
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [220, 200, 160]
+            variance: [30, 30, 25]
+          brightness:
+            min: 150
+            max: 230
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [180, 160, 120]
+            variance: [20, 20, 15]
+          brightness:
+            min: 100
+            max: 170

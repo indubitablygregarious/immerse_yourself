@@ -1,0 +1,72 @@
+name: "Throne Room"
+category: "town"
+description: "Grand castle throne room with echoing hall and royal atmosphere"
+icon: "👑"
+
+metadata:
+  tags: ["indoor", "castle", "royal", "grand", "noble", "formal"]
+  intensity: "low"
+  suitable_for: ["royal audiences", "noble encounters", "political intrigue", "formal events"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 3
+    mix:
+      # Quiet indoor room tone
+      - url: "https://freesound.org/people/IENBA/sounds/761024/"
+        volume: 50
+
+      # Distant murmur
+      - url: "https://freesound.org/people/Robinhood76/sounds/700022/"
+        volume: 30
+        optional: true
+        probability: 0.5
+
+      # Torch ambience
+      - url: "https://freesound.org/people/LordStirling/sounds/483692/"
+        volume: 35
+        optional: true
+        probability: 0.6
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [180, 150, 100]
+            variance: [25, 20, 15]
+          brightness:
+            min: 140
+            max: 220
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 20
+            speed_max: 100
+          brightness:
+            min: 180
+            max: 250
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [160, 130, 80]
+            variance: [20, 15, 12]
+          brightness:
+            min: 100
+            max: 180

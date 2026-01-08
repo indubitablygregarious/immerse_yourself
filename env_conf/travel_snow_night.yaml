@@ -1,0 +1,80 @@
+name: "Travel Snow Night"
+category: "travel"
+description: "Cold winter night journey under starlight with moonlit snow"
+icon: "❄️"
+
+metadata:
+  tags: ["outdoor", "travel", "snow", "winter", "night", "cold", "moonlit"]
+  intensity: "medium"
+  suitable_for: ["night travel", "winter urgency", "cold journey", "dangerous path"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Cold night wind
+      - url: "https://freesound.org/people/klankbeeld/sounds/413365/"
+        volume: 70
+
+      # Howling wind
+      - url: "https://freesound.org/people/DBlover/sounds/505999/"
+        volume: 50
+
+      # Wolf howl distant
+      - url: "https://freesound.org/people/Taure/sounds/380156/"
+        volume: 35
+        optional: true
+        probability: 0.3
+
+      # Wind through trees
+      - url: "https://freesound.org/people/klankbeeld/sounds/702233/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [80, 90, 120]  # Cold moonlit blue
+            variance: [20, 22, 30]
+          brightness:
+            min: 60
+            max: 120
+          flash:
+            probability: 0.03
+            color: [180, 200, 230]  # Moonbeam on snow
+            brightness: 180
+            duration: 2.0
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [40, 50, 80]  # Dark winter sky
+            variance: [18, 20, 28]
+          brightness:
+            min: 30
+            max: 80
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [60, 70, 100]  # Moonlit snow
+            variance: [15, 18, 25]
+          brightness:
+            min: 40
+            max: 100

@@ -1,0 +1,69 @@
+name: "Blacksmith Morning"
+category: "town"
+description: "Early morning forge firing up with preparations for the day's work"
+icon: "⚒️"
+
+metadata:
+  tags: ["indoor", "craft", "forge", "morning", "fire", "preparation"]
+  intensity: "low"
+  suitable_for: ["early orders", "weapon pickup", "commission discussion", "town services"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Forge fire starting up
+      - url: "https://freesound.org/people/NickTayloe/sounds/813328/"
+        volume: 55
+
+      # Light hammering beginning
+      - url: "https://freesound.org/people/ldezem/sounds/386393/"
+        volume: 50
+
+      # Distant morning birds
+      - url: "https://freesound.org/people/klankbeeld/sounds/625333/"
+        volume: 25
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [180, 140, 100]  # Warming forge + morning light
+            variance: [30, 25, 18]
+          brightness:
+            min: 120
+            max: 190
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [190, 160, 120]  # Morning light through windows
+            variance: [32, 28, 22]
+          brightness:
+            min: 150
+            max: 220
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [160, 110, 60]  # Warming floor
+            variance: [28, 22, 15]
+          brightness:
+            min: 100
+            max: 170

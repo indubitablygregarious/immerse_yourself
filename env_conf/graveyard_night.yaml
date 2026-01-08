@@ -1,0 +1,82 @@
+name: "Graveyard Night"
+category: "spooky"
+description: "Eerie graveyard at night with howling wind and distant crows"
+icon: "🪦"
+
+metadata:
+  tags: ["spooky", "outdoor", "night", "cemetery", "horror", "dark"]
+  intensity: "high"
+  suitable_for: ["horror scenes", "undead encounters", "graveyard exploration", "necromancy"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Eerie wind
+      - url: "https://freesound.org/people/Kinoton/sounds/558840/"
+        volume: 75
+
+      # Ravens/crows
+      - url: "https://freesound.org/people/SoundsLikeYuk/sounds/723570/"
+        volume: 55
+        optional: true
+        probability: 0.7
+
+      # Rustling leaves
+      - url: "https://freesound.org/people/MaiaSN/sounds/609333/"
+        volume: 45
+        optional: true
+        probability: 0.5
+
+      # Wolf howl distant
+      - url: "https://freesound.org/people/Taure/sounds/380156/"
+        volume: 30
+        optional: true
+        probability: 0.3
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [35, 35, 75]  # Deep purple-blue night
+            variance: [15, 15, 25]
+          brightness:
+            min: 40
+            max: 90
+          flash:
+            probability: 0.03
+            color: [150, 160, 180]  # Ghostly moonlight
+            brightness: 120
+            duration: 2.0
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [50, 45, 85]  # Dark purple sky
+            variance: [18, 18, 28]
+          brightness:
+            min: 50
+            max: 100
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [25, 25, 55]  # Very dark ground
+            variance: [10, 10, 18]
+          brightness:
+            min: 20
+            max: 60

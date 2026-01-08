@@ -1,0 +1,71 @@
+name: "Shop Morning"
+category: "town"
+description: "Quiet morning shop just opening with fresh inventory and early customers"
+icon: "🛒"
+
+metadata:
+  tags: ["social", "indoor", "morning", "shopping", "merchant", "medieval"]
+  intensity: "low"
+  suitable_for: ["early shopping", "merchant deals", "fresh stock", "opening time"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Quiet indoor room tone
+      - url: "https://freesound.org/people/IENBA/sounds/761024/"
+        volume: 40
+
+      # Morning birds faintly through windows
+      - url: "https://freesound.org/people/klankbeeld/sounds/625333/"
+        volume: 25
+        optional: true
+        probability: 0.4
+
+      # Coins clinking (early transactions)
+      - url: "https://freesound.org/people/husky70/sounds/161315/"
+        volume: 25
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [190, 180, 160]  # Soft morning light
+            variance: [25, 24, 20]
+          brightness:
+            min: 130
+            max: 200
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [210, 200, 180]  # Morning sun through windows
+            variance: [30, 28, 24]
+          brightness:
+            min: 170
+            max: 240
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [160, 150, 130]  # Warm wood floor
+            variance: [22, 20, 18]
+          brightness:
+            min: 110
+            max: 170

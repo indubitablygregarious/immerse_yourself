@@ -1,0 +1,75 @@
+name: "Graveyard Afternoon"
+category: "spooky"
+description: "Quiet graveyard in afternoon light with gentle wind through old stones"
+icon: "🪦"
+
+metadata:
+  tags: ["spooky", "outdoor", "afternoon", "cemetery", "peaceful", "somber"]
+  intensity: "low"
+  suitable_for: ["exploration", "burial ceremony", "investigation", "reflection"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Wind through stones
+      - url: "https://freesound.org/people/Kinoton/sounds/558840/"
+        volume: 50
+
+      # Afternoon birds
+      - url: "https://freesound.org/people/klankbeeld/sounds/414907/"
+        volume: 45
+
+      # Ravens/crows
+      - url: "https://freesound.org/people/SoundsLikeYuk/sounds/723570/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Rustling leaves
+      - url: "https://freesound.org/people/MaiaSN/sounds/609333/"
+        volume: 40
+        optional: true
+        probability: 0.6
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [150, 140, 110]  # Warm afternoon stone
+            variance: [25, 22, 18]
+          brightness:
+            min: 130
+            max: 200
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [180, 175, 160]  # Afternoon sky
+            variance: [30, 28, 25]
+          brightness:
+            min: 170
+            max: 240
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [110, 100, 80]  # Sun-warmed ground
+            variance: [18, 16, 14]
+          brightness:
+            min: 100
+            max: 160

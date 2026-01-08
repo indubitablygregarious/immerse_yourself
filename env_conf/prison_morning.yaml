@@ -1,0 +1,75 @@
+name: "Prison Morning"
+category: "dungeon"
+description: "Prison cells in early morning with dim light through barred windows"
+icon: "⛓️"
+
+metadata:
+  tags: ["indoor", "prison", "jail", "dungeon", "morning", "captivity"]
+  intensity: "medium"
+  suitable_for: ["prison morning", "guard change", "interrogation", "escape attempt"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Chains rattling
+      - url: "https://freesound.org/people/MSHahen/sounds/267543/"
+        volume: 50
+
+      # Water dripping
+      - url: "https://freesound.org/people/Sclolex/sounds/177958/"
+        volume: 45
+
+      # Distant morning birds through windows
+      - url: "https://freesound.org/people/klankbeeld/sounds/625333/"
+        volume: 20
+        optional: true
+        probability: 0.4
+
+      # Dungeon ambience
+      - url: "https://freesound.org/people/Kinoton/sounds/516566/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [90, 85, 75]  # Pale morning through small windows
+            variance: [15, 14, 12]
+          brightness:
+            min: 50
+            max: 110
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [110, 100, 90]  # Weak morning light
+            variance: [18, 16, 14]
+          brightness:
+            min: 70
+            max: 130
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [60, 55, 48]  # Dim stone floor
+            variance: [12, 11, 10]
+          brightness:
+            min: 35
+            max: 80

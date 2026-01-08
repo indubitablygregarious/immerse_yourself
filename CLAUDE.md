@@ -114,6 +114,68 @@ The launcher handles these differently:
 - Sound plays asynchronously via `SoundEngine.play_async()` with completion callback
 - Triggering a sound-only config does NOT stop running lights
 
+### Time-of-Day Variants
+
+Most environments have morning/afternoon/night variants with different lighting and sounds:
+
+**Naming Convention**: `{base_name}_{time}.yaml` where time is `morning`, `afternoon`, or `night`
+
+**Examples**:
+- `forest.yaml` (base) → `forest_morning.yaml`, `forest_afternoon.yaml`, `forest_night.yaml`
+- `tavern.yaml` (base) → `tavern_morning.yaml`, `tavern_afternoon.yaml`, `tavern_night.yaml`
+
+**Time-specific differences**:
+| Time | Lighting | Brightness | Sounds | Cycletime |
+|------|----------|------------|--------|-----------|
+| Morning | Warm gold/pink, soft | Medium (130-210) | Dawn chorus, roosters | Slower (12-16s) |
+| Afternoon | Bright, saturated | High (170-255) | Insects, busy activity | Medium (8-12s) |
+| Night | Dark blue/purple, low | Low (20-100) | Crickets, owls, wolves | Slow (14-20s) |
+
+**Environments with full time variants** (50 new configs):
+- Outdoor: forest, ancient_ruins, graveyard, swamp, marketplace, travel_snow
+- Town: town (morning/afternoon), marketplace (all three)
+- Indoor: tavern, library, shop, blacksmith, temple, throne_room, prison
+- Semi-outdoor: camping, travel_boat
+
+### Sound Variation System (sound_conf)
+
+Entry sounds can use `sound_conf:` references for randomized variety:
+
+- **`sound_conf/` directory**: Contains YAML files defining sound collections
+- **Random selection**: One sound is randomly chosen at runtime from the collection
+- **Mixed sources**: Collections can include local files AND freesound.org URLs
+
+**Available sound_confs:**
+| Reference | Description | Sounds |
+|-----------|-------------|--------|
+| `sound_conf:transition` | Whooshes, magic chimes, swooshes | 14 |
+| `sound_conf:squeaky_door` | Door creaks and squeaks | 7 |
+| `sound_conf:battle_intro` | Sword draws, war drums, danger stings | 8 |
+| `sound_conf:camp_setup` | Digging, shoveling, setup sounds | 7 |
+| `sound_conf:victory` | Fanfares, triumph sounds | 7 |
+| `sound_conf:applause` | Crowd clapping, cheering | 7 |
+
+**Usage in environment YAML:**
+```yaml
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"  # Randomly selects from collection
+```
+
+**sound_conf YAML format:**
+```yaml
+name: "Squeaky Door"
+description: "Various door sounds"
+sounds:
+  - file: "sounds/dooropen.wav"      # Local file
+  - url: "https://freesound.org/..."  # Freesound URL (auto-downloaded)
+```
+
+**Key files:**
+- `sound_conf_resolver.py` - Resolution logic for sound_conf references
+- `sound_conf/*.yaml` - Sound collection definitions
+
 ## Architecture (Detailed)
 
 See `ARCHITECTURE.md` for complete architectural documentation including:
@@ -154,7 +216,7 @@ metadata:
 engines:
   sound:
     enabled: true
-    file: "your_sound.wav"
+    file: "sound_conf:transition"  # Use sound_conf for variety (see sound_conf/ dir)
 
   spotify:
     enabled: true

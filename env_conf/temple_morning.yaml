@@ -1,0 +1,71 @@
+name: "Temple Morning"
+category: "relaxation"
+description: "Dawn temple sanctuary with morning prayers and soft golden light"
+icon: "🛕"
+
+metadata:
+  tags: ["indoor", "temple", "shrine", "morning", "dawn", "prayer", "peaceful"]
+  intensity: "low"
+  suitable_for: ["morning prayers", "meditation", "blessing seeking", "dawn worship"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 3
+    mix:
+      # Singing bowl morning meditation
+      - url: "https://freesound.org/people/hollajackz/sounds/573804/"
+        volume: 60
+
+      # Morning birds outside temple
+      - url: "https://freesound.org/people/klankbeeld/sounds/625333/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+      # Wind chimes
+      - url: "https://freesound.org/people/Adelantemos/sounds/222893/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 16
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [220, 190, 150]  # Golden dawn light
+            variance: [28, 25, 20]
+          brightness:
+            min: 140
+            max: 210
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [240, 210, 170]  # Soft morning sun
+            variance: [32, 30, 25]
+          brightness:
+            min: 170
+            max: 240
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [190, 170, 130]  # Warm stone floor
+            variance: [24, 22, 18]
+          brightness:
+            min: 120
+            max: 185

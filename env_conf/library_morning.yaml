@@ -1,0 +1,77 @@
+name: "Library Morning"
+category: "town"
+description: "Quiet morning library with soft light through windows and fresh start"
+icon: "📚"
+
+metadata:
+  tags: ["social", "indoor", "quiet", "morning", "study", "medieval"]
+  intensity: "low"
+  suitable_for: ["research", "studying", "early morning work", "quiet contemplation"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Very quiet library ambience
+      - url: "https://freesound.org/people/xkeril/sounds/620683/"
+        volume: 50
+
+      # Distant morning birds through windows
+      - url: "https://freesound.org/people/klankbeeld/sounds/625333/"
+        volume: 25
+        optional: true
+        probability: 0.4
+
+      # Clock ticking
+      - url: "https://freesound.org/people/OwlStorm/sounds/212181/"
+        volume: 35
+        optional: true
+        probability: 0.6
+
+      # Page turning
+      - url: "https://freesound.org/people/lartti/sounds/513779/"
+        volume: 25
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 15
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [200, 190, 170]  # Soft morning light
+            variance: [25, 24, 20]
+          brightness:
+            min: 140
+            max: 210
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [220, 210, 190]  # Natural morning light
+            variance: [30, 28, 24]
+          brightness:
+            min: 180
+            max: 245
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [170, 160, 140]  # Warm wood tones
+            variance: [22, 20, 18]
+          brightness:
+            min: 120
+            max: 180

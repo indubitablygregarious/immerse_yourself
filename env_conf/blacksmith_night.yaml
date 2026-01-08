@@ -1,0 +1,72 @@
+name: "Blacksmith Night"
+category: "town"
+description: "Late night forge with dying embers and quiet cooling metal"
+icon: "⚒️"
+
+metadata:
+  tags: ["indoor", "craft", "forge", "night", "fire", "quiet", "embers"]
+  intensity: "low"
+  suitable_for: ["late pickup", "secret commissions", "after hours meeting", "quiet work"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Dying forge fire/embers
+      - url: "https://freesound.org/people/NickTayloe/sounds/813328/"
+        volume: 45
+
+      # Occasional light hammering
+      - url: "https://freesound.org/people/ldezem/sounds/386393/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Distant night crickets
+      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+        volume: 20
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [140, 60, 25]  # Cooling embers
+            variance: [30, 20, 12]
+          brightness:
+            min: 50
+            max: 120
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28]  # Dying fire scenes
+            speed_min: 10
+            speed_max: 80
+          brightness:
+            min: 80
+            max: 140
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [100, 50, 25]  # Dark with ember glow
+            variance: [25, 18, 10]
+          brightness:
+            min: 40
+            max: 100

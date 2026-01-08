@@ -1,0 +1,75 @@
+name: "Travel Boat Morning"
+category: "coastal"
+description: "Early morning ocean voyage with pink dawn sky and calm seas"
+icon: "⛵"
+
+metadata:
+  tags: ["exploration", "travel", "boat", "ocean", "water", "morning", "dawn", "outdoor"]
+  intensity: "low"
+  suitable_for: ["dawn departure", "morning sailing", "ocean travel", "sunrise voyage"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Gentle ocean waves
+      - url: "https://freesound.org/people/Lucas_Schacht/sounds/534916/"
+        volume: 55
+
+      # Ship creaking
+      - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
+        volume: 45
+
+      # Morning seagulls
+      - url: "https://freesound.org/people/felix.blume/sounds/155747/"
+        volume: 50
+        optional: true
+        probability: 0.7
+
+      # Light wind in sails
+      - url: "https://freesound.org/people/iainmccurdy/sounds/645974/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 8
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [200, 160, 150]  # Pink/orange dawn sky
+            variance: [35, 30, 25]
+          brightness:
+            min: 150
+            max: 220
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [180, 150, 170]  # Pale pink morning sky
+            variance: [40, 35, 45]
+          brightness:
+            min: 170
+            max: 240
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [100, 120, 150]  # Morning ocean reflection
+            variance: [25, 30, 35]
+          brightness:
+            min: 120
+            max: 190

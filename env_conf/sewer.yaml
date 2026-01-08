@@ -1,0 +1,75 @@
+name: "Sewer"
+category: "dungeon"
+description: "Dark underground tunnels with dripping water and distant echoes"
+icon: "🕳️"
+
+metadata:
+  tags: ["underground", "sewer", "tunnel", "dark", "water", "urban"]
+  intensity: "medium"
+  suitable_for: ["urban exploration", "thieves guild", "rat encounters", "escape routes"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Cave dripping
+      - url: "https://freesound.org/people/Sclolex/sounds/177958/"
+        volume: 80
+
+      # More dripping in tunnel
+      - url: "https://freesound.org/people/tim.kahn/sounds/237265/"
+        volume: 65
+
+      # Water drips
+      - url: "https://freesound.org/people/tosha73/sounds/546359/"
+        volume: 50
+        optional: true
+        probability: 0.6
+
+      # Drain water flow
+      - url: "https://freesound.org/people/clif_creates/sounds/381418/"
+        volume: 45
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [40, 50, 45]
+            variance: [10, 15, 12]
+          brightness:
+            min: 30
+            max: 70
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [50, 60, 55]
+            variance: [15, 20, 18]
+          brightness:
+            min: 50
+            max: 100
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [35, 45, 40]
+            variance: [10, 12, 10]
+          brightness:
+            min: 25
+            max: 60

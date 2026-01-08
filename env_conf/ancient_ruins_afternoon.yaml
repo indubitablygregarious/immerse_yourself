@@ -1,0 +1,75 @@
+name: "Ancient Ruins Afternoon"
+category: "dungeon"
+description: "Sun-baked ancient ruins with heat shimmer and buzzing insects"
+icon: "🏛️"
+
+metadata:
+  tags: ["outdoor", "ruins", "ancient", "hot", "afternoon", "exploration"]
+  intensity: "medium"
+  suitable_for: ["exploration", "treasure hunting", "puzzle solving", "archaeology"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Hot afternoon insects/cicadas
+      - url: "https://freesound.org/people/kvv_audio_joosthogervorst/sounds/717893/"
+        volume: 60
+
+      # Wind through ruins
+      - url: "https://freesound.org/people/Kinoton/sounds/558840/"
+        volume: 55
+
+      # Distant birds
+      - url: "https://freesound.org/people/klankbeeld/sounds/414907/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Stone settling/grinding
+      - url: "https://freesound.org/people/Garuda1982/sounds/560304/"
+        volume: 25
+        optional: true
+        probability: 0.3
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [180, 160, 120]  # Hot sandstone
+            variance: [30, 28, 22]
+          brightness:
+            min: 150
+            max: 230
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [220, 210, 180]  # Bright afternoon sun
+            variance: [35, 32, 28]
+          brightness:
+            min: 200
+            max: 255
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [150, 135, 105]  # Sun-bleached stone
+            variance: [25, 22, 18]
+          brightness:
+            min: 120
+            max: 200

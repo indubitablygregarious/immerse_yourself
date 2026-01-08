@@ -1,0 +1,80 @@
+name: "Ancient Ruins Night"
+category: "dungeon"
+description: "Moonlit ancient ruins with mysterious whispers and eerie atmosphere"
+icon: "🏛️"
+
+metadata:
+  tags: ["outdoor", "ruins", "ancient", "mysterious", "night", "eerie", "moonlit"]
+  intensity: "medium"
+  suitable_for: ["night exploration", "ritual discovery", "undead encounters", "mystery"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Eerie wind through ruins
+      - url: "https://freesound.org/people/Kinoton/sounds/558840/"
+        volume: 70
+
+      # Whispering shadows atmosphere
+      - url: "https://freesound.org/people/matiogames/sounds/796514/"
+        volume: 60
+
+      # Night crickets
+      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+      # Owl hooting
+      - url: "https://freesound.org/people/Anthousai/sounds/398734/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [60, 65, 80]  # Cold moonlit stone
+            variance: [18, 20, 25]
+          brightness:
+            min: 40
+            max: 100
+          flash:
+            probability: 0.04
+            color: [180, 190, 210]  # Moonbeam
+            brightness: 150
+            duration: 2.0
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [40, 50, 70]  # Dark night sky
+            variance: [20, 22, 28]
+          brightness:
+            min: 30
+            max: 90
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [50, 55, 65]  # Dark shadowy stone
+            variance: [15, 16, 20]
+          brightness:
+            min: 25
+            max: 70

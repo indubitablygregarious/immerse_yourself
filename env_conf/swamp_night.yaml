@@ -1,0 +1,80 @@
+name: "Swamp Night"
+category: "forest"
+description: "Dark murky swamp at night with loud frogs and mysterious sounds"
+icon: "🐸"
+
+metadata:
+  tags: ["outdoor", "swamp", "marsh", "night", "frogs", "dark", "mysterious"]
+  intensity: "medium"
+  suitable_for: ["night travel", "hag encounters", "will-o-wisp", "ambush"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Night frogs chorus (loud at night)
+      - url: "https://freesound.org/people/felix.blume/sounds/673259/"
+        volume: 85
+
+      # More frogs
+      - url: "https://freesound.org/people/KrystianPawlowski/sounds/586933/"
+        volume: 70
+
+      # Night crickets
+      - url: "https://freesound.org/people/mesaiosound/sounds/594779/"
+        volume: 55
+        optional: true
+        probability: 0.7
+
+      # Water sounds
+      - url: "https://freesound.org/people/Didi0508/sounds/541955/"
+        volume: 45
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [20, 40, 30]  # Dark murky green
+            variance: [12, 18, 14]
+          brightness:
+            min: 30
+            max: 80
+          flash:
+            probability: 0.04
+            color: [100, 200, 150]  # Will-o-wisp green glow
+            brightness: 140
+            duration: 1.5
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [15, 35, 25]  # Dark canopy
+            variance: [10, 15, 12]
+          brightness:
+            min: 20
+            max: 60
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [10, 30, 20]  # Very dark water
+            variance: [8, 12, 10]
+          brightness:
+            min: 15
+            max: 50

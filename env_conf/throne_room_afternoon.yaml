@@ -1,0 +1,70 @@
+name: "Throne Room Afternoon"
+category: "town"
+description: "Grand throne room in full afternoon light with active court proceedings"
+icon: "👑"
+
+metadata:
+  tags: ["indoor", "castle", "royal", "afternoon", "grand", "busy", "formal"]
+  intensity: "medium"
+  suitable_for: ["royal audiences", "court proceedings", "political intrigue", "formal events"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Room tone with activity
+      - url: "https://freesound.org/people/IENBA/sounds/761024/"
+        volume: 50
+
+      # Court murmur
+      - url: "https://freesound.org/people/Robinhood76/sounds/700022/"
+        volume: 40
+
+      # Torch ambience
+      - url: "https://freesound.org/people/LordStirling/sounds/483692/"
+        volume: 35
+        optional: true
+        probability: 0.6
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [190, 160, 110]  # Rich afternoon light
+            variance: [30, 25, 18]
+          brightness:
+            min: 160
+            max: 235
+
+        overhead:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 20
+            speed_max: 100
+          brightness:
+            min: 200
+            max: 255
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [170, 145, 95]  # Warm marble floor
+            variance: [25, 20, 15]
+          brightness:
+            min: 130
+            max: 200

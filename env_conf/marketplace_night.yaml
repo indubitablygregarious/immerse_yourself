@@ -1,0 +1,76 @@
+name: "Marketplace Night"
+category: "town"
+description: "Night market with torchlight, late vendors, and quieter crowds"
+icon: "🏪"
+
+metadata:
+  tags: ["outdoor", "market", "town", "night", "torchlit", "evening"]
+  intensity: "low"
+  suitable_for: ["night shopping", "black market", "shady deals", "evening stroll"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Quieter night crowd
+      - url: "https://freesound.org/people/KEVOY/sounds/752092/"
+        volume: 45
+
+      # Torch crackling
+      - url: "https://freesound.org/people/LordStirling/sounds/483692/"
+        volume: 50
+
+      # Night crickets
+      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+        volume: 40
+        optional: true
+        probability: 0.6
+
+      # Distant tavern sounds
+      - url: "https://freesound.org/people/Robinhood76/sounds/700022/"
+        volume: 25
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "scene"
+          scenes:
+            ids: [5, 28, 31]  # Torch scenes
+            speed_min: 10
+            speed_max: 120
+          brightness:
+            min: 80
+            max: 150
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [30, 25, 50]  # Dark night sky
+            variance: [15, 15, 25]
+          brightness:
+            min: 20
+            max: 60
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [80, 60, 40]  # Torchlit ground
+            variance: [20, 18, 15]
+          brightness:
+            min: 50
+            max: 110

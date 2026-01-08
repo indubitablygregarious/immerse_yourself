@@ -1,0 +1,75 @@
+name: "Ancient Ruins"
+category: "dungeon"
+description: "Mysterious ancient ruins with wind whistling through crumbling stones"
+icon: "🏛️"
+
+metadata:
+  tags: ["outdoor", "ruins", "ancient", "mysterious", "exploration"]
+  intensity: "medium"
+  suitable_for: ["exploration", "treasure hunting", "ancient temples", "archaeology"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Eerie wind through ruins
+      - url: "https://freesound.org/people/Kinoton/sounds/558840/"
+        volume: 70
+
+      # Whispering atmosphere
+      - url: "https://freesound.org/people/matiogames/sounds/796514/"
+        volume: 55
+
+      # Stone grinding
+      - url: "https://freesound.org/people/Garuda1982/sounds/560304/"
+        volume: 30
+        optional: true
+        probability: 0.4
+
+      # Distant wind chimes
+      - url: "https://freesound.org/people/Adelantemos/sounds/222893/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [130, 120, 100]
+            variance: [20, 20, 15]
+          brightness:
+            min: 80
+            max: 160
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [150, 140, 120]
+            variance: [25, 25, 20]
+          brightness:
+            min: 100
+            max: 190
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [110, 100, 85]
+            variance: [18, 18, 14]
+          brightness:
+            min: 60
+            max: 130

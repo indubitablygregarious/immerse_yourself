@@ -14,8 +14,39 @@ engines:
     file: "sounds/dig.wav"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:4afgq42TTtXPh0Io3D135i"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:4afgq42TTtXPh0Io3D135i"
+    min_sounds: 2
+    max_sounds: 5
+    mix:
+      # Campfire and coyotes in desert night (required)
+      - url: "https://freesound.org/people/ghosting11/sounds/721816/"
+        volume: 60
+
+      # Arizona night with cicadas (required)
+      - url: "https://freesound.org/people/Marnie.Devereux/sounds/398600/"
+        volume: 55
+
+      # Desert night air with crickets (optional)
+      - url: "https://freesound.org/people/kangaroovindaloo/sounds/147264/"
+        volume: 45
+        optional: true
+        probability: 0.5
+
+      # Coyotes howling pack (optional)
+      - url: "https://freesound.org/people/SamsterBirdies/sounds/640059/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Cool desert night wind (optional)
+      - url: "https://freesound.org/people/kangaroovindaloo/sounds/102587/"
+        volume: 40
+        optional: true
+        probability: 0.5
 
   lights:
     enabled: true

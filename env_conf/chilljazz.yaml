@@ -14,8 +14,33 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:37i9dQZF1EIe80k6uRBZGd"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:37i9dQZF1EIe80k6uRBZGd"
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Cafe ambience (required)
+      - url: "https://freesound.org/people/CharleneZ/sounds/326371/"
+        volume: 50
+
+      # Coffee shop binaural (required)
+      - url: "https://freesound.org/people/Speedenza/sounds/460125/"
+        volume: 45
+
+      # Small indie cafe afternoon (optional)
+      - url: "https://freesound.org/people/theplax/sounds/656618/"
+        volume: 45
+        optional: true
+        probability: 0.5
+
+      # Gentle rain on window (optional)
+      - url: "https://freesound.org/people/RutgerMuller/sounds/158691/"
+        volume: 35
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

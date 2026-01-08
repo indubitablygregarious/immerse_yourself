@@ -19,7 +19,13 @@ from .spotify_engine import (
     start_spotify,
     wait_for_spotify_device,
 )
-from .lights_engine import LightsEngine, LightBulbGroup
+from .lights_engine import (
+    LightsEngine,
+    LightBulbGroup,
+    disable_lights_for_session,
+    enable_lights_for_session,
+    are_lights_disabled,
+)
 
 __all__ = [
     "SoundEngine",
@@ -41,4 +47,7 @@ __all__ = [
     "wait_for_spotify_device",
     "LightsEngine",
     "LightBulbGroup",
+    "disable_lights_for_session",
+    "enable_lights_for_session",
+    "are_lights_disabled",
 ]

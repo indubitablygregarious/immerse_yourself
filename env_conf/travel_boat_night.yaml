@@ -14,8 +14,39 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:37i9dQZF1DWV90ZWj21ygB"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:37i9dQZF1DWV90ZWj21ygB"
+    min_sounds: 2
+    max_sounds: 5
+    mix:
+      # Calm sea at night (required)
+      - url: "https://freesound.org/people/kevp888/sounds/836484/"
+        volume: 60
+
+      # Ship creaking (required)
+      - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
+        volume: 45
+
+      # Water lapping on hull (optional)
+      - url: "https://freesound.org/people/kyles/sounds/637206/"
+        volume: 50
+        optional: true
+        probability: 0.6
+
+      # Night waves from beach (optional)
+      - url: "https://freesound.org/people/felix.blume/sounds/510236/"
+        volume: 45
+        optional: true
+        probability: 0.5
+
+      # Humpback whale song (optional - rare)
+      - url: "https://freesound.org/people/MBARI_MARS/sounds/448984/"
+        volume: 30
+        optional: true
+        probability: 0.2
 
   lights:
     enabled: true

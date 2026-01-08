@@ -14,8 +14,57 @@ engines:
     file: "sounds/dooropen.wav"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:68O4wDfqFOBcDm3RV9dvsF"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:68O4wDfqFOBcDm3RV9dvsF"
+    min_sounds: 3
+    max_sounds: 6
+    mix:
+      # Town square crowd ambience (required)
+      - url: "https://freesound.org/people/kevp888/sounds/752092/"
+        volume: 70
+
+      # Footsteps on cobblestone (required)
+      - url: "https://freesound.org/people/YleArkisto/sounds/322565/"
+        volume: 55
+
+      # Medieval market vendors (optional)
+      - url: "https://freesound.org/people/bolkmar/sounds/424790/"
+        volume: 50
+        optional: true
+        probability: 0.6
+
+      # Cart wheels rolling (optional)
+      - url: "https://freesound.org/people/craigsmith/sounds/437078/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Blacksmith hammering (optional)
+      - url: "https://freesound.org/people/Emmaproductions/sounds/254370/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Children playing (optional)
+      - url: "https://freesound.org/people/Libra222/sounds/165529/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Horse hooves (optional)
+      - url: "https://freesound.org/people/guynoland/sounds/549882/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Church bells (optional - rare)
+      - url: "https://freesound.org/people/SoundsExciting/sounds/428395/"
+        volume: 30
+        optional: true
+        probability: 0.2
 
   lights:
     enabled: true

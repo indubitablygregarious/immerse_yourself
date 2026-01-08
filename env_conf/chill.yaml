@@ -14,8 +14,39 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:0vvXsWCC9xrXsKd4FyS8kM"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:0vvXsWCC9xrXsKd4FyS8kM"
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Calm ambient drone (required)
+      - url: "https://freesound.org/people/Usilaya/sounds/530424/"
+        volume: 50
+
+      # Beach waves ambient (required)
+      - url: "https://freesound.org/people/szegvari/sounds/532204/"
+        volume: 45
+
+      # Gentle wind chimes (optional)
+      - url: "https://freesound.org/people/Adelantemos/sounds/222893/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Singing bowl meditation (optional)
+      - url: "https://freesound.org/people/hollandm/sounds/573804/"
+        volume: 35
+        optional: true
+        probability: 0.3
+
+      # Bamboo chimes (optional)
+      - url: "https://freesound.org/people/GuntherDorksen/sounds/328059/"
+        volume: 35
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

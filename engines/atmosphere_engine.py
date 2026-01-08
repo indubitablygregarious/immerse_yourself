@@ -236,28 +236,125 @@ class AtmosphereEngine:
             names.append(name)
         return names
 
-    def play_mix(self, mix: List[Dict[str, Any]]) -> bool:
+    def select_sounds(self, mix: List[Dict[str, Any]], min_sounds: int = 2, max_sounds: int = 6) -> List[Dict[str, Any]]:
         """
-        Start playing a mix of sounds.
+        Select which sounds to play based on optional/probability/pool settings.
+
+        Selection logic:
+        1. Required sounds (no optional flag) are always included
+        2. Pool sounds: group by pool name, pick one randomly from each pool
+        3. Probability sounds: include if random roll passes probability threshold
+        4. Enforce min/max constraints by adding/removing optional sounds
+
+        Args:
+            mix: List of sound configurations
+            min_sounds: Minimum number of sounds to play
+            max_sounds: Maximum number of sounds to play
+
+        Returns:
+            List of selected sound configurations
+        """
+        import random
+
+        required = []
+        optional_probability = []
+        pools: Dict[str, List[Dict[str, Any]]] = {}
+
+        # Categorize sounds
+        for sound in mix:
+            is_optional = sound.get("optional", False)
+            pool_name = sound.get("pool")
+            probability = sound.get("probability")
+
+            if not is_optional:
+                # Required sound - always include
+                required.append(sound)
+            elif pool_name:
+                # Pool-based sound - group by pool name
+                if pool_name not in pools:
+                    pools[pool_name] = []
+                pools[pool_name].append(sound)
+            elif probability is not None:
+                # Probability-based sound
+                optional_probability.append(sound)
+            else:
+                # Optional without probability or pool - treat as 50% probability
+                optional_probability.append({**sound, "probability": 0.5})
+
+        selected = list(required)
+        unselected_optional = []
+
+        # Select one random sound from each pool
+        for pool_name, pool_sounds in pools.items():
+            chosen = random.choice(pool_sounds)
+            selected.append(chosen)
+            # Track unselected pool sounds for potential min enforcement
+            for s in pool_sounds:
+                if s is not chosen:
+                    unselected_optional.append(s)
+
+        # Process probability-based sounds
+        for sound in optional_probability:
+            prob = sound.get("probability", 0.5)
+            if random.random() < prob:
+                selected.append(sound)
+            else:
+                unselected_optional.append(sound)
+
+        # Enforce max_sounds constraint
+        if len(selected) > max_sounds:
+            # Keep required sounds, randomly remove optional until at max
+            required_set = set(id(s) for s in required)
+            optional_in_selected = [s for s in selected if id(s) not in required_set]
+            random.shuffle(optional_in_selected)
+
+            # Calculate how many to remove
+            excess = len(selected) - max_sounds
+            to_remove = optional_in_selected[:excess]
+            selected = [s for s in selected if s not in to_remove]
+
+        # Enforce min_sounds constraint
+        if len(selected) < min_sounds and unselected_optional:
+            needed = min_sounds - len(selected)
+            random.shuffle(unselected_optional)
+            selected.extend(unselected_optional[:needed])
+
+        return selected
+
+    def play_mix(self, mix: List[Dict[str, Any]], min_sounds: int = 2, max_sounds: int = 6) -> tuple:
+        """
+        Start playing a mix of sounds with random selection.
 
         Each sound loops infinitely with its specified volume and fades in
-        over 3 seconds.
+        over 3 seconds. Optional sounds are selected based on probability
+        and pool settings.
 
         Args:
             mix: List of sound configurations, each with:
                 - url: freesound.org URL or local file path (required)
                 - volume: 0-100, defaults to 100 (optional)
+                - optional: bool, marks sound as optional (optional)
+                - probability: 0.0-1.0, chance to play if optional (optional)
+                - pool: string, pool name for group selection (optional)
+            min_sounds: Minimum number of sounds to play
+            max_sounds: Maximum number of sounds to play
 
         Returns:
-            True if at least one sound started successfully
+            Tuple of (success: bool, selected_urls: List[str])
+            - success: True if at least one sound started
+            - selected_urls: List of URLs that were actually selected to play
         """
         if not self._player_cmd:
             print("WARNING: ffplay not found. Atmosphere requires ffplay (ffmpeg).")
-            return False
+            return False, []
+
+        # Select which sounds to play
+        selected_sounds = self.select_sounds(mix, min_sounds, max_sounds)
 
         started_any = False
+        selected_urls = []
 
-        for sound_config in mix:
+        for sound_config in selected_sounds:
             url = sound_config.get("url", "")
             volume = sound_config.get("volume", 100)
 
@@ -288,11 +385,12 @@ class AtmosphereEngine:
                 )
                 register_atmosphere_process(proc, url)
                 started_any = True
+                selected_urls.append(url)
             except Exception as e:
                 print(f"WARNING: Failed to start atmosphere sound: {url}")
                 print(f"         Reason: {e}")
 
-        return started_any
+        return started_any, selected_urls
 
     def stop(self, fade_out: bool = True) -> int:
         """

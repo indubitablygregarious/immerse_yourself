@@ -14,8 +14,39 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:7o2W8HWWiozS25FZHqSNwQ"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:7o2W8HWWiozS25FZHqSNwQ"
+    min_sounds: 2
+    max_sounds: 5
+    mix:
+      # Calm sea at night (required)
+      - url: "https://freesound.org/people/kevp888/sounds/836484/"
+        volume: 60
+
+      # Night waves from Thailand beach (required)
+      - url: "https://freesound.org/people/felix.blume/sounds/510236/"
+        volume: 55
+
+      # Night crickets (optional)
+      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Evening beach ambience (optional)
+      - url: "https://freesound.org/people/kevp888/sounds/836178/"
+        volume: 45
+        optional: true
+        probability: 0.5
+
+      # Young people on beach evening (optional)
+      - url: "https://freesound.org/people/klankbeeld/sounds/190043/"
+        volume: 30
+        optional: true
+        probability: 0.3
 
   lights:
     enabled: true

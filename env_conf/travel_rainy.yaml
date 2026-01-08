@@ -14,8 +14,39 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:2ALchm62vkQWpeUY8cBVbV"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:2ALchm62vkQWpeUY8cBVbV"
+    min_sounds: 2
+    max_sounds: 5
+    mix:
+      # Gentle summer rain (required)
+      - url: "https://freesound.org/people/newlocknew/sounds/828660/"
+        volume: 60
+
+      # Rain falling on forest leaves (required)
+      - url: "https://freesound.org/people/AlanCat/sounds/383064/"
+        volume: 55
+
+      # Gentle rain with rolling thunder (optional)
+      - url: "https://freesound.org/people/AppleCorey/sounds/688468/"
+        volume: 50
+        optional: true
+        probability: 0.4
+
+      # Distant thunder rumble with rain (optional)
+      - url: "https://freesound.org/people/RutgerMuller/sounds/158691/"
+        volume: 40
+        optional: true
+        probability: 0.4
+
+      # Dripping rain hitting leaves (optional)
+      - url: "https://freesound.org/people/newtad1/sounds/836410/"
+        volume: 45
+        optional: true
+        probability: 0.5
 
   lights:
     enabled: true

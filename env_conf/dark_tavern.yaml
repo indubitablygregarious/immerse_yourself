@@ -14,8 +14,33 @@ engines:
     file: "sounds/dooropen.wav"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:5Q8DWZnPe7o7GA96SARmOK"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:5Q8DWZnPe7o7GA96SARmOK"
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Low fireplace crackling (required - quieter for dark atmosphere)
+      - url: "https://freesound.org/people/NickTayloe/sounds/813328/"
+        volume: 40
+
+      # Quiet tavern crowd murmur (required - subdued)
+      - url: "https://freesound.org/people/dazzamoo/sounds/651364/"
+        volume: 45
+
+      # Wood floor creaking (optional - more prominent in quiet setting)
+      - url: "https://freesound.org/people/Kostas17/sounds/536365/"
+        volume: 30
+        optional: true
+        probability: 0.6
+
+      # Distant whispers/quiet conversation (optional)
+      - url: "https://freesound.org/people/soundslikewillem/sounds/449550/"
+        volume: 25
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

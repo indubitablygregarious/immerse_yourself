@@ -14,8 +14,39 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:4Hhe4kDZSKZNBQjpUZABpK"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:4Hhe4kDZSKZNBQjpUZABpK"
+    min_sounds: 2
+    max_sounds: 5
+    mix:
+      # Night crickets and insects (required)
+      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+        volume: 55
+
+      # Owl hooting (required)
+      - url: "https://freesound.org/people/Anthousai/sounds/398734/"
+        volume: 45
+
+      # Distant wolf howl (optional)
+      - url: "https://freesound.org/people/taure/sounds/380156/"
+        volume: 35
+        optional: true
+        probability: 0.3
+
+      # Night wind on farmland (optional)
+      - url: "https://freesound.org/people/klankbeeld/sounds/583866/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Frog chorus (optional)
+      - url: "https://freesound.org/people/MeliaRoger/sounds/645706/"
+        volume: 40
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

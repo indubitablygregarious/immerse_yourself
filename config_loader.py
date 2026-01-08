@@ -252,6 +252,25 @@ class ConfigLoader:
                     "engines.atmosphere.mix must contain at least one sound"
                 )
 
+            # Validate min_sounds and max_sounds if present
+            min_sounds = atmosphere_config.get("min_sounds", 2)
+            max_sounds = atmosphere_config.get("max_sounds", 6)
+
+            if not isinstance(min_sounds, int) or min_sounds < 1:
+                raise ConfigValidationError(
+                    "engines.atmosphere.min_sounds must be a positive integer"
+                )
+
+            if not isinstance(max_sounds, int) or max_sounds < 1:
+                raise ConfigValidationError(
+                    "engines.atmosphere.max_sounds must be a positive integer"
+                )
+
+            if min_sounds > max_sounds:
+                raise ConfigValidationError(
+                    f"engines.atmosphere.min_sounds ({min_sounds}) cannot exceed max_sounds ({max_sounds})"
+                )
+
             # Validate each sound in the mix
             for i, sound in enumerate(mix):
                 if not isinstance(sound, dict):
@@ -279,6 +298,40 @@ class ConfigLoader:
                     if vol < 0 or vol > 100:
                         raise ConfigValidationError(
                             f"engines.atmosphere.mix[{i}].volume must be 0-100"
+                        )
+
+                # Validate optional flag if present
+                if "optional" in sound:
+                    if not isinstance(sound["optional"], bool):
+                        raise ConfigValidationError(
+                            f"engines.atmosphere.mix[{i}].optional must be a boolean"
+                        )
+
+                # Validate probability if present (only valid with optional=true)
+                if "probability" in sound:
+                    prob = sound["probability"]
+                    if not isinstance(prob, (int, float)):
+                        raise ConfigValidationError(
+                            f"engines.atmosphere.mix[{i}].probability must be a number"
+                        )
+                    if prob < 0.0 or prob > 1.0:
+                        raise ConfigValidationError(
+                            f"engines.atmosphere.mix[{i}].probability must be 0.0-1.0"
+                        )
+                    if not sound.get("optional", False):
+                        raise ConfigValidationError(
+                            f"engines.atmosphere.mix[{i}].probability requires optional=true"
+                        )
+
+                # Validate pool if present (only valid with optional=true)
+                if "pool" in sound:
+                    if not isinstance(sound["pool"], str):
+                        raise ConfigValidationError(
+                            f"engines.atmosphere.mix[{i}].pool must be a string"
+                        )
+                    if not sound.get("optional", False):
+                        raise ConfigValidationError(
+                            f"engines.atmosphere.mix[{i}].pool requires optional=true"
                         )
 
     def _validate_lights_engine(self, lights_config: Dict[str, Any]) -> None:

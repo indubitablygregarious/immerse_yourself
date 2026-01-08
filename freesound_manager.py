@@ -13,15 +13,114 @@ Usage:
     path, metadata = manager.get_sound("https://freesound.org/people/DJT4NN3R/sounds/449994/")
 
     # metadata contains: creator, sound_id, sound_name, filename
+
+    # Get category from tags
+    category = select_category_from_tags(["rain", "storm", "nature"])  # Returns "exploration"
 """
 
 import os
 import re
+import random
 import subprocess
 from pathlib import Path
-from typing import Optional, Tuple, Dict
+from typing import Optional, Tuple, Dict, List
 from urllib.parse import urlparse
 import requests
+
+
+# Category definitions with associated keywords/tags
+# Order matters - first match wins
+CATEGORY_TAG_MAPPINGS = {
+    "combat": [
+        "battle", "fight", "combat", "war", "sword", "weapon", "attack",
+        "explosion", "gunshot", "gun", "rifle", "cannon", "arrow", "clash",
+        "hit", "punch", "kick", "scream", "death", "pain", "hurt", "injury",
+        "monster", "creature", "beast", "dragon", "roar", "growl",
+        "metal", "clang", "impact", "slash", "stab",
+    ],
+    "exploration": [
+        "nature", "forest", "woods", "tree", "bird", "birds", "wind", "breeze",
+        "rain", "storm", "thunder", "water", "river", "stream", "ocean", "sea",
+        "wave", "beach", "sand", "desert", "mountain", "cave", "footstep",
+        "walk", "travel", "outdoor", "outside", "ambient", "environment",
+        "weather", "field", "grass", "meadow", "jungle", "swamp", "marsh",
+        "night", "day", "morning", "evening", "dawn", "dusk", "crickets",
+        "insects", "cicada", "frog", "owl", "wolf", "howl",
+    ],
+    "social": [
+        "crowd", "people", "voice", "voices", "talk", "talking", "chatter",
+        "laugh", "laughter", "applause", "clap", "cheer", "boo", "tavern",
+        "bar", "pub", "restaurant", "cafe", "city", "town", "market",
+        "street", "urban", "traffic", "car", "horn", "bell", "church",
+        "celebration", "party", "festival", "music", "instrument",
+        "comedy", "funny", "humor", "reaction",
+    ],
+    "relaxation": [
+        "calm", "peaceful", "relax", "relaxing", "soothing", "gentle",
+        "soft", "quiet", "meditation", "zen", "spa", "sleep", "dream",
+        "ambient", "atmosphere", "drone", "pad", "texture", "background",
+        "white noise", "pink noise", "brown noise", "binaural",
+        "lofi", "lo-fi", "chill", "jazz", "piano", "acoustic",
+        "fireplace", "fire", "crackling", "cozy", "warm",
+    ],
+    "special": [
+        "magic", "spell", "fantasy", "mystical", "ethereal", "supernatural",
+        "ghost", "haunted", "horror", "scary", "creepy", "eerie", "spooky",
+        "sci-fi", "space", "alien", "robot", "mechanical", "electronic",
+        "glitch", "digital", "synth", "synthesizer", "futuristic",
+        "heaven", "hell", "divine", "demonic", "angel", "demon",
+        "victory", "win", "success", "fanfare", "triumph", "achievement",
+        "fail", "failure", "loss", "game over", "dramatic",
+    ],
+}
+
+
+def select_category_from_tags(tags: List[str], default_category: str = "freesound") -> str:
+    """
+    Select the best category based on sound tags.
+
+    Checks each tag against category keyword mappings. If a tag matches
+    a category, returns that category. If no match, picks a random tag
+    as a fallback or returns the default category.
+
+    Args:
+        tags: List of tags from the freesound page
+        default_category: Category to use if no match found (default: "freesound")
+
+    Returns:
+        Best matching category name
+    """
+    if not tags:
+        return default_category
+
+    # Normalize tags to lowercase
+    normalized_tags = [t.lower().strip() for t in tags]
+
+    # Check each tag against category mappings
+    for tag in normalized_tags:
+        for category, keywords in CATEGORY_TAG_MAPPINGS.items():
+            for keyword in keywords:
+                # Check if keyword is in tag or tag is in keyword
+                if keyword in tag or tag in keyword:
+                    return category
+
+    # No match found - pick a random tag as category if it's reasonable
+    # Filter for reasonable category names (short, alphanumeric)
+    reasonable_tags = [
+        t for t in normalized_tags
+        if len(t) <= 20 and t.isalnum() or t.replace(" ", "").replace("-", "").replace("_", "").isalnum()
+    ]
+
+    if reasonable_tags:
+        # Pick a random tag, but prefer shorter ones
+        reasonable_tags.sort(key=len)
+        # Take from the shorter half
+        half = max(1, len(reasonable_tags) // 2)
+        selected_tag = random.choice(reasonable_tags[:half])
+        # Clean up for use as category
+        return selected_tag.replace(" ", "_").replace("-", "_").lower()
+
+    return default_category
 
 
 class FreesoundError(Exception):

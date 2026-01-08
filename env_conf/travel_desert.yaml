@@ -14,8 +14,39 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:4afgq42TTtXPh0Io3D135i"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:4afgq42TTtXPh0Io3D135i"
+    min_sounds: 2
+    max_sounds: 5
+    mix:
+      # Desert wind and flowing sand (required)
+      - url: "https://freesound.org/people/Vrymaa/sounds/825860/"
+        volume: 60
+
+      # Desert wind with sand grains (required)
+      - url: "https://freesound.org/people/Proxima4/sounds/104320/"
+        volume: 55
+
+      # Footsteps on desert sand (optional)
+      - url: "https://freesound.org/people/felix.blume/sounds/705512/"
+        volume: 40
+        optional: true
+        probability: 0.6
+
+      # Distant eagle/hawk cry (optional)
+      - url: "https://freesound.org/people/natemarler/sounds/338683/"
+        volume: 30
+        optional: true
+        probability: 0.3
+
+      # Outback desert wind (optional)
+      - url: "https://freesound.org/people/kangaroovindaloo/sounds/102587/"
+        volume: 45
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

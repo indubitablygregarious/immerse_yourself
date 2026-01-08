@@ -14,8 +14,39 @@ engines:
     file: "sounds/dooropen.wav"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:4Hhe4kDZSKZNBQjpUZABpK"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:4Hhe4kDZSKZNBQjpUZABpK"
+    min_sounds: 2
+    max_sounds: 5
+    mix:
+      # Night crickets/insects (required)
+      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+        volume: 55
+
+      # Owl hooting (required)
+      - url: "https://freesound.org/people/Anthousai/sounds/398734/"
+        volume: 40
+
+      # Torch crackling (optional)
+      - url: "https://freesound.org/people/LordStirling/sounds/483692/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+      # Distant footsteps on leaves (optional)
+      - url: "https://freesound.org/people/trafficarte/sounds/457057/"
+        volume: 30
+        optional: true
+        probability: 0.5
+
+      # Distant town ambience with river (optional)
+      - url: "https://freesound.org/people/misperpodcast/sounds/733590/"
+        volume: 35
+        optional: true
+        probability: 0.5
 
   lights:
     enabled: true

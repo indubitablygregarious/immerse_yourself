@@ -14,8 +14,37 @@ engines:
     file: "sounds/dooropen.wav"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:2q6tU7SrOYgtSPw2x1cGt0"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:2q6tU7SrOYgtSPw2x1cGt0"
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Fireplace crackling (required)
+      - url: "https://freesound.org/people/hansende/sounds/263994/"
+        volume: 50
+
+      # Howling wind outside (required - mountain atmosphere)
+      - url: "https://freesound.org/people/Kinoton/sounds/558840/"
+        volume: 60
+
+      # Quiet tavern crowd murmur (required)
+      - url: "https://freesound.org/people/dazzamoo/sounds/651364/"
+        volume: 40
+
+      # Wood creaking (optional)
+      - url: "https://freesound.org/people/Kostas17/sounds/536365/"
+        volume: 30
+        optional: true
+        probability: 0.5
+
+      # Distant wolf howl (optional - atmospheric)
+      - url: "https://freesound.org/people/taure/sounds/380156/"
+        volume: 25
+        optional: true
+        probability: 0.3
 
   lights:
     enabled: true

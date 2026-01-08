@@ -14,8 +14,37 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:7o2W8HWWiozS25FZHqSNwQ"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:7o2W8HWWiozS25FZHqSNwQ"
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Ocean waves Baltic Sea (required)
+      - url: "https://freesound.org/people/Lucas_Schacht/sounds/534916/"
+        volume: 65
+
+      # Seagulls on beach (required)
+      - url: "https://freesound.org/people/felix.blume/sounds/155747/"
+        volume: 50
+
+      # Summer beach ambience (required)
+      - url: "https://freesound.org/people/arpeggio1980/sounds/437459/"
+        volume: 55
+
+      # Young people playing on beach (optional)
+      - url: "https://freesound.org/people/klankbeeld/sounds/190043/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Atlantic ocean with birds (optional)
+      - url: "https://freesound.org/people/bruno.auzet/sounds/785768/"
+        volume: 45
+        optional: true
+        probability: 0.5
 
   lights:
     enabled: true

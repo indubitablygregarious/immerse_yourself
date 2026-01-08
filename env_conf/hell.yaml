@@ -14,8 +14,43 @@ engines:
     file: "sounds/hell.m4a"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:7JK8c6NETQlnvZzFkmxBw6"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:7JK8c6NETQlnvZzFkmxBw6"
+    min_sounds: 3
+    max_sounds: 6
+    mix:
+      # Roaring inferno fire (required)
+      - url: "https://freesound.org/people/newlocknew/sounds/636917/"
+        volume: 65
+
+      # Lava bubbling volcano (required)
+      - url: "https://freesound.org/people/morganpurkis/sounds/385098/"
+        volume: 60
+
+      # Lava reservoir (required)
+      - url: "https://freesound.org/people/Fission9/sounds/474852/"
+        volume: 55
+
+      # Demonic growl (optional)
+      - url: "https://freesound.org/people/IFartInUrGeneralDirection/sounds/66861/"
+        volume: 45
+        optional: true
+        probability: 0.4
+
+      # Chains rattling (optional)
+      - url: "https://freesound.org/people/mshahen/sounds/267543/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Eerie spooky wind (optional)
+      - url: "https://freesound.org/people/newlocknew/sounds/729336/"
+        volume: 45
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

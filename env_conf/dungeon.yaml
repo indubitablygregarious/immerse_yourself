@@ -14,8 +14,43 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:2q6tU7SrOYgtSPw2x1cGt0"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:2q6tU7SrOYgtSPw2x1cGt0"
+    min_sounds: 3
+    max_sounds: 6
+    mix:
+      # Water dripping in cave (required)
+      - url: "https://freesound.org/people/Sclolex/sounds/177958/"
+        volume: 55
+
+      # Creepy dungeon cave soundscape (required)
+      - url: "https://freesound.org/people/Kinoton/sounds/516566/"
+        volume: 50
+
+      # Torch ambience loop (required)
+      - url: "https://freesound.org/people/LordStirling/sounds/483692/"
+        volume: 45
+
+      # Heavy chains rattling (optional)
+      - url: "https://freesound.org/people/mshahen/sounds/267543/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Stone grinding on stone (optional)
+      - url: "https://freesound.org/people/Garuda1982/sounds/560304/"
+        volume: 30
+        optional: true
+        probability: 0.3
+
+      # Eerie whispers (optional)
+      - url: "https://freesound.org/people/Matio888/sounds/796514/"
+        volume: 25
+        optional: true
+        probability: 0.3
 
   lights:
     enabled: true

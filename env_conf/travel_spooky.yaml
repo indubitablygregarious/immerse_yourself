@@ -14,8 +14,45 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:5Ut1kkNxhOnqqXgZxrxIYI"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:5Ut1kkNxhOnqqXgZxrxIYI"
+    min_sounds: 3
+    max_sounds: 6
+    mix:
+      # Howling spooky wind (required)
+      - url: "https://freesound.org/people/newlocknew/sounds/729336/"
+        volume: 55
+
+      # Old death oak creaking in wind (required)
+      - url: "https://freesound.org/people/klankbeeld/sounds/211776/"
+        volume: 50
+
+      # Distant raven cawing (optional)
+      - url: "https://freesound.org/people/SoundsLikeYukon/sounds/723570/"
+        volume: 40
+        optional: true
+        probability: 0.6
+
+      # Dead leaves rustling (optional)
+      - url: "https://freesound.org/people/maiasnowdrop/sounds/609333/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+      # Eerie whispers and ghostly atmosphere (optional)
+      - url: "https://freesound.org/people/Matio888/sounds/796514/"
+        volume: 30
+        optional: true
+        probability: 0.3
+
+      # Distant wolf howl (optional)
+      - url: "https://freesound.org/people/taure/sounds/380156/"
+        volume: 35
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

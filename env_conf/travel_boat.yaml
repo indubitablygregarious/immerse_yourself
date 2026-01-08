@@ -14,8 +14,39 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:5LIhbkgfhRDUGGsGvgt8a0"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:5LIhbkgfhRDUGGsGvgt8a0"
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Ocean waves Baltic Sea (required)
+      - url: "https://freesound.org/people/Lucas_Schacht/sounds/534916/"
+        volume: 65
+
+      # Ship creaking and tension (required)
+      - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
+        volume: 50
+
+      # Seagulls on beach (optional)
+      - url: "https://freesound.org/people/felix.blume/sounds/155747/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+      # Sailing with wind and rigging (optional)
+      - url: "https://freesound.org/people/iainmccurdy/sounds/645974/"
+        volume: 50
+        optional: true
+        probability: 0.7
+
+      # Rattling rigging in wind (optional)
+      - url: "https://freesound.org/people/klankbeeld/sounds/170545/"
+        volume: 40
+        optional: true
+        probability: 0.5
 
   lights:
     enabled: true

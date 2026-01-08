@@ -14,8 +14,37 @@ engines:
     file: "sounds/danger.opus"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:6FohP6m1ipvNjgllOH4HLt"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:6FohP6m1ipvNjgllOH4HLt"
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Sword clash collection (required)
+      - url: "https://freesound.org/people/courter/sounds/658736/"
+        volume: 55
+
+      # Ocean waves (required)
+      - url: "https://freesound.org/people/Lucas_Schacht/sounds/534916/"
+        volume: 50
+
+      # Battle cries (required)
+      - url: "https://freesound.org/people/florianreichelt/sounds/563011/"
+        volume: 45
+
+      # Ship creaking (optional)
+      - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Heavy breathing exertion (optional)
+      - url: "https://freesound.org/people/mO_o/sounds/22262/"
+        volume: 40
+        optional: true
+        probability: 0.5
 
   lights:
     enabled: true

@@ -14,8 +14,39 @@ engines:
     file: "sounds/win.wav"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:2q6tU7SrOYgtSPw2x1cGt0"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:2q6tU7SrOYgtSPw2x1cGt0"
+    min_sounds: 2
+    max_sounds: 5
+    mix:
+      # Victory fanfare (required)
+      - url: "https://freesound.org/people/humanoide9000/sounds/505426/"
+        volume: 55
+
+      # Torch crackling (required)
+      - url: "https://freesound.org/people/LordStirling/sounds/483692/"
+        volume: 45
+
+      # Treasure coins spilling (optional)
+      - url: "https://freesound.org/people/Vrymaa/sounds/756381/"
+        volume: 50
+        optional: true
+        probability: 0.6
+
+      # Medieval fanfare (optional)
+      - url: "https://freesound.org/people/gertraut_hecher/sounds/572935/"
+        volume: 45
+        optional: true
+        probability: 0.4
+
+      # Dungeon cave soundscape (optional)
+      - url: "https://freesound.org/people/Kinoton/sounds/516566/"
+        volume: 35
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

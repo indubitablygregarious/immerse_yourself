@@ -14,8 +14,45 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:5Q8DWZnPe7o7GA96SARmOK"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:5Q8DWZnPe7o7GA96SARmOK"
+    min_sounds: 3
+    max_sounds: 6
+    mix:
+      # Festival crowd ambience (required)
+      - url: "https://freesound.org/people/kyles/sounds/405309/"
+        volume: 70
+
+      # Festival drums and flute (required)
+      - url: "https://freesound.org/people/manuke/sounds/315888/"
+        volume: 60
+
+      # Crowd cheering/applause (optional)
+      - url: "https://freesound.org/people/Sadiquecat/sounds/777710/"
+        volume: 50
+        optional: true
+        probability: 0.6
+
+      # Children laughing (optional)
+      - url: "https://freesound.org/people/FunWithSound/sounds/416703/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Fireworks with crowd (optional - rare)
+      - url: "https://freesound.org/people/redcrow1973/sounds/190699/"
+        volume: 45
+        optional: true
+        probability: 0.3
+
+      # Parade drums and bagpipes (optional)
+      - url: "https://freesound.org/people/kyles/sounds/453868/"
+        volume: 45
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

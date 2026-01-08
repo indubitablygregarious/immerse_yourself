@@ -14,8 +14,39 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:7o2W8HWWiozS25FZHqSNwQ"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:7o2W8HWWiozS25FZHqSNwQ"
+    min_sounds: 2
+    max_sounds: 5
+    mix:
+      # Gentle waves (required)
+      - url: "https://freesound.org/people/IanFSA/sounds/755303/"
+        volume: 60
+
+      # Seagulls (required)
+      - url: "https://freesound.org/people/felix.blume/sounds/155747/"
+        volume: 45
+
+      # Atlantic ocean with birds (optional)
+      - url: "https://freesound.org/people/bruno.auzet/sounds/785768/"
+        volume: 50
+        optional: true
+        probability: 0.6
+
+      # Beach ambience (optional)
+      - url: "https://freesound.org/people/arpeggio1980/sounds/437459/"
+        volume: 45
+        optional: true
+        probability: 0.5
+
+      # Calm sea close-up (optional)
+      - url: "https://freesound.org/people/kevp888/sounds/836484/"
+        volume: 40
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

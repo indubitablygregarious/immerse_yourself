@@ -14,8 +14,37 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:7BzRcrEaDLIylIEgZGONTC"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:7BzRcrEaDLIylIEgZGONTC"
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Summer thunderstorm with heavy rain (required)
+      - url: "https://freesound.org/people/newlocknew/sounds/815258/"
+        volume: 70
+
+      # Thunderstorm with lightning, wind, and rain (required)
+      - url: "https://freesound.org/people/PNMCarrieRailfan/sounds/682445/"
+        volume: 65
+
+      # Strong storm wind (required)
+      - url: "https://freesound.org/people/juskiddink/sounds/136287/"
+        volume: 60
+
+      # Intense lightning strike (optional)
+      - url: "https://freesound.org/people/foad/sounds/243614/"
+        volume: 50
+        optional: true
+        probability: 0.5
+
+      # Spring thunder ambience (optional)
+      - url: "https://freesound.org/people/GregorQuendel/sounds/639563/"
+        volume: 55
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

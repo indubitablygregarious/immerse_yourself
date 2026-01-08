@@ -14,8 +14,39 @@ engines:
     file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:3Vz5yr3PL1xIIAe89mPfT4"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:3Vz5yr3PL1xIIAe89mPfT4"
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Summer meadow with insects and birds (required)
+      - url: "https://freesound.org/people/bruno.auzet/sounds/810412/"
+        volume: 65
+
+      # Summer afternoon meadow with birds and crickets (required)
+      - url: "https://freesound.org/people/DanGasior/sounds/414907/"
+        volume: 55
+
+      # Hot summer day with wind (optional)
+      - url: "https://freesound.org/people/klankbeeld/sounds/434838/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+      # Countryside with farm animals (optional)
+      - url: "https://freesound.org/people/brunoboselli/sounds/458113/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Summer cicadas (optional)
+      - url: "https://freesound.org/people/TRP/sounds/717893/"
+        volume: 40
+        optional: true
+        probability: 0.5
 
   lights:
     enabled: true

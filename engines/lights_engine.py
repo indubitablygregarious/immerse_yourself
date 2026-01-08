@@ -14,6 +14,28 @@ from typing import Dict, List, Optional, Any
 from pywizlight import wizlight, PilotBuilder
 
 
+# Global flag to disable lights for the session
+# When True, all lights operations become no-ops
+_lights_disabled_for_session = False
+
+
+def disable_lights_for_session():
+    """Disable all lights operations for this session."""
+    global _lights_disabled_for_session
+    _lights_disabled_for_session = True
+
+
+def enable_lights_for_session():
+    """Re-enable lights operations for this session."""
+    global _lights_disabled_for_session
+    _lights_disabled_for_session = False
+
+
+def are_lights_disabled() -> bool:
+    """Check if lights are disabled for this session."""
+    return _lights_disabled_for_session
+
+
 class LightBulbGroup:
     """
     Represents a group of bulbs with shared animation behavior.
@@ -104,7 +126,7 @@ class LightsEngine:
                         (default: .wizbulb.ini in current directory)
 
         Raises:
-            FileNotFoundError: If config file doesn't exist
+            FileNotFoundError: If config file doesn't exist (unless lights disabled)
         """
         self.config_file = config_file
         self.bulb_groups: Dict[str, LightBulbGroup] = {}
@@ -112,7 +134,11 @@ class LightsEngine:
         self.should_stop = False
         self.current_config: Optional[Dict[str, Any]] = None
         self._config_lock = asyncio.Lock()
-        self._load_bulbs()
+        self._disabled = _lights_disabled_for_session
+
+        # Skip loading bulbs if lights are disabled
+        if not self._disabled:
+            self._load_bulbs()
 
     def _load_bulbs(self) -> None:
         """
@@ -419,6 +445,10 @@ class LightsEngine:
         Args:
             animation_config: Animation configuration dictionary
         """
+        # No-op if lights disabled for session
+        if self._disabled:
+            return
+
         self.should_stop = False
         self.animation_task = asyncio.create_task(
             self.run_animation_loop(animation_config)
@@ -426,6 +456,10 @@ class LightsEngine:
 
     async def stop(self) -> None:
         """Stop animation loop gracefully."""
+        # No-op if lights disabled for session
+        if self._disabled:
+            return
+
         self.should_stop = True
         if self.animation_task:
             self.animation_task.cancel()
@@ -444,6 +478,10 @@ class LightsEngine:
         Args:
             animation_config: New animation configuration
         """
+        # No-op if lights disabled for session
+        if self._disabled:
+            return
+
         async with self._config_lock:
             self.current_config = animation_config
         print("Light configuration updated (hot-swapped)")
@@ -455,4 +493,6 @@ class LightsEngine:
         Returns:
             True if running, False otherwise
         """
+        if self._disabled:
+            return False
         return self.animation_task is not None and not self.animation_task.done()

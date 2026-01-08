@@ -14,8 +14,35 @@ engines:
     file: "sounds/dooropen.wav"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:7kEDZnp2Zy56OatRijFSeE"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:7kEDZnp2Zy56OatRijFSeE"
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Quiet library ambience (required)
+      - url: "https://freesound.org/people/xkeril/sounds/620683/"
+        volume: 60
+
+      # Clock ticking (optional)
+      - url: "https://freesound.org/people/OwlStorm/sounds/212181/"
+        volume: 35
+        optional: true
+        probability: 0.6
+
+      # Page turning (optional)
+      - url: "https://freesound.org/people/lartti/sounds/513779/"
+        volume: 30
+        optional: true
+        probability: 0.5
+
+      # Wood floor creaking - quiet footsteps (optional)
+      - url: "https://freesound.org/people/Kostas17/sounds/536365/"
+        volume: 20
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

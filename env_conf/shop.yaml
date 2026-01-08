@@ -14,8 +14,33 @@ engines:
     file: "sounds/dooropen.wav"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:4iYXc8F4OogJCYqnb2a6Ia"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:4iYXc8F4OogJCYqnb2a6Ia"
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Quiet indoor room tone (required)
+      - url: "https://freesound.org/people/IENBA/sounds/761024/"
+        volume: 40
+
+      # Fireplace crackling (required - cozy shop)
+      - url: "https://freesound.org/people/NickTayloe/sounds/813328/"
+        volume: 45
+
+      # Coins clinking (optional)
+      - url: "https://freesound.org/people/husky70/sounds/161315/"
+        volume: 30
+        optional: true
+        probability: 0.6
+
+      # Wood floor creaking (optional)
+      - url: "https://freesound.org/people/Kostas17/sounds/536365/"
+        volume: 25
+        optional: true
+        probability: 0.4
 
   lights:
     enabled: true

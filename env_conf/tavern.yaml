@@ -11,12 +11,48 @@ metadata:
 engines:
   sound:
     enabled: true
-    file: "https://freesound.org/people/ultradust/sounds/165116/"
-      #file: "sounds/dooropen.wav"
+    file: "sounds/dooropen.wav"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:5Q8DWZnPe7o7GA96SARmOK"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:5Q8DWZnPe7o7GA96SARmOK"
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Fireplace crackling (required - core tavern sound)
+      - url: "https://freesound.org/people/hansende/sounds/263994/"
+        volume: 70
+
+      # Tavern crowd murmur (required)
+      - url: "https://freesound.org/people/Robinhood76/sounds/700022/"
+        volume: 80
+
+      # Glasses clinking (optional)
+      - url: "https://freesound.org/people/EpicWizard/sounds/325194/"
+        volume: 40
+        optional: true
+        probability: 0.7
+
+      # Crowd laughter (optional)
+      - url: "https://freesound.org/people/deleted_user_2104797/sounds/346688/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+      # Wood floor creaking (optional)
+      - url: "https://freesound.org/people/Kostas17/sounds/536365/"
+        volume: 25
+        optional: true
+        probability: 0.4
+
+      # Medieval lute music (optional - pool)
+      - url: "https://freesound.org/people/f-r-a-g-i-l-e/sounds/506266/"
+        volume: 30
+        optional: true
+        pool: "music"
 
   lights:
     enabled: true

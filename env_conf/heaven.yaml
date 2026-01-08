@@ -14,8 +14,39 @@ engines:
     file: "sounds/heaven.m4a"
 
   spotify:
+    enabled: false
+    # context_uri: "spotify:playlist:6CGzeXP7y71R94To9KD0RC"
+
+  atmosphere:
     enabled: true
-    context_uri: "spotify:playlist:6CGzeXP7y71R94To9KD0RC"
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Angelic choir (required)
+      - url: "https://freesound.org/people/BuytheField/sounds/434700/"
+        volume: 55
+
+      # Ethereal angels atmosphere (required)
+      - url: "https://freesound.org/people/ERH/sounds/29592/"
+        volume: 50
+
+      # Gentle wind chimes (optional)
+      - url: "https://freesound.org/people/Adelantemos/sounds/222893/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Echo chime (optional)
+      - url: "https://freesound.org/people/husky70/sounds/161316/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Ethereal melody choir (optional)
+      - url: "https://freesound.org/people/pngn3/sounds/725153/"
+        volume: 45
+        optional: true
+        probability: 0.5
 
   lights:
     enabled: true

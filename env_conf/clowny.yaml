@@ -11,7 +11,7 @@ metadata:
 engines:
   sound:
     enabled: true
-    file: "sounds/dooropen.wav"
+    file: "sound_conf:squeaky_door"
 
   spotify:
     enabled: true

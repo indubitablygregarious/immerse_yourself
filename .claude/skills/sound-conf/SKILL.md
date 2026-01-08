@@ -1,0 +1,212 @@
+---
+name: sound-conf
+description: Create sound variation configs (sound_conf) with multiple sound alternatives, and find freesound.org replacements for local audio files. Use when building sound collections, finding freesound alternatives, or creating audio variation configs.
+allowed-tools: Read, Write, Glob, Grep, Bash(python3:*), WebFetch
+---
+
+# Sound Configuration Builder
+
+Build sound variation configs and find freesound.org alternatives for local audio files.
+
+## Overview
+
+Sound configs (`sound_conf/`) define collections of similar sounds where one is randomly selected at runtime. This provides variety - e.g., different door squeaks, footstep variations, or sword clash sounds.
+
+## Use Cases
+
+1. **Build a new sound_conf** - Create a collection of sound variations
+2. **Find freesound replacements** - Search freesound.org for alternatives to local wav/mp3 files
+3. **Expand existing sound_conf** - Add more variations to an existing collection
+
+## Sound Conf Format
+
+```yaml
+# sound_conf/example.yaml
+name: "Human-readable Name"
+description: "What these sounds represent"
+
+sounds:
+  # Local file reference
+  - file: "sounds/original.wav"
+    description: "Original sound from sounds/ directory"
+
+  # Freesound.org URL reference
+  - url: "https://freesound.org/people/CREATOR/sounds/ID/"
+    description: "Brief description of this variation"
+
+  # More variations...
+  - url: "https://freesound.org/people/CREATOR/sounds/ID/"
+    description: "Another variation"
+```
+
+## How Sound Confs Are Used
+
+Environment configs reference sound_confs with the `sound_conf:` prefix:
+
+```yaml
+# In env_conf/tavern.yaml
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:squeaky_door"  # References sound_conf/squeaky_door.yaml
+```
+
+At runtime, one sound is randomly selected from the collection.
+
+## Process: Building a Sound Conf
+
+### Step 1: Identify the Sound Type
+Ask the user:
+- What type of sound? (door, footsteps, sword, scream, etc.)
+- Any existing local file to include?
+- How many variations desired? (recommend 5-10)
+
+### Step 2: Search Freesound.org
+Use WebFetch to search freesound.org for variations:
+
+```
+https://freesound.org/search/?q=SEARCH_TERMS
+```
+
+Good search strategies:
+- **Doors**: "door creak", "door squeak", "wooden door", "old door hinge"
+- **Footsteps**: "footsteps wood", "boots walking", "gravel footsteps"
+- **Swords**: "sword clash", "metal sword", "sword swing", "blade hit"
+- **Reactions**: "human gasp", "surprised scream", "pain groan"
+- **Nature**: "bird chirp", "owl hoot", "wolf howl"
+
+### Step 3: Evaluate Results
+For each sound, check:
+- Duration (prefer 1-5 seconds for one-shots)
+- Quality (sample rate, clarity)
+- License (all freesound sounds are CC licensed)
+- Downloads/ratings as quality indicator
+
+### Step 4: Build the YAML
+Create `sound_conf/name.yaml` with:
+- Descriptive name
+- Brief description
+- 5-10 sound entries mixing local files and freesound URLs
+
+### Step 5: Validate
+```bash
+python3 -c "
+from sound_conf_resolver import resolve_sound_conf, get_sound_conf_info
+info = get_sound_conf_info('sound_conf:NAME')
+print(f'Loaded: {info}')
+for i in range(3):
+    print(f'Random selection {i+1}: {resolve_sound_conf(\"sound_conf:NAME\")}')
+"
+```
+
+## Process: Finding Freesound Replacements
+
+### Step 1: Identify Local Files
+Find wav/mp3 files in the project:
+```bash
+find sounds/ -name "*.wav" -o -name "*.mp3"
+```
+
+Or check what's used in configs:
+```bash
+grep -r "file:.*sounds/" env_conf/
+```
+
+### Step 2: Analyze the Sound
+Read the filename and any context to understand what the sound is:
+- `dooropen.wav` → door opening/creaking sound
+- `danger.wav` → alert/warning sound
+- `chill.wav` → relaxation transition sound
+
+### Step 3: Search Freesound
+Use WebFetch to find alternatives:
+```
+https://freesound.org/search/?q=door+creak+wood
+```
+
+### Step 4: Create or Extend Sound Conf
+Either:
+- Create new sound_conf with original + alternatives
+- Add alternatives to existing sound_conf
+
+## Freesound URL Format
+
+Valid freesound URLs look like:
+```
+https://freesound.org/people/USERNAME/sounds/ID/
+```
+
+Example:
+```
+https://freesound.org/people/kyles/sounds/451813/
+```
+
+## Example Sound Confs
+
+### Door Sounds (squeaky_door.yaml)
+```yaml
+name: "Squeaky Door"
+description: "Various door creaking and squeaking sounds"
+
+sounds:
+  - file: "sounds/dooropen.wav"
+    description: "Original door open sound"
+  - url: "https://freesound.org/people/callyrobyn/sounds/417968/"
+    description: "Door creak by callyrobyn"
+  - url: "https://freesound.org/people/kyles/sounds/451813/"
+    description: "Door squeak by kyles"
+```
+
+### Sword Clashes (sword_clash.yaml)
+```yaml
+name: "Sword Clash"
+description: "Metal sword impact and clash sounds"
+
+sounds:
+  - url: "https://freesound.org/people/CGEffex/sounds/93136/"
+    description: "Sword clash impact"
+  - url: "https://freesound.org/people/Yoyodaman234/sounds/183015/"
+    description: "Metal sword hit"
+  - url: "https://freesound.org/people/EminYILDIRIM/sounds/541462/"
+    description: "Sword blade clash"
+```
+
+### Footsteps on Wood (footsteps_wood.yaml)
+```yaml
+name: "Wood Footsteps"
+description: "Footsteps on wooden floors and boards"
+
+sounds:
+  - url: "https://freesound.org/people/Kostas17/sounds/536365/"
+    description: "Wood floor creak"
+  - url: "https://freesound.org/people/deleted_user_7146007/sounds/383067/"
+    description: "Wooden footsteps"
+```
+
+## Search Tips
+
+### Freesound Search Modifiers
+- Use quotes for exact phrases: `"door creak"`
+- Combine terms: `door creak wood old`
+- Filter by duration in search results page
+
+### Quality Indicators
+- Higher download counts = more popular/useful
+- Check ratings if available
+- Preview sounds on freesound.org before adding
+
+### Sound Categories to Consider
+| Category | Search Terms |
+|----------|--------------|
+| Doors | door creak, hinge squeak, wooden door, gate |
+| Footsteps | footsteps, walking, boots, running, gravel |
+| Combat | sword, metal clash, punch, hit, impact |
+| Nature | birds, wind, rain, thunder, water |
+| Reactions | gasp, scream, groan, sigh, laugh |
+| Ambient | room tone, crowd murmur, tavern, market |
+
+## Reference Files
+
+- `sound_conf/squeaky_door.yaml` - Example door sound collection
+- `sound_conf_resolver.py` - Resolution logic for sound_conf references
+- `env_conf/tavern.yaml` - Example usage of sound_conf in environment

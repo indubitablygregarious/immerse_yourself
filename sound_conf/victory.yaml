@@ -1,0 +1,28 @@
+# Victory Sound Collection
+# One sound is randomly selected and played when this config is referenced
+name: "Victory"
+description: "Various victory fanfares and triumphant sounds"
+
+sounds:
+  # Original win sound from sounds/ directory
+  - file: "sounds/win.wav"
+    description: "Original victory sound"
+
+  # Freesound victory/fanfare sounds
+  - url: "https://freesound.org/people/humanoide9000/sounds/466133/"
+    description: "Orchestral victory fanfare"
+
+  - url: "https://freesound.org/people/Vrymaa/sounds/770059/"
+    description: "Epic triumphant music with trumpets"
+
+  - url: "https://freesound.org/people/DylanTheFish/sounds/423293/"
+    description: "Medieval fanfare for entrances"
+
+  - url: "https://freesound.org/people/klankbeeld/sounds/254644/"
+    description: "Brass band victory tune"
+
+  - url: "https://freesound.org/people/SergeQuadrado/sounds/460665/"
+    description: "Bright brass positive ceremony fanfare"
+
+  - url: "https://freesound.org/people/FunWithSound/sounds/456966/"
+    description: "Success triumph fanfare trumpets"

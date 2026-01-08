@@ -11,7 +11,7 @@ metadata:
 engines:
   sound:
     enabled: true
-    file: "sounds/win.wav"
+    file: "sound_conf:victory"
 
   spotify:
     enabled: false

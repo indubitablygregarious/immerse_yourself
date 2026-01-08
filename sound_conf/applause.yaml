@@ -1,0 +1,28 @@
+# Applause Sound Collection
+# One sound is randomly selected and played when this config is referenced
+name: "Applause"
+description: "Various crowd applause and clapping sounds for celebrations"
+
+sounds:
+  # Original applause sound from sounds/ directory
+  - file: "sounds/applause-4.mp3"
+    description: "Original applause sound"
+
+  # Freesound applause sounds
+  - url: "https://freesound.org/people/imagefilm.berlin/sounds/746442/"
+    description: "Energetic crowd applauding enthusiastically"
+
+  - url: "https://freesound.org/people/jentlemen/sounds/432327/"
+    description: "Medium-sized crowd clapping for speaker"
+
+  - url: "https://freesound.org/people/Kyster/sounds/124023/"
+    description: "Big crowd clapping and applauding"
+
+  - url: "https://freesound.org/people/Halleck/sounds/18666/"
+    description: "Curtain call applause with cheering"
+
+  - url: "https://freesound.org/people/pluralz/sounds/735562/"
+    description: "Large crowd clapping at concert"
+
+  - url: "https://freesound.org/people/tim.kahn/sounds/615873/"
+    description: "About 50 people clapping in small venue"

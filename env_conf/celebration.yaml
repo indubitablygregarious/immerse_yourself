@@ -11,7 +11,7 @@ metadata:
 engines:
   sound:
     enabled: true
-    file: "sounds/applause-4.mp3"
+    file: "sound_conf:applause"
 
   spotify:
     enabled: true

@@ -11,7 +11,7 @@ metadata:
 engines:
   sound:
     enabled: true
-    file: "sounds/dig.wav"
+    file: "sound_conf:camp_setup"
 
   spotify:
     enabled: false

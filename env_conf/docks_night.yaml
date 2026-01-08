@@ -1,0 +1,84 @@
+name: "Docks Night"
+category: "town"
+description: "Moonlit harbor with creaking ships, lapping waves, and shadowy figures on the pier"
+icon: "⚓"
+
+metadata:
+  tags: ["outdoor", "harbor", "ships", "coastal", "night", "noir"]
+  intensity: "medium"
+  suitable_for: ["smuggler encounters", "midnight meetings", "ship boarding", "noir scenes"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Waves lapping against dock
+      - url: "https://freesound.org/people/j1987/sounds/106427/"
+        volume: 60
+
+      # Ship creaking (more prominent at night)
+      - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
+        volume: 55
+
+      # Rope/rigging in wind
+      - url: "https://freesound.org/people/martinimeniscus/sounds/182249/"
+        volume: 45
+
+      # Distant bell (ship or buoy)
+      - url: "https://freesound.org/people/bone666138/sounds/198877/"
+        volume: 30
+        optional: true
+        probability: 0.4
+
+      # Night crickets (from shore)
+      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+        volume: 25
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 16
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [30, 50, 80]  # Dark sea blue
+            variance: [15, 20, 25]
+          brightness:
+            min: 40
+            max: 90
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [50, 60, 90]  # Moonlit sky
+            variance: [20, 20, 30]
+          brightness:
+            min: 50
+            max: 110
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [40, 55, 75]  # Dark water reflection
+            variance: [15, 20, 25]
+          brightness:
+            min: 30
+            max: 80
+          flash:
+            probability: 0.04
+            color: [150, 170, 200]  # Moonbeam on water
+            brightness: 130
+            duration: 2.0

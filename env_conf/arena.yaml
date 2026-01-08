@@ -1,0 +1,86 @@
+name: "Arena"
+category: "combat"
+description: "Gladiatorial arena with roaring crowds, anticipation, and the clash of combat"
+icon: "🏟️"
+
+metadata:
+  tags: ["combat", "arena", "gladiator", "crowd", "tournament", "spectacle"]
+  intensity: "high"
+  suitable_for: ["gladiator combat", "tournaments", "duels", "public executions", "beast fights"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:battle_intro"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Crowd cheering/roaring
+      - url: "https://freesound.org/people/Breviceps/sounds/445958/"
+        volume: 65
+
+      # Sword clashing
+      - url: "https://freesound.org/people/courter/sounds/658736/"
+        volume: 50
+
+      # Crowd chanting
+      - url: "https://freesound.org/people/deleted_user_2104797/sounds/164399/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+      # War drums
+      - url: "https://freesound.org/people/Zott820/sounds/209984/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Metal on metal impact
+      - url: "https://freesound.org/people/qubodup/sounds/182986/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 6
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [255, 200, 100]  # Hot sand/sun
+            variance: [30, 30, 30]
+          brightness:
+            min: 150
+            max: 230
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [255, 220, 150]  # Bright arena sun
+            variance: [25, 25, 30]
+          brightness:
+            min: 180
+            max: 255
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [200, 150, 80]  # Sandy arena floor
+            variance: [30, 25, 20]
+          brightness:
+            min: 120
+            max: 200
+          flash:
+            probability: 0.15
+            color: [255, 50, 50]  # Blood/combat flash
+            brightness: 240
+            duration: 0.8

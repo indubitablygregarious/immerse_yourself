@@ -1,0 +1,86 @@
+name: "Wizard's Tower"
+category: "celestial"
+description: "Arcane laboratory filled with bubbling potions, crackling magic, and mystical energy"
+icon: "🧙"
+
+metadata:
+  tags: ["indoor", "magic", "arcane", "wizard", "laboratory", "mystical"]
+  intensity: "medium"
+  suitable_for: ["wizard encounters", "magical research", "arcane discoveries", "potion shopping"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Magical humming energy
+      - url: "https://freesound.org/people/quetzalcontla/sounds/612813/"
+        volume: 50
+
+      # Bubbling cauldron/potions
+      - url: "https://freesound.org/people/Breviceps/sounds/456826/"
+        volume: 55
+
+      # Crackling magical energy
+      - url: "https://freesound.org/people/Mrthenoronha/sounds/521839/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Page turning/books
+      - url: "https://freesound.org/people/InspectorJ/sounds/416153/"
+        volume: 30
+        optional: true
+        probability: 0.4
+
+      # Wind through tower windows
+      - url: "https://freesound.org/people/BaDoink/sounds/570690/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [100, 50, 180]  # Mystical purple
+            variance: [40, 30, 40]
+          brightness:
+            min: 80
+            max: 160
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [80, 120, 200]  # Arcane blue
+            variance: [30, 40, 50]
+          brightness:
+            min: 100
+            max: 180
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [60, 40, 120]  # Deep purple glow
+            variance: [25, 20, 35]
+          brightness:
+            min: 60
+            max: 120
+          flash:
+            probability: 0.08
+            color: [200, 150, 255]  # Magic spark
+            brightness: 220
+            duration: 0.5

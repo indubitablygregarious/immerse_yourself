@@ -1,0 +1,81 @@
+name: "Docks"
+category: "town"
+description: "Busy harbor with creaking ships, seagulls, waves, and the bustle of sailors"
+icon: "⚓"
+
+metadata:
+  tags: ["outdoor", "harbor", "ships", "sailors", "coastal", "trade"]
+  intensity: "low"
+  suitable_for: ["ship boarding", "smuggler encounters", "sailor interactions", "coastal adventures"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Waves lapping against dock
+      - url: "https://freesound.org/people/j1987/sounds/106427/"
+        volume: 55
+
+      # Seagulls calling
+      - url: "https://freesound.org/people/Benboncan/sounds/64765/"
+        volume: 50
+
+      # Ship creaking
+      - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+      # Rope/rigging sounds
+      - url: "https://freesound.org/people/martinimeniscus/sounds/182249/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Distant sailor chatter
+      - url: "https://freesound.org/people/Leandros.Ntounis/sounds/163612/"
+        volume: 30
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [150, 180, 220]  # Sea blue sky
+            variance: [20, 25, 30]
+          brightness:
+            min: 140
+            max: 220
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [255, 245, 200]  # Coastal sun
+            variance: [20, 20, 25]
+          brightness:
+            min: 180
+            max: 250
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [120, 150, 180]  # Weathered wood/water reflection
+            variance: [25, 25, 30]
+          brightness:
+            min: 100
+            max: 180

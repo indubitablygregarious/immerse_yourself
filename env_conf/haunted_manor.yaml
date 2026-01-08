@@ -1,0 +1,84 @@
+name: "Haunted Manor"
+category: "spooky"
+description: "Decrepit mansion with creaking floors, howling wind, and ghostly presences"
+icon: "👻"
+
+metadata:
+  tags: ["indoor", "haunted", "ghost", "horror", "mansion", "spooky"]
+  intensity: "high"
+  suitable_for: ["ghost encounters", "horror sessions", "mystery investigations", "haunted locations"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Creaking floorboards/doors
+      - url: "https://freesound.org/people/spookymodem/sounds/249935/"
+        volume: 55
+
+      # Wind howling through windows
+      - url: "https://freesound.org/people/Kinoton/sounds/558840/"
+        volume: 50
+
+      # Ghostly whispers
+      - url: "https://freesound.org/people/Matio888/sounds/796514/"
+        volume: 45
+
+      # Clock ticking
+      - url: "https://freesound.org/people/InspectorJ/sounds/343130/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+      # Distant piano notes
+      - url: "https://freesound.org/people/Setuniman/sounds/149058/"
+        volume: 25
+        optional: true
+        probability: 0.3
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [40, 45, 60]  # Cold moonlight blue
+            variance: [15, 15, 25]
+          brightness:
+            min: 40
+            max: 90
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [50, 55, 70]  # Pale ghostly
+            variance: [20, 20, 30]
+          brightness:
+            min: 50
+            max: 100
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [30, 35, 50]  # Deep shadows
+            variance: [12, 12, 20]
+          brightness:
+            min: 25
+            max: 70
+          flash:
+            probability: 0.06
+            color: [200, 220, 255]  # Ghostly flash
+            brightness: 200
+            duration: 1.0

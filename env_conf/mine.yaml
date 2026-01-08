@@ -1,0 +1,82 @@
+name: "Mine"
+category: "dungeon"
+description: "Deep underground mine with pickaxe echoes, creaking timber supports, and dripping water"
+icon: "⛏️"
+
+metadata:
+  tags: ["underground", "mine", "dark", "labor", "industrial", "exploration"]
+  intensity: "medium"
+  suitable_for: ["dungeon exploration", "rescue missions", "resource quests", "kobold encounters"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Pickaxe mining sounds
+      - url: "https://freesound.org/people/qubodup/sounds/187592/"
+        volume: 45
+
+      # Dripping water in cave
+      - url: "https://freesound.org/people/Sclolex/sounds/177958/"
+        volume: 55
+
+      # Creaking wood supports
+      - url: "https://freesound.org/people/spookymodem/sounds/249935/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Distant rumbling/settling
+      - url: "https://freesound.org/people/Garuda1982/sounds/560304/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Cart on rails
+      - url: "https://freesound.org/people/SoundDesignForYou/sounds/646738/"
+        volume: 30
+        optional: true
+        probability: 0.3
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 8
+
+      groups:
+        backdrop:
+          type: "scene"
+          scenes:
+            ids: [5, 28]  # Torch/candle scenes
+            speed_min: 20
+            speed_max: 100
+          brightness:
+            min: 60
+            max: 110
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [60, 50, 40]  # Dim amber torchlight
+            variance: [20, 15, 10]
+          brightness:
+            min: 50
+            max: 90
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [40, 35, 30]  # Very dim
+            variance: [15, 10, 10]
+          brightness:
+            min: 30
+            max: 60

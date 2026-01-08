@@ -1,0 +1,84 @@
+name: "Dragon's Lair"
+category: "combat"
+description: "Massive cave filled with treasure hoard, deep rumbling, and oppressive heat"
+icon: "🐉"
+
+metadata:
+  tags: ["underground", "dragon", "boss", "treasure", "epic", "fire"]
+  intensity: "high"
+  suitable_for: ["dragon encounters", "boss fights", "treasure discovery", "epic confrontations"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:battle_intro"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Deep rumbling/breathing
+      - url: "https://freesound.org/people/Garuda1982/sounds/560304/"
+        volume: 55
+
+      # Coins/treasure shifting
+      - url: "https://freesound.org/people/Ridiculously_Decent_Audio/sounds/743389/"
+        volume: 50
+
+      # Fire crackling/roaring
+      - url: "https://freesound.org/people/LordStirling/sounds/483692/"
+        volume: 45
+
+      # Wind through cavern
+      - url: "https://freesound.org/people/Kinoton/sounds/558840/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+      # Dripping water/steam
+      - url: "https://freesound.org/people/Sclolex/sounds/177958/"
+        volume: 30
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 6
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [255, 100, 30]  # Fiery orange
+            variance: [40, 40, 20]
+          brightness:
+            min: 100
+            max: 200
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [200, 60, 20]  # Deep fire red
+            variance: [50, 30, 15]
+          brightness:
+            min: 80
+            max: 180
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [255, 180, 50]  # Golden treasure glow
+            variance: [40, 40, 30]
+          brightness:
+            min: 120
+            max: 220
+          flash:
+            probability: 0.1
+            color: [255, 200, 100]  # Fire breath flash
+            brightness: 255
+            duration: 1.2

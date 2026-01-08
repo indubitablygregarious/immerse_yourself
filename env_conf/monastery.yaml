@@ -1,0 +1,75 @@
+name: "Monastery"
+category: "relaxation"
+description: "Peaceful mountain monastery with monk chanting, temple bells, and serene contemplation"
+icon: "🔔"
+
+metadata:
+  tags: ["indoor", "religious", "peaceful", "monks", "meditation", "sanctuary"]
+  intensity: "low"
+  suitable_for: ["monk encounters", "healing rest", "training montages", "spiritual quests"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 2
+    max_sounds: 4
+    mix:
+      # Monk chanting
+      - url: "https://freesound.org/people/Sonic_Salad/sounds/398687/"
+        volume: 55
+
+      # Temple bells
+      - url: "https://freesound.org/people/bone666138/sounds/198877/"
+        volume: 50
+
+      # Mountain wind
+      - url: "https://freesound.org/people/BaDoink/sounds/570690/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Singing bowls
+      - url: "https://freesound.org/people/MichiJung/sounds/723722/"
+        volume: 45
+        optional: true
+        probability: 0.6
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 16
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [220, 200, 160]  # Warm candlelight
+            variance: [20, 20, 15]
+          brightness:
+            min: 130
+            max: 200
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [240, 220, 180]  # Soft daylight through windows
+            variance: [25, 25, 20]
+          brightness:
+            min: 160
+            max: 230
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [200, 180, 140]  # Stone floor warmth
+            variance: [20, 18, 15]
+          brightness:
+            min: 110
+            max: 180

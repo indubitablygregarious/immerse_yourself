@@ -1,0 +1,84 @@
+name: "Crypt"
+category: "dungeon"
+description: "Ancient burial chambers with bone rattling, whispers of the dead, and oppressive darkness"
+icon: "💀"
+
+metadata:
+  tags: ["underground", "crypt", "undead", "horror", "burial", "tomb"]
+  intensity: "high"
+  suitable_for: ["undead encounters", "tomb raiding", "necromancer lairs", "horror scenes"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Eerie whispers/ghostly
+      - url: "https://freesound.org/people/Matio888/sounds/796514/"
+        volume: 50
+
+      # Bone rattling/skeletal
+      - url: "https://freesound.org/people/spookymodem/sounds/202091/"
+        volume: 45
+
+      # Dripping water
+      - url: "https://freesound.org/people/Sclolex/sounds/177958/"
+        volume: 40
+
+      # Chains dragging
+      - url: "https://freesound.org/people/mshahen/sounds/267543/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+      # Stone coffin scraping
+      - url: "https://freesound.org/people/Garuda1982/sounds/560304/"
+        volume: 30
+        optional: true
+        probability: 0.3
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 12
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [20, 40, 30]  # Sickly green-gray
+            variance: [15, 20, 15]
+          brightness:
+            min: 40
+            max: 80
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [30, 50, 40]  # Deathly pale
+            variance: [20, 25, 20]
+          brightness:
+            min: 50
+            max: 100
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [15, 30, 25]  # Deep tomb darkness
+            variance: [10, 15, 10]
+          brightness:
+            min: 25
+            max: 60
+          flash:
+            probability: 0.05
+            color: [100, 255, 150]  # Ghostly green flash
+            brightness: 180
+            duration: 1.5

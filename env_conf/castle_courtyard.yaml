@@ -1,0 +1,81 @@
+name: "Castle Courtyard"
+category: "town"
+description: "Bustling castle courtyard with guards patrolling, horses, and noble atmosphere"
+icon: "🏰"
+
+metadata:
+  tags: ["outdoor", "castle", "noble", "guards", "royal", "daytime"]
+  intensity: "low"
+  suitable_for: ["noble encounters", "political intrigue", "guard interactions", "royal audiences"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Armor clanking/guards walking
+      - url: "https://freesound.org/people/CaCtUs2003/sounds/117885/"
+        volume: 45
+
+      # Horses neighing
+      - url: "https://freesound.org/people/GoodListener/sounds/322445/"
+        volume: 40
+        optional: true
+        probability: 0.5
+
+      # Fountain water
+      - url: "https://freesound.org/people/sss_samples/sounds/612682/"
+        volume: 50
+
+      # Distant crowd murmur
+      - url: "https://freesound.org/people/Leandros.Ntounis/sounds/163612/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+      # Banner flapping in wind
+      - url: "https://freesound.org/people/uair01/sounds/77607/"
+        volume: 30
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [255, 240, 200]  # Bright daylight
+            variance: [15, 20, 25]
+          brightness:
+            min: 180
+            max: 255
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [255, 250, 220]  # Warm sun
+            variance: [10, 15, 20]
+          brightness:
+            min: 200
+            max: 255
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [220, 200, 160]  # Stone/shadow
+            variance: [20, 20, 25]
+          brightness:
+            min: 140
+            max: 200

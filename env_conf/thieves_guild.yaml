@@ -1,0 +1,80 @@
+name: "Thieves' Guild"
+category: "dungeon"
+description: "Shadowy criminal hideout with whispered deals, clinking coins, and lurking danger"
+icon: "🗡️"
+
+metadata:
+  tags: ["indoor", "underground", "criminal", "noir", "shadows", "urban"]
+  intensity: "medium"
+  suitable_for: ["criminal encounters", "information gathering", "black market", "heist planning"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Hushed whispers/murmuring
+      - url: "https://freesound.org/people/Matio888/sounds/796514/"
+        volume: 40
+
+      # Coins clinking
+      - url: "https://freesound.org/people/Ridiculously_Decent_Audio/sounds/743389/"
+        volume: 50
+
+      # Creaking floorboards
+      - url: "https://freesound.org/people/spookymodem/sounds/249935/"
+        volume: 45
+
+      # Knife sharpening
+      - url: "https://freesound.org/people/kyles/sounds/453650/"
+        volume: 30
+        optional: true
+        probability: 0.3
+
+      # Dice rolling on table
+      - url: "https://freesound.org/people/dermotte/sounds/220743/"
+        volume: 35
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "scene"
+          scenes:
+            ids: [5, 28]  # Dim candlelight
+            speed_min: 15
+            speed_max: 60
+          brightness:
+            min: 40
+            max: 80
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [50, 40, 30]  # Dim amber
+            variance: [20, 15, 10]
+          brightness:
+            min: 40
+            max: 75
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [30, 25, 20]  # Deep shadows
+            variance: [15, 12, 10]
+          brightness:
+            min: 20
+            max: 50

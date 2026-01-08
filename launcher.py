@@ -926,11 +926,11 @@ class NowPlayingWidget(QWidget):
         self._download_icon = "⬇️"
         self._idle_icon = "⏸"
 
-        # Pulse animation for download
+        # Pulse animation for download (falling effect)
         self._pulse_timer = QTimer(self)
         self._pulse_timer.timeout.connect(self._pulse_download)
         self._pulse_opacity = 1.0
-        self._pulse_direction = -1
+        self._pulse_progress = 0.0  # 0.0 = top/small, 1.0 = bottom/large
         self._download_count = 0  # Track concurrent downloads
 
         self.setStyleSheet("""
@@ -1067,16 +1067,38 @@ class NowPlayingWidget(QWidget):
         """Stop the pulse animation."""
         self._pulse_timer.stop()
         self._pulse_opacity = 1.0
+        self._pulse_progress = 0.0
 
     def _pulse_download(self) -> None:
-        """Animate the download icon opacity."""
-        self._pulse_opacity += self._pulse_direction * 0.05
-        if self._pulse_opacity <= 0.3:
-            self._pulse_direction = 1
-        elif self._pulse_opacity >= 1.0:
-            self._pulse_direction = -1
-        opacity_int = int(self._pulse_opacity * 255)
-        self.icon_label.setStyleSheet(f"font-size: 28px; color: rgba(0, 150, 255, {opacity_int});")
+        """Animate the download icon with rising motion and shrinking size."""
+        # Progress from 0.0 to 1.0, then reset
+        self._pulse_progress += 0.04  # Speed of animation
+        if self._pulse_progress >= 1.0:
+            self._pulse_progress = 0.0  # Reset for continuous effect
+
+        # Invert progress for opposite direction
+        inv_progress = 1.0 - self._pulse_progress
+
+        # Font size: starts large (32px) and shrinks to small (18px)
+        min_size = 18
+        max_size = 32
+        font_size = int(min_size + (max_size - min_size) * inv_progress)
+
+        # Vertical offset: starts at bottom and rises up
+        max_offset = 8  # Maximum pixels
+        offset = int(max_offset * inv_progress)
+
+        # Opacity: starts visible and fades out as it rises
+        min_opacity = 0.4
+        max_opacity = 1.0
+        opacity = min_opacity + (max_opacity - min_opacity) * inv_progress
+        opacity_int = int(opacity * 255)
+
+        self.icon_label.setStyleSheet(
+            f"font-size: {font_size}px; "
+            f"color: rgba(0, 150, 255, {opacity_int}); "
+            f"padding-top: {offset}px;"
+        )
 
 
 class FuzzySearchBar(QLineEdit):
@@ -2433,6 +2455,17 @@ class EnvironmentLauncher(QMainWindow):
         """
         self.immersive_status.set_message("Downloads complete, starting atmosphere...", timeout_ms=2000)
 
+        # NOW stop the previous atmosphere/lights (they were kept running during downloads)
+        stop_all_atmosphere()
+        self._clear_atmosphere_buttons()
+
+        # Stop previous lights if new config has lights
+        has_lights = config["engines"]["lights"]["enabled"]
+        if self._lights_disabled_this_session:
+            has_lights = False
+        if has_lights and self.lights_runner is not None:
+            self._stop_lights()
+
         # Extract atmosphere mix and ensure configs exist
         atmosphere_mix = config.get("engines", {}).get("atmosphere", {}).get("mix", [])
 
@@ -3379,30 +3412,13 @@ engines:
         has_spotify = config["engines"].get("spotify", {}).get("enabled", False)
         has_atmosphere = config["engines"].get("atmosphere", {}).get("enabled", False)
 
-        # Only stop lights runner if new config has lights
-        if has_lights and self.lights_runner is not None:
-            self._stop_lights()
-
-        # Stop any currently playing sounds when starting an environment with lights
-        if has_lights:
-            stop_all_sounds()
-            self.immersive_status.clear_sound()
-
-        # Handle atmosphere/spotify switching
-        # Stop atmosphere when switching to a Spotify environment
-        if has_spotify:
-            stop_all_atmosphere()
-
-        # Stop Spotify when switching to an atmosphere environment
+        # For atmosphere environments, check if downloads are needed FIRST
+        # If so, keep current lights/atmosphere running until downloads complete
         if has_atmosphere:
             try:
                 SpotifyEngine().stop()
             except Exception:
                 pass  # Spotify may not be configured
-            # Also stop any previous atmosphere
-            stop_all_atmosphere()
-            # Clear previous atmosphere button highlights
-            self._clear_atmosphere_buttons()
 
             # Extract atmosphere URLs
             atmosphere_mix = config.get("engines", {}).get("atmosphere", {}).get("mix", [])
@@ -3412,12 +3428,15 @@ engines:
 
             if downloads_queued > 0:
                 # Downloads pending - store config and wait for queue to empty
-                # The _on_queue_empty callback will start the environment
+                # DON'T stop current atmosphere/lights yet - keep them running during downloads
+                # The _start_atmosphere_playback callback will stop them when ready
                 self._pending_atmosphere_start = config
                 self.immersive_status.set_message(f"Queued {downloads_queued} downloads...", timeout_ms=0)
-                # Update button to show we're loading this environment
-                self._update_active_button(config["name"])
                 return  # Don't start EngineRunner yet - wait for downloads
+
+            # No downloads needed - stop previous atmosphere/lights now
+            stop_all_atmosphere()
+            self._clear_atmosphere_buttons()
 
             # All sounds cached - ensure configs exist for them (quick, no downloads)
             self._ensure_atmosphere_configs(atmosphere_mix)
@@ -3441,10 +3460,17 @@ engines:
                             # Slider was deleted, remove from dict
                             del self.volume_sliders[url]
 
-            # Don't set active_atmosphere_urls yet - wait for atmosphere_urls_selected signal
-            # which will tell us which sounds were actually selected to play
-        elif has_spotify:
-            # Clear atmosphere buttons when switching to Spotify
+        # Now safe to stop lights/sounds (no downloads pending)
+        if has_lights and self.lights_runner is not None:
+            self._stop_lights()
+
+        if has_lights:
+            stop_all_sounds()
+            self.immersive_status.clear_sound()
+
+        # Stop atmosphere when switching to a Spotify environment
+        if has_spotify:
+            stop_all_atmosphere()
             self._clear_atmosphere_buttons()
 
         # Start the EngineRunner

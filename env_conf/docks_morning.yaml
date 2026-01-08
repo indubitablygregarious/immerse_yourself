@@ -1,0 +1,79 @@
+name: "Docks Morning"
+category: "town"
+description: "Early morning harbor with misty waters, waking seagulls, and fishermen preparing boats"
+icon: "⚓"
+
+metadata:
+  tags: ["outdoor", "harbor", "ships", "coastal", "morning", "trade"]
+  intensity: "low"
+  suitable_for: ["ship boarding", "early departures", "fisherman encounters", "coastal adventures"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Waves lapping against dock
+      - url: "https://freesound.org/people/j1987/sounds/106427/"
+        volume: 55
+
+      # Morning seagulls (fewer, calmer)
+      - url: "https://freesound.org/people/Benboncan/sounds/64765/"
+        volume: 40
+
+      # Ship creaking
+      - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
+        volume: 45
+
+      # Morning birds from shore
+      - url: "https://freesound.org/people/klankbeeld/sounds/625333/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+      # Rope/rigging sounds
+      - url: "https://freesound.org/people/martinimeniscus/sounds/182249/"
+        volume: 30
+        optional: true
+        probability: 0.4
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 14
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [180, 160, 140]  # Misty morning sky
+            variance: [25, 25, 20]
+          brightness:
+            min: 120
+            max: 180
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [220, 190, 150]  # Early golden sun
+            variance: [25, 25, 20]
+          brightness:
+            min: 140
+            max: 210
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [150, 140, 130]  # Misty dock wood
+            variance: [20, 20, 20]
+          brightness:
+            min: 100
+            max: 160

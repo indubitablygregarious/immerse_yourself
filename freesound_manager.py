@@ -23,10 +23,21 @@ Usage:
 import os
 import re
 import subprocess
+import configparser
 from pathlib import Path
 from typing import Optional, Tuple, Dict, List
 from urllib.parse import urlparse
 import requests
+
+
+def _get_ignore_ssl_setting() -> bool:
+    """Read the ignore_ssl_errors setting from settings.ini."""
+    settings_path = Path("settings.ini")
+    if settings_path.exists():
+        config = configparser.ConfigParser()
+        config.read(settings_path)
+        return config.get("downloads", "ignore_ssl_errors", fallback="false").lower() == "true"
+    return False
 
 
 # Keyword mappings for sound-only configs (no lights/atmosphere)
@@ -163,7 +174,8 @@ class FreesoundManager:
             Sound name extracted from page title
         """
         try:
-            response = requests.get(url, timeout=10)
+            verify_ssl = not _get_ignore_ssl_setting()
+            response = requests.get(url, timeout=10, verify=verify_ssl)
             response.raise_for_status()
 
             # Extract title from HTML - format is usually "Sound Name - Freesound"
@@ -239,17 +251,25 @@ class FreesoundManager:
         output_template = str(self.cache_dir / f"{creator}_{sound_id}_{sound_name}.%(ext)s")
 
         try:
+            # Build yt-dlp command
+            cmd = [
+                "yt-dlp",
+                "--extract-audio",
+                "--audio-format", "best",
+                "--output", output_template,
+                "--no-playlist",
+                "--quiet",
+            ]
+
+            # Add SSL bypass flag if configured (for VPN/proxy environments)
+            if _get_ignore_ssl_setting():
+                cmd.append("--no-check-certificates")
+
+            cmd.append(url)
+
             # Run yt-dlp to download the audio
             result = subprocess.run(
-                [
-                    "yt-dlp",
-                    "--extract-audio",
-                    "--audio-format", "best",
-                    "--output", output_template,
-                    "--no-playlist",
-                    "--quiet",
-                    url
-                ],
+                cmd,
                 capture_output=True,
                 text=True,
                 timeout=120

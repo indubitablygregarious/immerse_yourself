@@ -62,6 +62,9 @@ class SettingsManager:
         "spotify": {
             "auto_start": "ask",  # Options: "always", "never", "ask"
             "startup_playlist": ""  # Playlist URI to play on startup (empty = none)
+        },
+        "downloads": {
+            "ignore_ssl_errors": "false"  # Set to "true" to ignore SSL certificate errors (for VPN/proxy)
         }
     }
 
@@ -119,6 +122,14 @@ class SettingsManager:
     def set_startup_playlist(self, uri: str) -> None:
         """Set the startup playlist URI."""
         self.set("spotify", "startup_playlist", uri)
+
+    def get_ignore_ssl_errors(self) -> bool:
+        """Get whether to ignore SSL certificate errors for downloads."""
+        return self.get("downloads", "ignore_ssl_errors", "false").lower() == "true"
+
+    def set_ignore_ssl_errors(self, ignore: bool) -> None:
+        """Set whether to ignore SSL certificate errors for downloads."""
+        self.set("downloads", "ignore_ssl_errors", "true" if ignore else "false")
 
 
 class SpotifyConfigManager:
@@ -245,6 +256,9 @@ class SettingsDialog(QDialog):
         bulb_item = QListWidgetItem(f"💡 WIZ Bulbs [{bulb_status}]")
         self.nav_list.addItem(bulb_item)
 
+        downloads_item = QListWidgetItem("📥 Downloads")
+        self.nav_list.addItem(downloads_item)
+
         self.nav_list.currentRowChanged.connect(self._on_nav_changed)
 
         # Right panel stack
@@ -254,6 +268,7 @@ class SettingsDialog(QDialog):
         self.panel_stack.addWidget(self._create_appearance_panel())
         self.panel_stack.addWidget(self._create_spotify_panel())
         self.panel_stack.addWidget(self._create_wizbulb_panel())
+        self.panel_stack.addWidget(self._create_downloads_panel())
 
         layout.addWidget(self.nav_list)
         layout.addWidget(self.panel_stack, 1)
@@ -625,6 +640,42 @@ class SettingsDialog(QDialog):
             )
         except Exception as e:
             self.discovery_results.setText(f"Discovery failed:\n{str(e)}")
+
+    def _create_downloads_panel(self) -> QWidget:
+        """Create the downloads settings panel."""
+        panel = QWidget()
+        layout = QVBoxLayout()
+
+        # SSL group
+        ssl_group = QGroupBox("SSL Certificate Verification")
+        ssl_layout = QVBoxLayout()
+
+        self.ignore_ssl_checkbox = QCheckBox("Ignore SSL certificate errors")
+        self.ignore_ssl_checkbox.setChecked(self.settings_manager.get_ignore_ssl_errors())
+        self.ignore_ssl_checkbox.stateChanged.connect(self._on_ssl_setting_changed)
+        ssl_layout.addWidget(self.ignore_ssl_checkbox)
+
+        ssl_note = QLabel(
+            "Enable this if you're behind a corporate VPN or proxy that performs\n"
+            "SSL inspection (MITM). This allows freesound.org downloads to work\n"
+            "when certificate verification fails.\n\n"
+            "⚠️ Only enable if you trust your network. Disabling SSL verification\n"
+            "can expose you to man-in-the-middle attacks on untrusted networks."
+        )
+        ssl_note.setWordWrap(True)
+        ssl_note.setStyleSheet("color: gray; font-size: 11px;")
+        ssl_layout.addWidget(ssl_note)
+
+        ssl_group.setLayout(ssl_layout)
+        layout.addWidget(ssl_group)
+
+        layout.addStretch()
+        panel.setLayout(layout)
+        return panel
+
+    def _on_ssl_setting_changed(self, state: int) -> None:
+        """Handle SSL setting change."""
+        self.settings_manager.set_ignore_ssl_errors(state == 2)  # 2 = Qt.Checked
 
     def _on_nav_changed(self, index: int) -> None:
         """Handle navigation selection change."""
@@ -1741,7 +1792,7 @@ class EnvironmentLauncher(QMainWindow):
             color: #333333;
             border: 1px solid #666666;
             padding: 4px;
-            font-family: monospace;
+            font-family: "SF Mono", "Monaco", "Menlo", "Consolas", "Liberation Mono", monospace;
         }
     """
 
@@ -2844,7 +2895,8 @@ engines:
 
         tags = []
         try:
-            response = requests.get(url, timeout=15)
+            verify_ssl = not self.settings_manager.get_ignore_ssl_errors()
+            response = requests.get(url, timeout=15, verify=verify_ssl)
             response.raise_for_status()
             html = response.text
 

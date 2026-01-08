@@ -1,0 +1,79 @@
+name: "Docks Afternoon"
+category: "town"
+description: "Bustling afternoon harbor with bright sun, busy sailors, and ships loading cargo"
+icon: "⚓"
+
+metadata:
+  tags: ["outdoor", "harbor", "ships", "sailors", "coastal", "trade", "afternoon"]
+  intensity: "low"
+  suitable_for: ["ship boarding", "smuggler encounters", "sailor interactions", "cargo inspection"]
+
+engines:
+  sound:
+    enabled: true
+    file: "sound_conf:transition"
+
+  spotify:
+    enabled: false
+
+  atmosphere:
+    enabled: true
+    min_sounds: 3
+    max_sounds: 5
+    mix:
+      # Waves lapping against dock
+      - url: "https://freesound.org/people/j1987/sounds/106427/"
+        volume: 50
+
+      # Seagulls calling (active)
+      - url: "https://freesound.org/people/Benboncan/sounds/64765/"
+        volume: 55
+
+      # Ship creaking
+      - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
+        volume: 40
+        optional: true
+        probability: 0.6
+
+      # Sailor chatter (busier in afternoon)
+      - url: "https://freesound.org/people/Leandros.Ntounis/sounds/163612/"
+        volume: 45
+
+      # Rope/rigging sounds
+      - url: "https://freesound.org/people/martinimeniscus/sounds/182249/"
+        volume: 35
+        optional: true
+        probability: 0.5
+
+  lights:
+    enabled: true
+    animation:
+      cycletime: 10
+
+      groups:
+        backdrop:
+          type: "rgb"
+          rgb:
+            base: [130, 170, 220]  # Bright blue sky
+            variance: [20, 25, 30]
+          brightness:
+            min: 170
+            max: 240
+
+        overhead:
+          type: "rgb"
+          rgb:
+            base: [255, 250, 220]  # Bright afternoon sun
+            variance: [15, 15, 20]
+          brightness:
+            min: 200
+            max: 255
+
+        battlefield:
+          type: "rgb"
+          rgb:
+            base: [140, 160, 190]  # Sun-bleached wood, water glare
+            variance: [25, 25, 30]
+          brightness:
+            min: 150
+            max: 220

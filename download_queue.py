@@ -15,6 +15,7 @@ Usage:
 
 import re
 import threading
+import configparser
 from dataclasses import dataclass, field
 from pathlib import Path
 from queue import Queue
@@ -24,6 +25,16 @@ from PyQt5.QtCore import QObject, QThread, pyqtSignal
 import requests
 
 from freesound_manager import FreesoundManager, FreesoundError
+
+
+def _get_ignore_ssl_setting() -> bool:
+    """Read the ignore_ssl_errors setting from settings.ini."""
+    settings_path = Path("settings.ini")
+    if settings_path.exists():
+        config = configparser.ConfigParser()
+        config.read(settings_path)
+        return config.get("downloads", "ignore_ssl_errors", fallback="false").lower() == "true"
+    return False
 
 
 @dataclass
@@ -151,7 +162,8 @@ class DownloadWorker(QThread):
         }
 
         try:
-            response = requests.get(url, timeout=15)
+            verify_ssl = not _get_ignore_ssl_setting()
+            response = requests.get(url, timeout=15, verify=verify_ssl)
             response.raise_for_status()
             html = response.text
 

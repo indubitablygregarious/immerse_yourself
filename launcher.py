@@ -1792,7 +1792,7 @@ class EnvironmentLauncher(QMainWindow):
             color: #333333;
             border: 1px solid #666666;
             padding: 4px;
-            font-family: "SF Mono", "Monaco", "Menlo", "Consolas", "Liberation Mono", monospace;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
         }
     """
 
@@ -2439,6 +2439,7 @@ class EnvironmentLauncher(QMainWindow):
     def _create_menu(self) -> None:
         """Create the application menu bar."""
         menubar = self.menuBar()
+        menubar.setNativeMenuBar(False)  # Force menu into window on macOS
 
         # File menu (Ctrl+F, F underlined)
         file_menu = menubar.addMenu("&File")

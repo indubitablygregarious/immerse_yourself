@@ -117,12 +117,11 @@ class ConfigLoader:
                 "Field 'name' must be a non-empty string"
             )
 
-        # Validate category
-        valid_categories = ["combat", "social", "exploration", "relaxation", "special", "hidden", "freesound"]
-        if config["category"] not in valid_categories:
+        # Validate category - must be a non-empty string
+        # Categories are dynamic - any string is allowed (freesound tags become categories)
+        if not isinstance(config["category"], str) or not config["category"].strip():
             raise ConfigValidationError(
-                f"Field 'category' must be one of: {', '.join(valid_categories)}\n"
-                f"Got: {config['category']}"
+                "Field 'category' must be a non-empty string"
             )
 
         # Validate engines

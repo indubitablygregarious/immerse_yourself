@@ -26,4 +26,4 @@ __pycache__/
 *.pyo
 *.egg-info/
 venv/
-env_conf/freesound_freesound**
+env_conf/freesound_**

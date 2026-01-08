@@ -14,13 +14,14 @@ Usage:
 
     # metadata contains: creator, sound_id, sound_name, filename
 
-    # Get category from tags
-    category = select_category_from_tags(["rain", "storm", "nature"])  # Returns "exploration"
+    # Get category from tags - exact match with existing, or use tag as new category
+    existing = ["combat", "exploration", "social"]
+    category = select_category_from_tags(["rain", "storm"], existing)  # Returns "rain" (new category)
+    category = select_category_from_tags(["combat", "war"], existing)  # Returns "combat" (existing)
 """
 
 import os
 import re
-import random
 import subprocess
 from pathlib import Path
 from typing import Optional, Tuple, Dict, List
@@ -28,98 +29,47 @@ from urllib.parse import urlparse
 import requests
 
 
-# Category definitions with associated keywords/tags
-# Order matters - first match wins
-CATEGORY_TAG_MAPPINGS = {
-    "combat": [
-        "battle", "fight", "combat", "war", "sword", "weapon", "attack",
-        "explosion", "gunshot", "gun", "rifle", "cannon", "arrow", "clash",
-        "hit", "punch", "kick", "scream", "death", "pain", "hurt", "injury",
-        "monster", "creature", "beast", "dragon", "roar", "growl",
-        "metal", "clang", "impact", "slash", "stab",
-    ],
-    "exploration": [
-        "nature", "forest", "woods", "tree", "bird", "birds", "wind", "breeze",
-        "rain", "storm", "thunder", "water", "river", "stream", "ocean", "sea",
-        "wave", "beach", "sand", "desert", "mountain", "cave", "footstep",
-        "walk", "travel", "outdoor", "outside", "ambient", "environment",
-        "weather", "field", "grass", "meadow", "jungle", "swamp", "marsh",
-        "night", "day", "morning", "evening", "dawn", "dusk", "crickets",
-        "insects", "cicada", "frog", "owl", "wolf", "howl",
-    ],
-    "social": [
-        "crowd", "people", "voice", "voices", "talk", "talking", "chatter",
-        "laugh", "laughter", "applause", "clap", "cheer", "boo", "tavern",
-        "bar", "pub", "restaurant", "cafe", "city", "town", "market",
-        "street", "urban", "traffic", "car", "horn", "bell", "church",
-        "celebration", "party", "festival", "music", "instrument",
-        "comedy", "funny", "humor", "reaction",
-    ],
-    "relaxation": [
-        "calm", "peaceful", "relax", "relaxing", "soothing", "gentle",
-        "soft", "quiet", "meditation", "zen", "spa", "sleep", "dream",
-        "ambient", "atmosphere", "drone", "pad", "texture", "background",
-        "white noise", "pink noise", "brown noise", "binaural",
-        "lofi", "lo-fi", "chill", "jazz", "piano", "acoustic",
-        "fireplace", "fire", "crackling", "cozy", "warm",
-    ],
-    "special": [
-        "magic", "spell", "fantasy", "mystical", "ethereal", "supernatural",
-        "ghost", "haunted", "horror", "scary", "creepy", "eerie", "spooky",
-        "sci-fi", "space", "alien", "robot", "mechanical", "electronic",
-        "glitch", "digital", "synth", "synthesizer", "futuristic",
-        "heaven", "hell", "divine", "demonic", "angel", "demon",
-        "victory", "win", "success", "fanfare", "triumph", "achievement",
-        "fail", "failure", "loss", "game over", "dramatic",
-    ],
-}
-
-
-def select_category_from_tags(tags: List[str], default_category: str = "freesound") -> str:
+def select_category_from_tags(tags: List[str], existing_categories: List[str] = None, default_category: str = "freesound") -> str:
     """
-    Select the best category based on sound tags.
+    Select a category based on sound tags.
 
-    Checks each tag against category keyword mappings. If a tag matches
-    a category, returns that category. If no match, picks a random tag
-    as a fallback or returns the default category.
+    Uses EXACT case-insensitive matching against existing categories.
+    If a tag exactly matches an existing category, use that category.
+    If no match, use the first reasonable tag as a new category name.
 
     Args:
         tags: List of tags from the freesound page
-        default_category: Category to use if no match found (default: "freesound")
+        existing_categories: List of existing category names from loaded YAML configs
+        default_category: Category to use if no tags available (default: "freesound")
 
     Returns:
-        Best matching category name
+        Category name - either an existing category or a new one from tags
     """
     if not tags:
         return default_category
 
-    # Normalize tags to lowercase
+    existing_categories = existing_categories or []
+
+    # Normalize for comparison
     normalized_tags = [t.lower().strip() for t in tags]
+    normalized_existing = {cat.lower(): cat for cat in existing_categories}
 
-    # Check each tag against category mappings
+    # First: Check for exact match with existing categories
     for tag in normalized_tags:
-        for category, keywords in CATEGORY_TAG_MAPPINGS.items():
-            for keyword in keywords:
-                # Check if keyword is in tag or tag is in keyword
-                if keyword in tag or tag in keyword:
-                    return category
+        if tag in normalized_existing:
+            return normalized_existing[tag]  # Return original casing
 
-    # No match found - pick a random tag as category if it's reasonable
-    # Filter for reasonable category names (short, alphanumeric)
-    reasonable_tags = [
-        t for t in normalized_tags
-        if len(t) <= 20 and t.isalnum() or t.replace(" ", "").replace("-", "").replace("_", "").isalnum()
-    ]
+    # No match with existing categories - use first reasonable tag as new category
+    for tag in normalized_tags:
+        # Skip very short or very long tags
+        if 2 <= len(tag) <= 30:
+            # Clean up for use as category name (replace spaces/hyphens with underscores)
+            clean_tag = tag.replace(" ", "_").replace("-", "_")
+            # Only alphanumeric and underscores
+            if clean_tag.replace("_", "").isalnum():
+                return clean_tag
 
-    if reasonable_tags:
-        # Pick a random tag, but prefer shorter ones
-        reasonable_tags.sort(key=len)
-        # Take from the shorter half
-        half = max(1, len(reasonable_tags) // 2)
-        selected_tag = random.choice(reasonable_tags[:half])
-        # Clean up for use as category
-        return selected_tag.replace(" ", "_").replace("-", "_").lower()
-
+    # Fallback if no reasonable tags found
     return default_category
 
 

@@ -165,17 +165,14 @@ class DownloadWorker(QThread):
                 metadata["sound_name"] = self._freesound._sanitize_filename(title)
 
             # Extract tags - freesound uses a tags section with links
-            # Pattern: <a href="/search/?q=tagname" class="tag">tagname</a>
-            # Or: data-tag="tagname" or similar patterns
+            # Pattern: <a href="/browse/tags/tagname/">tagname</a>
             tag_patterns = [
-                # Pattern 1: class="tag" links
+                # Pattern 1: Extract tag from /browse/tags/tagname/ URL path
+                r'href="/browse/tags/([^/"]+)/"',
+                # Pattern 2: class="tag" links
                 r'class="tag[^"]*"[^>]*>([^<]+)</a>',
-                # Pattern 2: Tags in search links
-                r'/search/\?q=([^"&]+)"[^>]*class="[^"]*tag',
                 # Pattern 3: data-tag attributes
                 r'data-tag="([^"]+)"',
-                # Pattern 4: Tags container with tag links
-                r'<a[^>]+href="/browse/tags/[^"]*"[^>]*>([^<]+)</a>',
             ]
 
             tags = set()

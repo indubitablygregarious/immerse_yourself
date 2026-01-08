@@ -1562,7 +1562,7 @@ class CategoryItemWidget(QWidget):
     lights_clicked = pyqtSignal(str)  # category name
     atmosphere_clicked = pyqtSignal(str)  # category name
 
-    def __init__(self, category: str, parent=None):
+    def __init__(self, category: str, display_name: str = None, parent=None):
         super().__init__(parent)
         self.category = category
         self._lights_active = False
@@ -1573,8 +1573,9 @@ class CategoryItemWidget(QWidget):
         layout.setContentsMargins(8, 4, 4, 4)
         layout.setSpacing(3)
 
-        # Category name label
-        self.name_label = QLabel(category.capitalize())
+        # Category name label - use display_name if provided, otherwise capitalize
+        label_text = display_name if display_name else category.replace("_", " ").title()
+        self.name_label = QLabel(label_text)
         self.name_label.setStyleSheet("font-size: 13px;")
         layout.addWidget(self.name_label)
 
@@ -2361,11 +2362,21 @@ class EnvironmentLauncher(QMainWindow):
             category = config.get("category", "special")
             organized[category].append(config)
 
-        # Sort categories
+        # Sort categories - predefined ones first, then dynamic ones alphabetically
         sorted_organized = {}
-        for category in ["combat", "social", "exploration", "relaxation", "special", "hidden", "freesound"]:
+        predefined = ["combat", "social", "exploration", "relaxation", "special", "hidden", "freesound"]
+
+        # Add predefined categories in order
+        for category in predefined:
             if category in organized:
-                # Sort configs within category by name
+                sorted_organized[category] = sorted(
+                    organized[category],
+                    key=lambda c: c["name"]
+                )
+
+        # Add any dynamic categories (from freesound tags) alphabetically
+        for category in sorted(organized.keys()):
+            if category not in predefined:
                 sorted_organized[category] = sorted(
                     organized[category],
                     key=lambda c: c["name"]
@@ -2438,7 +2449,14 @@ class EnvironmentLauncher(QMainWindow):
             if url:
                 self.atmosphere_volumes[url] = vol
                 if url in self.volume_sliders:
-                    self.volume_sliders[url].set_volume(vol)
+                    try:
+                        slider = self.volume_sliders[url]
+                        # Check if slider is still valid (not deleted by Qt)
+                        if slider is not None:
+                            slider.set_volume(vol)
+                    except RuntimeError:
+                        # Slider was deleted, remove from dict
+                        del self.volume_sliders[url]
 
         # Now start the actual EngineRunner
         self._start_environment_runner(config)
@@ -2447,7 +2465,7 @@ class EnvironmentLauncher(QMainWindow):
         """
         Auto-create a YAML config for a freesound using metadata with tags.
 
-        Uses tag-based category selection instead of always using "freesound".
+        Category selection: exact match with existing categories, or use tag as new category.
         """
         try:
             sound_name = metadata.get("sound_name", "Unknown")
@@ -2456,8 +2474,11 @@ class EnvironmentLauncher(QMainWindow):
             sound_id = metadata.get("sound_id", "0")
             tags = metadata.get("tags", [])
 
-            # Select category based on tags
-            category = select_category_from_tags(tags)
+            # Get existing categories from loaded configs
+            existing_categories = list(self.configs.keys()) if hasattr(self, 'configs') else []
+
+            # Select category based on tags - exact match with existing, or use tag as new category
+            category = select_category_from_tags(tags, existing_categories)
 
             # Create a safe filename
             safe_name = sound_name.lower().replace(' ', '_').replace('-', '_')
@@ -2536,21 +2557,14 @@ engines:
             self.url_to_config[sound_file] = config
 
         # Find or create the category tab
-        if category not in self.category_content_widgets:
-            # Create the category tab dynamically (with scroll area like _create_category_tab)
-            scroll_area = QScrollArea()
-            scroll_area.setWidgetResizable(True)
-            scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            scroll_area.setFrameShape(QFrame.NoFrame)
+        is_new_category = category not in self.category_content_widgets
 
-            content_widget = QWidget()
-            layout = QGridLayout()
-            layout.setSpacing(10)
-            content_widget.setLayout(layout)
-            scroll_area.setWidget(content_widget)
+        if is_new_category:
+            # For new categories, use _create_category_tab with just this config
+            # This ensures the same widget setup order that works at startup
+            scroll_area = self._create_category_tab(category, [config])
 
-            # Add to category list and stack
+            # Add to category list
             item = QListWidgetItem()
             item.setSizeHint(QSize(0, 44))
             self.category_list.addItem(item)
@@ -2562,47 +2576,70 @@ engines:
             self.category_list.setItemWidget(item, category_widget)
             self.category_widgets[category] = category_widget
 
+            # Add to stack
             self.category_stack.addWidget(scroll_area)
             self.category_content_widgets[category] = scroll_area
 
             # Update tab_configs for the new category
             new_tab_index = self.category_list.count() - 1
-            self.tab_configs[new_tab_index] = []
+            self.tab_configs[new_tab_index] = [config]
 
-        # Find the tab index for this category
-        scroll_area = self.category_content_widgets[category]
-        tab_index = self.category_stack.indexOf(scroll_area)
+            # Ensure visible
+            scroll_area.show()
 
-        # Add config to tab_configs for keyboard shortcuts
-        if tab_index >= 0 and tab_index in self.tab_configs:
-            self.tab_configs[tab_index].append(config)
+        else:
+            # Existing category - add button to existing grid
+            scroll_area = self.category_content_widgets[category]
+            tab_index = self.category_stack.indexOf(scroll_area)
 
-        # Create button for the new config
-        # Calculate shortcut key based on position in tab
-        shortcut_key = ""
-        if tab_index >= 0 and tab_index in self.tab_configs:
-            config_index = len(self.tab_configs[tab_index]) - 1  # Just added above
-            if config_index < len(self.KEYS):
-                shortcut_key = self.KEYS[config_index]
+            # Add config to tab_configs for keyboard shortcuts
+            if tab_index >= 0 and tab_index in self.tab_configs:
+                self.tab_configs[tab_index].append(config)
 
-        container, btn = self._create_button(config, shortcut_key)
-        name = config["name"]
-        self.buttons[name] = btn
+            # Calculate shortcut key based on position in tab
+            shortcut_key = ""
+            if tab_index >= 0 and tab_index in self.tab_configs:
+                config_index = len(self.tab_configs[tab_index]) - 1
+                if config_index < len(self.KEYS):
+                    shortcut_key = self.KEYS[config_index]
 
-        # Find the content widget inside the scroll area and add button to its grid
-        content_widget = scroll_area.widget()
-        if content_widget and content_widget.layout():
-            grid = content_widget.layout()
-            count = grid.count()
-            cols = 4  # Match the column count from _create_category_tab
-            row = count // cols
-            col = count % cols
-            grid.addWidget(container, row, col)
+            container, btn = self._create_button(config, shortcut_key)
+            name = config["name"]
+            self.buttons[name] = btn
 
-        # If this is the currently selected tab, refresh shortcuts
-        current_tab_index = self.category_list.currentRow()
-        if current_tab_index == tab_index:
-            self._update_shortcuts_for_tab(tab_index)
+            # Add button to existing grid
+            content_widget = scroll_area.widget()
+            if content_widget and content_widget.layout():
+                grid = content_widget.layout()
+                count = grid.count()
+                cols = 4
+                row = count // cols
+                col = count % cols
+                grid.addWidget(container, row, col)
+
+                # Ensure visible and force repaint
+                container.show()
+                btn.show()
+                grid.activate()
+                content_widget.adjustSize()
+                content_widget.repaint()
+                scroll_area.viewport().update()
+
+            # Refresh shortcuts if this is current tab
+            current_tab_index = self.category_list.currentRow()
+            if current_tab_index == tab_index:
+                self._update_shortcuts_for_tab(tab_index)
+
+    def _force_category_repaint(self, category: str) -> None:
+        """Force a repaint of a category's content widget."""
+        if category in self.category_content_widgets:
+            scroll_area = self.category_content_widgets[category]
+            content_widget = scroll_area.widget()
+            if content_widget:
+                content_widget.update()
+                content_widget.repaint()
+            scroll_area.viewport().update()
+            scroll_area.update()
 
     def _queue_atmosphere_downloads(self, mix: List[Dict[str, Any]]) -> int:
         """
@@ -2676,8 +2713,7 @@ engines:
                 cached = freesound_manager._find_cached_file(creator, sound_id)
 
                 if cached:
-                    # File is cached but no config - create one with basic metadata
-                    # (We don't have tags, so it will get "freesound" category)
+                    # File is cached but no config - fetch tags from webpage and create config
                     # Extract sound name from cached filename
                     filename = cached.name
                     parts = filename.split('_', 2)
@@ -2686,13 +2722,15 @@ engines:
                     else:
                         sound_name = f"sound_{sound_id}"
 
-                    # Create basic config (without tags - legacy cached file)
+                    # Fetch tags from the webpage
+                    tags = self._fetch_freesound_tags(url)
+
                     metadata = {
                         "sound_name": sound_name,
                         "display_name": sound_name.replace("_", " "),
                         "creator": creator,
                         "sound_id": sound_id,
-                        "tags": [],  # No tags for legacy cached files
+                        "tags": tags,
                     }
                     self._auto_create_freesound_config_from_metadata(url, metadata)
                 else:
@@ -2704,30 +2742,70 @@ engines:
 
         return needs_download
 
+    def _fetch_freesound_tags(self, url: str) -> List[str]:
+        """Fetch tags from a freesound webpage."""
+        import re
+        import requests
+
+        tags = []
+        try:
+            response = requests.get(url, timeout=15)
+            response.raise_for_status()
+            html = response.text
+
+            # Extract tags from /browse/tags/tagname/ links
+            matches = re.findall(r'href="/browse/tags/([^/"]+)/"', html, re.IGNORECASE)
+            for match in matches:
+                tag = match.strip().lower()
+                if tag and len(tag) < 50:
+                    tag = tag.replace('%20', ' ').replace('+', ' ')
+                    if tag not in tags:
+                        tags.append(tag)
+        except Exception as e:
+            print(f"Warning: Could not fetch tags for {url}: {e}")
+
+        return tags
+
     def _update_atmosphere_buttons(self, urls: List[str], active: bool) -> None:
         """Highlight or unhighlight buttons for atmosphere member sounds."""
+        stale_buttons = []
         for url in urls:
             config = self.url_to_config.get(url)
             if config:
                 config_name = config.get("name")
                 if config_name and config_name in self.buttons:
-                    btn = self.buttons[config_name]
-                    if active:
-                        btn.setStyleSheet(self.ATMOSPHERE_ACTIVE_STYLE)
-                    else:
-                        btn.setStyleSheet(self.INACTIVE_STYLE)
-                    btn.update()  # Force visual refresh
+                    try:
+                        btn = self.buttons[config_name]
+                        if active:
+                            btn.setStyleSheet(self.ATMOSPHERE_ACTIVE_STYLE)
+                        else:
+                            btn.setStyleSheet(self.INACTIVE_STYLE)
+                        btn.update()  # Force visual refresh
+                    except RuntimeError:
+                        stale_buttons.append(config_name)
+        # Clean up stale button references
+        for name in stale_buttons:
+            if name in self.buttons:
+                del self.buttons[name]
 
     def _clear_atmosphere_buttons(self) -> None:
         """Clear all atmosphere button highlights."""
+        stale_buttons = []
         for url in self.active_atmosphere_urls:
             config = self.url_to_config.get(url)
             if config:
                 config_name = config.get("name")
                 if config_name and config_name in self.buttons:
-                    btn = self.buttons[config_name]
-                    btn.setStyleSheet(self.INACTIVE_STYLE)
-                    btn.update()  # Force visual refresh
+                    try:
+                        btn = self.buttons[config_name]
+                        btn.setStyleSheet(self.INACTIVE_STYLE)
+                        btn.update()  # Force visual refresh
+                    except RuntimeError:
+                        stale_buttons.append(config_name)
+        # Clean up stale button references
+        for name in stale_buttons:
+            if name in self.buttons:
+                del self.buttons[name]
         self.active_atmosphere_urls.clear()
         self._update_category_badges()
 
@@ -2747,7 +2825,10 @@ engines:
             atmosphere_engine.stop_single(sound_url, fade_out=True)
             self.active_atmosphere_urls.discard(sound_url)
             if config_name in self.buttons:
-                self.buttons[config_name].setStyleSheet(self.INACTIVE_STYLE)
+                try:
+                    self.buttons[config_name].setStyleSheet(self.INACTIVE_STYLE)
+                except RuntimeError:
+                    del self.buttons[config_name]
             self.immersive_status.set_message(f"Removed: {config_name}", timeout_ms=2000)
             self._update_category_badges()
 
@@ -2769,7 +2850,10 @@ engines:
             if atmosphere_engine.start_single(sound_url, volume=volume, fade_in=True):
                 self.active_atmosphere_urls.add(sound_url)
                 if config_name in self.buttons:
-                    self.buttons[config_name].setStyleSheet(self.ATMOSPHERE_ACTIVE_STYLE)
+                    try:
+                        self.buttons[config_name].setStyleSheet(self.ATMOSPHERE_ACTIVE_STYLE)
+                    except RuntimeError:
+                        del self.buttons[config_name]
                 self.immersive_status.set_message(f"Added: {config_name}", timeout_ms=2000)
                 self._update_category_badges()
 
@@ -2945,9 +3029,9 @@ engines:
             self.tab_configs[tab_index] = configs
             tab_index += 1
 
-        # Connect list selection to stack
+        # Connect list selection to stack - use custom handler to look up by category name
         self.category_list.currentRowChanged.connect(self._on_tab_changed)
-        self.category_list.currentRowChanged.connect(self.category_stack.setCurrentIndex)
+        self.category_list.currentRowChanged.connect(self._switch_to_category_at_row)
 
         # Select first category
         self.category_list.setCurrentRow(0)
@@ -3095,6 +3179,26 @@ engines:
     def _on_tab_changed(self, index: int) -> None:
         """Handle tab change - remap keyboard shortcuts."""
         self._update_shortcuts_for_tab(index)
+
+    def _switch_to_category_at_row(self, row: int) -> None:
+        """Switch the stack widget to show the category at the given list row."""
+        # Get the category name from the list item widget
+        item = self.category_list.item(row)
+        if not item:
+            return
+
+        category_widget = self.category_list.itemWidget(item)
+        if not category_widget or not isinstance(category_widget, CategoryItemWidget):
+            return
+
+        category = category_widget.category
+
+        # Find the content widget for this category and switch to it
+        if category in self.category_content_widgets:
+            content_widget = self.category_content_widgets[category]
+            stack_index = self.category_stack.indexOf(content_widget)
+            if stack_index >= 0:
+                self.category_stack.setCurrentIndex(stack_index)
 
     def _update_shortcuts_for_tab(self, tab_index: int) -> None:
         """Update keyboard shortcuts to point to current tab's buttons."""
@@ -3329,7 +3433,13 @@ engines:
                     self.atmosphere_volumes[url] = vol
                     # Update slider if it exists
                     if url in self.volume_sliders:
-                        self.volume_sliders[url].set_volume(vol)
+                        try:
+                            slider = self.volume_sliders[url]
+                            if slider is not None:
+                                slider.set_volume(vol)
+                        except RuntimeError:
+                            # Slider was deleted, remove from dict
+                            del self.volume_sliders[url]
 
             # Don't set active_atmosphere_urls yet - wait for atmosphere_urls_selected signal
             # which will tell us which sounds were actually selected to play
@@ -3699,20 +3809,24 @@ engines:
         total_pulses = len(pulse_styles)
 
         def do_pulse():
-            if pulse_count[0] < total_pulses:
-                btn.setStyleSheet(pulse_styles[pulse_count[0]])
-                pulse_count[0] += 1
-                QTimer.singleShot(20, do_pulse)  # ~0.6 seconds total for 3 pulses
-            else:
-                # Restore appropriate style based on button state
-                if btn_config_name and btn_config_name == self.lights_config_name:
-                    # Active lights button
-                    btn.setStyleSheet(self.ACTIVE_STYLE)
-                elif btn_config_name and self._is_atmosphere_button(btn_config_name):
-                    # Active atmosphere button
-                    btn.setStyleSheet(self.ATMOSPHERE_ACTIVE_STYLE)
+            try:
+                if pulse_count[0] < total_pulses:
+                    btn.setStyleSheet(pulse_styles[pulse_count[0]])
+                    pulse_count[0] += 1
+                    QTimer.singleShot(20, do_pulse)  # ~0.6 seconds total for 3 pulses
                 else:
-                    btn.setStyleSheet(self.INACTIVE_STYLE)
+                    # Restore appropriate style based on button state
+                    if btn_config_name and btn_config_name == self.lights_config_name:
+                        # Active lights button
+                        btn.setStyleSheet(self.ACTIVE_STYLE)
+                    elif btn_config_name and self._is_atmosphere_button(btn_config_name):
+                        # Active atmosphere button
+                        btn.setStyleSheet(self.ATMOSPHERE_ACTIVE_STYLE)
+                    else:
+                        btn.setStyleSheet(self.INACTIVE_STYLE)
+            except RuntimeError:
+                # Button was deleted during pulse animation, ignore
+                pass
 
         do_pulse()
 
@@ -3773,19 +3887,34 @@ engines:
             if cfg:
                 atmosphere_button_names.add(cfg.get("name"))
 
+        stale_buttons = []
         for name, btn in self.buttons.items():
-            if name == active_name:
-                btn.setStyleSheet(self.ACTIVE_STYLE)
-            elif name in atmosphere_button_names:
-                # Keep atmosphere members blue
-                btn.setStyleSheet(self.ATMOSPHERE_ACTIVE_STYLE)
-            else:
-                btn.setStyleSheet(self.INACTIVE_STYLE)
+            try:
+                if name == active_name:
+                    btn.setStyleSheet(self.ACTIVE_STYLE)
+                elif name in atmosphere_button_names:
+                    # Keep atmosphere members blue
+                    btn.setStyleSheet(self.ATMOSPHERE_ACTIVE_STYLE)
+                else:
+                    btn.setStyleSheet(self.INACTIVE_STYLE)
+            except RuntimeError:
+                # Button was deleted, mark for removal
+                stale_buttons.append(name)
+
+        # Clean up stale button references
+        for name in stale_buttons:
+            del self.buttons[name]
 
     def _reset_button_styles(self) -> None:
         """Reset all buttons to inactive state."""
-        for btn in self.buttons.values():
-            btn.setStyleSheet(self.INACTIVE_STYLE)
+        stale_buttons = []
+        for name, btn in list(self.buttons.items()):
+            try:
+                btn.setStyleSheet(self.INACTIVE_STYLE)
+            except RuntimeError:
+                stale_buttons.append(name)
+        for name in stale_buttons:
+            del self.buttons[name]
 
     def keyPressEvent(self, event) -> None:
         """Handle key press events."""

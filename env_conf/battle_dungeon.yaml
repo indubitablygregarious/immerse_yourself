@@ -14,37 +14,37 @@ engines:
     file: "sound_conf:battle_intro"
 
   spotify:
-    enabled: false
-    # context_uri: "spotify:playlist:6FohP6m1ipvNjgllOH4HLt"
+    enabled: true
+    context_uri: "spotify:playlist:6FohP6m1ipvNjgllOH4HLt"
 
   atmosphere:
-    enabled: true
-    min_sounds: 3
-    max_sounds: 5
-    mix:
-      # Sword clash collection (required)
-      - url: "https://freesound.org/people/courter/sounds/658736/"
-        volume: 55
-
-      # Battle cries charging (required)
-      - url: "https://freesound.org/people/florianreichelt/sounds/563011/"
-        volume: 50
-
-      # Dungeon cave atmosphere (required)
-      - url: "https://freesound.org/people/Kinoton/sounds/516566/"
-        volume: 45
-
-      # Chains rattling (optional)
-      - url: "https://freesound.org/people/mshahen/sounds/267543/"
-        volume: 35
-        optional: true
-        probability: 0.4
-
-      # Heavy breathing exertion (optional)
-      - url: "https://freesound.org/people/mO_o/sounds/22262/"
-        volume: 40
-        optional: true
-        probability: 0.5
+    enabled: false
+    # min_sounds: 3
+    # max_sounds: 5
+    # mix:
+    #   # Sword clash collection (required)
+    #   - url: "https://freesound.org/people/courter/sounds/658736/"
+    #     volume: 55
+    #
+    #   # Battle cries charging (required)
+    #   - url: "https://freesound.org/people/florianreichelt/sounds/563011/"
+    #     volume: 50
+    #
+    #   # Dungeon cave atmosphere (required)
+    #   - url: "https://freesound.org/people/Kinoton/sounds/516566/"
+    #     volume: 45
+    #
+    #   # Chains rattling (optional)
+    #   - url: "https://freesound.org/people/mshahen/sounds/267543/"
+    #     volume: 35
+    #     optional: true
+    #     probability: 0.4
+    #
+    #   # Heavy breathing exertion (optional)
+    #   - url: "https://freesound.org/people/mO_o/sounds/22262/"
+    #     volume: 40
+    #     optional: true
+    #     probability: 0.5
 
   lights:
     enabled: true

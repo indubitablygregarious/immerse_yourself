@@ -1533,7 +1533,7 @@ class EngineRunner(QThread):
             display_name = sound_name.replace('_', ' ')
             config_content = f'''name: "{display_name}"
 category: "freesound"
-description: "Freesound by {creator}"
+description: "{display_name} by {creator}"
 icon: "🔁"
 
 metadata:
@@ -2587,7 +2587,7 @@ class EnvironmentLauncher(QMainWindow):
             # Create the config content
             config_content = f'''name: "{display_name}"
 category: "{category}"
-description: "Freesound by {creator}"
+description: "{display_name} by {creator}"
 icon: "🔁"
 
 metadata:

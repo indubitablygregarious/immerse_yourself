@@ -21,7 +21,7 @@ from pathlib import Path
 from queue import Queue
 from typing import Optional, List, Dict, Any, Callable
 
-from PyQt5.QtCore import QObject, QThread, pyqtSignal
+from PyQt6.QtCore import QObject, QThread, pyqtSignal
 import requests
 
 from freesound_manager import FreesoundManager, FreesoundError

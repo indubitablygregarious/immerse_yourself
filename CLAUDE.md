@@ -41,7 +41,7 @@ The project has been refactored from individual Python scripts into a modular en
   - Category filtering
 
 - **Launcher** (`launcher.py`):
-  - PyQt5 GUI for launching environments
+  - PyQt6 GUI for launching environments
   - **File menu** (Alt+F): Settings (Ctrl+,) and Quit (Ctrl+Q)
   - **Settings dialog** (`SettingsDialog` class): Icon navigation on left, settings panels on right
     - **Appearance panel**: Light/Dark/System theme selection

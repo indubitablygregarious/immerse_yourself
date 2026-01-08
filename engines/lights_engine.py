@@ -151,10 +151,9 @@ class LightsEngine:
         battlefield_bulbs = 192.168.1.163 192.168.1.164
         """
         if not Path(self.config_file).exists():
-            raise FileNotFoundError(
-                f"WIZ bulb config file not found: {self.config_file}\n"
-                "Please create .wizbulb.ini with your bulb IP addresses."
-            )
+            # No config file - disable lights for this engine instance
+            self._disabled = True
+            return
 
         config = configparser.ConfigParser()
         config.read(self.config_file)

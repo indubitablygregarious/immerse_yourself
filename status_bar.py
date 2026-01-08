@@ -10,8 +10,8 @@ Tracks 4 independent statuses:
 
 from typing import Optional
 from pathlib import Path
-from PyQt5.QtWidgets import QWidget, QStatusBar, QHBoxLayout
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QTimer
+from PyQt6.QtWidgets import QWidget, QStatusBar, QHBoxLayout
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QTimer
 
 
 class ImmersiveStatusBar(QWidget):

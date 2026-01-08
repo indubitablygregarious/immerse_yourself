@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Immerse Yourself Environment Launcher
-A PyQt5 GUI for managing ambient environment configs with Spotify and smart lights.
+A PyQt6 GUI for managing ambient environment configs with Spotify and smart lights.
 """
 
 import sys
@@ -14,16 +14,19 @@ from pathlib import Path
 from typing import List, Dict, Optional, Any, Set
 from collections import defaultdict
 
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QGridLayout, QPushButton,
     QStatusBar, QMessageBox, QVBoxLayout, QTabWidget, QHBoxLayout,
-    QShortcut, QLabel, QFrame, QSizePolicy, QStyleFactory, QMenuBar,
-    QMenu, QAction, QDialog, QListWidget, QListWidgetItem, QStackedWidget,
+    QLabel, QFrame, QSizePolicy, QStyleFactory, QMenuBar,
+    QMenu, QDialog, QListWidget, QListWidgetItem, QStackedWidget,
     QRadioButton, QButtonGroup, QGroupBox, QSplitter, QLineEdit,
-    QAbstractItemView, QScrollArea
+    QAbstractItemView, QScrollArea, QCheckBox
 )
-from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, QSize, QRect
-from PyQt5.QtGui import QKeySequence, QPalette, QColor, QPainter, QPen, QFont, QIcon
+from PyQt6.QtCore import Qt, QTimer, QThread, pyqtSignal, QSize, QRect
+from PyQt6.QtGui import (
+    QKeySequence, QPalette, QColor, QPainter, QPen, QFont, QIcon, QAction,
+    QShortcut
+)
 
 from config_loader import ConfigLoader
 from status_bar import ImmersiveStatusBar
@@ -322,7 +325,7 @@ class SettingsDialog(QDialog):
 
     def _create_spotify_panel(self) -> QWidget:
         """Create the Spotify settings panel."""
-        from PyQt5.QtWidgets import QScrollArea, QTextBrowser
+        from PyQt6.QtWidgets import QScrollArea, QTextBrowser
 
         panel = QWidget()
         layout = QVBoxLayout()
@@ -364,7 +367,7 @@ class SettingsDialog(QDialog):
         self.spotify_client_secret = QLineEdit()
         self.spotify_client_secret.setText(self.spotify_config.get("client_secret"))
         self.spotify_client_secret.setPlaceholderText("From Spotify Developer Dashboard")
-        self.spotify_client_secret.setEchoMode(QLineEdit.Password)
+        self.spotify_client_secret.setEchoMode(QLineEdit.EchoMode.Password)
         secret_layout.addWidget(self.spotify_client_secret)
         creds_layout.addLayout(secret_layout)
 
@@ -452,7 +455,7 @@ class SettingsDialog(QDialog):
 
     def _create_wizbulb_panel(self) -> QWidget:
         """Create the WIZ bulb settings panel."""
-        from PyQt5.QtWidgets import QTextBrowser, QTextEdit
+        from PyQt6.QtWidgets import QTextBrowser, QTextEdit
 
         panel = QWidget()
         layout = QVBoxLayout()
@@ -720,7 +723,7 @@ class OutlinedLabel(QLabel):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # Scale font size based on label dimensions
         rect = self.rect()
@@ -760,7 +763,7 @@ class VolumeSlider(QWidget):
         self._segments = 10
         self._hovered = False
         self.setMouseTracking(True)
-        self.setCursor(Qt.PointingHandCursor)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
     def set_volume(self, vol: int) -> None:
         """Set volume (0-100, will be rounded to nearest 10)."""
@@ -775,7 +778,7 @@ class VolumeSlider(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         rect = self.rect()
         w = rect.width()
@@ -799,7 +802,7 @@ class VolumeSlider(QWidget):
         icon_font = QFont()
         icon_font.setPointSize(10)
         painter.setFont(icon_font)
-        painter.drawText(QRect(0, 0, w, icon_height), Qt.AlignCenter, "🔊")
+        painter.drawText(QRect(0, 0, w, icon_height), Qt.AlignmentFlag.AlignCenter, "🔊")
 
         # Draw segments from bottom to top
         for i in range(self._segments):
@@ -819,7 +822,7 @@ class VolumeSlider(QWidget):
 
     def mousePressEvent(self, event):
         """Handle click - set volume based on click position."""
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             # Account for icon at top
             icon_height = 16 + 2
             h = self.height()
@@ -864,7 +867,7 @@ class IconButton(QPushButton):
         super().paintEvent(event)
 
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         rect = self.rect()
         min_dimension = min(rect.width(), rect.height())
 
@@ -875,7 +878,7 @@ class IconButton(QPushButton):
             font.setPointSize(emoji_font_size)
             painter.setFont(font)
             painter.setOpacity(0.15)
-            painter.drawText(rect, Qt.AlignCenter, self.icon_emoji)
+            painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, self.icon_emoji)
 
         # Draw label text with scaled font
         painter.setOpacity(1.0)
@@ -884,8 +887,8 @@ class IconButton(QPushButton):
         font.setPointSize(label_font_size)
         painter.setFont(font)
         # Use palette color for text (respects dark/light mode)
-        painter.setPen(self.palette().color(self.palette().ButtonText))
-        painter.drawText(rect, Qt.AlignCenter | Qt.TextWordWrap, self._label_text)
+        painter.setPen(self.palette().color(QPalette.ColorRole.ButtonText))
+        painter.drawText(rect, Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap, self._label_text)
 
 
 class ButtonContainer(QWidget):
@@ -911,7 +914,7 @@ class ButtonContainer(QWidget):
             self.volume_slider.setParent(self)
         self.setMinimumHeight(130)
         self.setMinimumWidth(180)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
     def resizeEvent(self, event):
         w = self.width()
@@ -962,7 +965,7 @@ class NowPlayingWidget(QWidget):
 
         # "now playing:" label always visible on the left
         self.title_label = QLabel("now playing:")
-        self.title_label.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight)
         self.title_label.setStyleSheet("font-size: 15px; color: #888; margin-top: 18px;")
         main_layout.addWidget(self.title_label)
 
@@ -975,13 +978,13 @@ class NowPlayingWidget(QWidget):
 
         # Status label on top (describes current state)
         self.status_label = QLabel("idle")
-        self.status_label.setAlignment(Qt.AlignCenter)
+        self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.status_label.setStyleSheet("font-size: 9px; color: #666; font-weight: bold;")
         icon_layout.addWidget(self.status_label)
 
         # Icon display below (visual indicator)
         self.icon_label = QLabel("⏸")
-        self.icon_label.setAlignment(Qt.AlignCenter)
+        self.icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.icon_label.setStyleSheet("font-size: 24px;")
         icon_layout.addWidget(self.icon_label)
 
@@ -1117,13 +1120,13 @@ class NowPlayingWidget(QWidget):
     def _update_cursor(self) -> None:
         """Update cursor based on whether lights are clickable."""
         if self._current_state == "lights" or self._lights_icon:
-            self.icon_section.setCursor(Qt.PointingHandCursor)
+            self.icon_section.setCursor(Qt.CursorShape.PointingHandCursor)
         else:
-            self.icon_section.setCursor(Qt.ArrowCursor)
+            self.icon_section.setCursor(Qt.CursorShape.ArrowCursor)
 
     def mousePressEvent(self, event) -> None:
         """Handle mouse clicks - emit signal if clicking on lights."""
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             # Check if click is in the icon section area and lights are active
             if self._lights_icon and self.icon_section.geometry().contains(event.pos()):
                 self.lights_clicked.emit()
@@ -1213,7 +1216,7 @@ class FuzzySearchBar(QLineEdit):
 
         # Results list - will be parented to top-level window
         self.results = QListWidget()
-        self.results.setWindowFlags(Qt.ToolTip)  # Lightweight overlay, not a full popup
+        self.results.setWindowFlags(Qt.WindowType.ToolTip)  # Lightweight overlay, not a full popup
         self.results.setMaximumHeight(200)
         self.results.setMinimumWidth(400)
         self.results.hide()
@@ -1237,7 +1240,7 @@ class FuzzySearchBar(QLineEdit):
         if matches:
             for disp, name, cat_idx in matches[:15]:
                 item = QListWidgetItem(disp)
-                item.setData(Qt.UserRole, (name, cat_idx))
+                item.setData(Qt.ItemDataRole.UserRole, (name, cat_idx))
                 self.results.addItem(item)
             self.results.setCurrentRow(0)
             # Position below the search bar
@@ -1250,7 +1253,7 @@ class FuzzySearchBar(QLineEdit):
 
     def _on_item_clicked(self, item: QListWidgetItem) -> None:
         """Handle item selection."""
-        name, cat_idx = item.data(Qt.UserRole)
+        name, cat_idx = item.data(Qt.ItemDataRole.UserRole)
         self.environment_selected.emit(name, cat_idx)
         self._clear_and_hide()
 
@@ -1269,17 +1272,17 @@ class FuzzySearchBar(QLineEdit):
 
     def keyPressEvent(self, event) -> None:
         """Handle arrow keys for result navigation."""
-        if event.key() == Qt.Key_Down and self.results.isVisible():
+        if event.key() == Qt.Key.Key_Down and self.results.isVisible():
             row = self.results.currentRow()
             if row < self.results.count() - 1:
                 self.results.setCurrentRow(row + 1)
             return
-        elif event.key() == Qt.Key_Up and self.results.isVisible():
+        elif event.key() == Qt.Key.Key_Up and self.results.isVisible():
             row = self.results.currentRow()
             if row > 0:
                 self.results.setCurrentRow(row - 1)
             return
-        elif event.key() == Qt.Key_Escape:
+        elif event.key() == Qt.Key.Key_Escape:
             self._clear_and_hide()
             return
         super().keyPressEvent(event)
@@ -1715,7 +1718,7 @@ class CategoryItemWidget(QWidget):
                 border: 2px solid #4CAF50;
             }}
         """)
-        self.lights_badge.setCursor(Qt.PointingHandCursor)
+        self.lights_badge.setCursor(Qt.CursorShape.PointingHandCursor)
         self.lights_badge.setToolTip("Click to show active lights preset")
         self.lights_badge.clicked.connect(lambda: self.lights_clicked.emit(self.category))
         self.lights_badge.hide()
@@ -1737,7 +1740,7 @@ class CategoryItemWidget(QWidget):
                 border: 2px solid #5B9BD5;
             }}
         """)
-        self.atmosphere_badge.setCursor(Qt.PointingHandCursor)
+        self.atmosphere_badge.setCursor(Qt.CursorShape.PointingHandCursor)
         self.atmosphere_badge.setToolTip("Click to show playing atmosphere sounds")
         self.atmosphere_badge.clicked.connect(lambda: self.atmosphere_clicked.emit(self.category))
         self.atmosphere_badge.hide()
@@ -1768,7 +1771,7 @@ class CategoryItemWidget(QWidget):
 
 
 class EnvironmentLauncher(QMainWindow):
-    """Main PyQt5 window for the environment launcher with tabs."""
+    """Main PyQt6 window for the environment launcher with tabs."""
 
     # Keyboard shortcuts (applied to current tab only)
     KEYS = [
@@ -1947,11 +1950,11 @@ class EnvironmentLauncher(QMainWindow):
             self,
             "Light Bulbs Unavailable",
             "\n".join(msg_lines),
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.Yes
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes
         )
 
-        if reply == QMessageBox.Yes:
+        if reply == QMessageBox.StandardButton.Yes:
             self._lights_disabled_this_session = True
             # Also disable at the engine level so LightsEngine does nothing
             disable_lights_for_session()
@@ -2124,7 +2127,7 @@ class EnvironmentLauncher(QMainWindow):
                                       remote_devices: list, engine: "SpotifyEngine",
                                       then_play_config: Optional[Dict[str, Any]] = None) -> bool:
         """Show startup Spotify options dialog. Returns True if connected successfully."""
-        from PyQt5.QtWidgets import QDialog, QCheckBox
+        from PyQt6.QtWidgets import QDialog
 
         dialog = QDialog(self)
         dialog.setWindowTitle("Spotify Setup")
@@ -2177,7 +2180,7 @@ class EnvironmentLauncher(QMainWindow):
         layout.addWidget(self._startup_remember_checkbox)
 
         dialog.setLayout(layout)
-        dialog.exec_()
+        dialog.exec()
 
         # Handle the result
         if self._startup_dialog_result is None:
@@ -2198,7 +2201,7 @@ class EnvironmentLauncher(QMainWindow):
                 # If multiple, let user choose
                 if len(remote_devices) > 1:
                     device_names = [f"{d['name']} ({d['type']})" for d in remote_devices]
-                    from PyQt5.QtWidgets import QInputDialog
+                    from PyQt6.QtWidgets import QInputDialog
                     choice, ok = QInputDialog.getItem(
                         self, "Select Device", "Choose a Spotify device:",
                         device_names, 0, False
@@ -2326,7 +2329,7 @@ class EnvironmentLauncher(QMainWindow):
 
         # Multiple devices - let user choose
         device_names = [f"{d['name']} ({d['type']})" for d in remote_devices]
-        from PyQt5.QtWidgets import QInputDialog
+        from PyQt6.QtWidgets import QInputDialog
         choice, ok = QInputDialog.getItem(
             self,
             "Select Device",
@@ -2349,7 +2352,7 @@ class EnvironmentLauncher(QMainWindow):
 
     def _show_spotify_options_dialog(self, spotify_running: bool, spotify_available: bool, remote_devices: list) -> None:
         """Show dialog with Spotify connection options."""
-        from PyQt5.QtWidgets import QDialog, QDialogButtonBox
+        from PyQt6.QtWidgets import QDialog, QDialogButtonBox
 
         dialog = QDialog(self)
         dialog.setWindowTitle("Spotify - No Active Device")
@@ -2392,12 +2395,11 @@ class EnvironmentLauncher(QMainWindow):
         layout.addLayout(btn_layout)
 
         # Remember choice checkbox
-        from PyQt5.QtWidgets import QCheckBox
         self._remember_checkbox = QCheckBox("Remember my choice")
         layout.addWidget(self._remember_checkbox)
 
         dialog.setLayout(layout)
-        dialog.exec_()
+        dialog.exec()
 
     def _dialog_start_local(self, dialog: "QDialog", spotify_running: bool, spotify_available: bool) -> None:
         """Handle 'Start local' from options dialog."""
@@ -2461,7 +2463,7 @@ class EnvironmentLauncher(QMainWindow):
     def _show_settings(self) -> None:
         """Show the settings dialog."""
         dialog = SettingsDialog(self.settings_manager, self)
-        dialog.exec_()
+        dialog.exec()
 
     def _detect_dark_mode(self) -> bool:
         """Detect if the system is using dark mode based on window background color."""
@@ -3051,7 +3053,7 @@ engines:
         self.search_bar = FuzzySearchBar(self.configs)
         self.search_bar.environment_selected.connect(self._on_search_selected)
         # Only focus search bar when clicked or via Ctrl+L, not by default
-        self.search_bar.setFocusPolicy(Qt.ClickFocus)
+        self.search_bar.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
         if self.is_dark_mode:
             self.search_bar.setStyleSheet("""
                 QLineEdit {
@@ -3090,7 +3092,7 @@ engines:
         main_layout.addWidget(search_container)
 
         # Create splitter for left tabs and right content
-        self.splitter = QSplitter(Qt.Horizontal)
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
 
         # Left side: category list (15% width)
         self.category_list = QListWidget()
@@ -3161,8 +3163,8 @@ engines:
                 self.separator_row = self.category_list.count()
                 separator_item = QListWidgetItem("── SOUNDS ──")
                 separator_item.setSizeHint(QSize(0, 28))
-                separator_item.setFlags(Qt.NoItemFlags)  # Non-selectable
-                separator_item.setTextAlignment(Qt.AlignCenter)
+                separator_item.setFlags(Qt.ItemFlag.NoItemFlags)  # Non-selectable
+                separator_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 # Style the separator item directly
                 separator_item.setForeground(QColor("#888888"))
                 font = separator_item.font()
@@ -3221,13 +3223,13 @@ engines:
         self.stop_button.setStyleSheet(self.STOP_STYLE)
         self.stop_button.clicked.connect(self._stop_current)
         self.stop_button.setEnabled(False)
-        self.stop_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.stop_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         control_layout.addWidget(self.stop_button)
 
         # Stop Sound button with shortcut badge
         stop_sound_container = QWidget()
         stop_sound_container.setMinimumHeight(45)
-        stop_sound_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        stop_sound_container.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         self.stop_sound_button = QPushButton("STOP SOUND")
         self.stop_sound_button.setMinimumHeight(40)
@@ -3263,7 +3265,7 @@ engines:
             "background-color: #1DB954; color: white; font-weight: bold; font-size: 12px;"
         )
         self.stop_atmosphere_button.clicked.connect(self._stop_atmosphere_and_spotify)
-        self.stop_atmosphere_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.stop_atmosphere_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         control_layout.addWidget(self.stop_atmosphere_button)
 
         # Equal width for all three stop buttons
@@ -3286,9 +3288,9 @@ engines:
         # Create scroll area for the category content
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        scroll_area.setFrameShape(QFrame.NoFrame)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
 
         # Content widget inside scroll area
         content_widget = QWidget()
@@ -3324,7 +3326,7 @@ engines:
         prev_tab.activated.connect(self._navigate_prev_tab)
 
         # Spacebar to stop sounds
-        stop_sound_shortcut = QShortcut(QKeySequence(Qt.Key_Space), self)
+        stop_sound_shortcut = QShortcut(QKeySequence(Qt.Key.Key_Space), self)
         stop_sound_shortcut.activated.connect(self._stop_sounds)
 
         # Ctrl+L to focus search bar
@@ -3332,7 +3334,7 @@ engines:
         search_shortcut.activated.connect(self._focus_search)
 
         # Escape to clear search and unfocus
-        escape_shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        escape_shortcut = QShortcut(QKeySequence(Qt.Key.Key_Escape), self)
         escape_shortcut.activated.connect(self._clear_search)
 
         # Setup initial shortcuts for first tab
@@ -3474,7 +3476,7 @@ engines:
         desc_label = None
         if description:
             desc_label = QLabel(description)
-            desc_label.setAlignment(Qt.AlignCenter)
+            desc_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             desc_label.setWordWrap(True)
             desc_style = self.DESC_STYLE_DARK if self.is_dark_mode else self.DESC_STYLE
             desc_label.setStyleSheet(desc_style)
@@ -3496,7 +3498,7 @@ engines:
             sound_label.setStyleSheet(
                 "background-color: #FFCBA4; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px; color: black;"
             )
-            sound_label.setAlignment(Qt.AlignCenter)
+            sound_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             emoji_layout.addWidget(sound_label)
 
         if spotify_enabled:
@@ -3505,7 +3507,7 @@ engines:
             spotify_label.setStyleSheet(
                 "background-color: #B4F0A8; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px; color: black;"
             )
-            spotify_label.setAlignment(Qt.AlignCenter)
+            spotify_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             emoji_layout.addWidget(spotify_label)
 
         if atmosphere_enabled:
@@ -3514,7 +3516,7 @@ engines:
             atmosphere_label.setStyleSheet(
                 "background-color: #B4E8F0; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px; color: black;"
             )
-            atmosphere_label.setAlignment(Qt.AlignCenter)
+            atmosphere_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             emoji_layout.addWidget(atmosphere_label)
 
         if lights_enabled:
@@ -3523,7 +3525,7 @@ engines:
             lights_label.setStyleSheet(
                 "background-color: #FFF9B0; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px; color: black;"
             )
-            lights_label.setAlignment(Qt.AlignCenter)
+            lights_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             emoji_layout.addWidget(lights_label)
 
         if is_loop:
@@ -3532,7 +3534,7 @@ engines:
             loop_label.setStyleSheet(
                 "background-color: #E0B4F0; padding: 0px 6px; border: 1px solid gray; border-radius: 3px; font-size: 14px; color: black;"
             )
-            loop_label.setAlignment(Qt.AlignCenter)
+            loop_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             emoji_layout.addWidget(loop_label)
 
         emoji_layout.addStretch()
@@ -4126,7 +4128,7 @@ engines:
     def keyPressEvent(self, event) -> None:
         """Handle key press events."""
         # Enter triggers pending search result button
-        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+        if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
             if self._pending_search_button is not None:
                 self._pending_search_button.click()
                 self._pending_search_button = None
@@ -4140,10 +4142,10 @@ engines:
                 self,
                 "Confirm Exit",
                 f"Lights '{self.lights_config_name}' are running.\n\nStop and exit?",
-                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             )
 
-            if reply == QMessageBox.Yes:
+            if reply == QMessageBox.StandardButton.Yes:
                 # On exit, actually wait for cleanup
                 self.lights_runner.running = False
                 if not self.lights_runner.wait(2000):
@@ -4239,24 +4241,24 @@ def apply_dark_palette(app: QApplication) -> None:
     dark_palette = QPalette()
 
     # Base colors
-    dark_palette.setColor(QPalette.Window, QColor(53, 53, 53))
-    dark_palette.setColor(QPalette.WindowText, Qt.white)
-    dark_palette.setColor(QPalette.Base, QColor(25, 25, 25))
-    dark_palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
-    dark_palette.setColor(QPalette.ToolTipBase, Qt.white)
-    dark_palette.setColor(QPalette.ToolTipText, Qt.white)
-    dark_palette.setColor(QPalette.Text, Qt.white)
-    dark_palette.setColor(QPalette.Button, QColor(53, 53, 53))
-    dark_palette.setColor(QPalette.ButtonText, Qt.white)
-    dark_palette.setColor(QPalette.BrightText, Qt.red)
-    dark_palette.setColor(QPalette.Link, QColor(42, 130, 218))
-    dark_palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
-    dark_palette.setColor(QPalette.HighlightedText, Qt.black)
+    dark_palette.setColor(QPalette.ColorRole.Window, QColor(53, 53, 53))
+    dark_palette.setColor(QPalette.ColorRole.WindowText, QColor(255, 255, 255))
+    dark_palette.setColor(QPalette.ColorRole.Base, QColor(25, 25, 25))
+    dark_palette.setColor(QPalette.ColorRole.AlternateBase, QColor(53, 53, 53))
+    dark_palette.setColor(QPalette.ColorRole.ToolTipBase, QColor(255, 255, 255))
+    dark_palette.setColor(QPalette.ColorRole.ToolTipText, QColor(255, 255, 255))
+    dark_palette.setColor(QPalette.ColorRole.Text, QColor(255, 255, 255))
+    dark_palette.setColor(QPalette.ColorRole.Button, QColor(53, 53, 53))
+    dark_palette.setColor(QPalette.ColorRole.ButtonText, QColor(255, 255, 255))
+    dark_palette.setColor(QPalette.ColorRole.BrightText, QColor(255, 0, 0))
+    dark_palette.setColor(QPalette.ColorRole.Link, QColor(42, 130, 218))
+    dark_palette.setColor(QPalette.ColorRole.Highlight, QColor(42, 130, 218))
+    dark_palette.setColor(QPalette.ColorRole.HighlightedText, QColor(0, 0, 0))
 
     # Disabled colors
-    dark_palette.setColor(QPalette.Disabled, QPalette.WindowText, QColor(127, 127, 127))
-    dark_palette.setColor(QPalette.Disabled, QPalette.Text, QColor(127, 127, 127))
-    dark_palette.setColor(QPalette.Disabled, QPalette.ButtonText, QColor(127, 127, 127))
+    dark_palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText, QColor(127, 127, 127))
+    dark_palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text, QColor(127, 127, 127))
+    dark_palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, QColor(127, 127, 127))
 
     app.setPalette(dark_palette)
 
@@ -4281,7 +4283,7 @@ def main():
 
     launcher = EnvironmentLauncher(settings_manager)
     launcher.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

@@ -32,6 +32,25 @@ from download_queue import get_download_queue, DownloadQueue
 import configparser
 
 
+# Category ordering for the launcher sidebar
+# Environment categories (configs with lights/atmosphere) - shown first
+ENVIRONMENT_CATEGORIES = [
+    "tavern", "town", "travel", "forest", "coastal",
+    "desert", "mountain", "dungeon", "combat", "spooky",
+    "weather", "relaxation", "celestial"
+]
+
+# Sound categories (sound-only configs) - shown after separator
+# These are for freesound downloads via keyword mapping
+SOUND_CATEGORIES = [
+    "nature", "water", "fire", "wind", "crowd",
+    "footsteps", "reactions", "combat_sfx", "ambient", "creatures"
+]
+
+# Special categories (at end)
+SPECIAL_CATEGORIES = ["hidden"]
+
+
 class SettingsManager:
     """Manages application settings via settings.ini file."""
 
@@ -2375,30 +2394,46 @@ class EnvironmentLauncher(QMainWindow):
         return luminance < 0.5
 
     def _load_and_organize_configs(self) -> Dict[str, List[Dict[str, Any]]]:
-        """Load all configs and organize by category."""
+        """Load all configs and organize by category with environment/sound separation."""
         all_configs = self.config_loader.discover_all()
 
         # Group by category
         organized = defaultdict(list)
         for config in all_configs:
-            category = config.get("category", "special")
+            category = config.get("category", "misc")
             organized[category].append(config)
 
-        # Sort categories - predefined ones first, then dynamic ones alphabetically
+        # Build ordered dict with environment categories first, then sound categories
         sorted_organized = {}
-        predefined = ["combat", "social", "exploration", "relaxation", "special", "hidden", "freesound"]
+        all_predefined = ENVIRONMENT_CATEGORIES + SOUND_CATEGORIES + SPECIAL_CATEGORIES
 
-        # Add predefined categories in order
-        for category in predefined:
+        # Add environment categories in order (these have lights/atmosphere)
+        for category in ENVIRONMENT_CATEGORIES:
             if category in organized:
                 sorted_organized[category] = sorted(
                     organized[category],
                     key=lambda c: c["name"]
                 )
 
-        # Add any dynamic categories (from freesound tags) alphabetically
+        # Add sound categories in order (sound-only configs)
+        for category in SOUND_CATEGORIES:
+            if category in organized:
+                sorted_organized[category] = sorted(
+                    organized[category],
+                    key=lambda c: c["name"]
+                )
+
+        # Add special categories
+        for category in SPECIAL_CATEGORIES:
+            if category in organized:
+                sorted_organized[category] = sorted(
+                    organized[category],
+                    key=lambda c: c["name"]
+                )
+
+        # Add any dynamic categories (not in predefined lists) alphabetically at end
         for category in sorted(organized.keys()):
-            if category not in predefined:
+            if category not in all_predefined:
                 sorted_organized[category] = sorted(
                     organized[category],
                     key=lambda c: c["name"]
@@ -2599,7 +2634,7 @@ engines:
 
             # Add to category list
             item = QListWidgetItem()
-            item.setSizeHint(QSize(0, 44))
+            item.setSizeHint(QSize(0, 50))
             self.category_list.addItem(item)
 
             # Create and set custom widget for this item
@@ -3032,16 +3067,34 @@ engines:
         # Track category content widgets for dynamic button addition
         self.category_content_widgets = {}
 
-        # Add categories
+        # Add categories with separator between environments and sounds
         tab_index = 0
+        self.separator_row = -1  # Track separator position for navigation
+        added_separator = False
         for category, configs in self.configs.items():
             # Skip hidden category
             if category == "hidden":
                 continue
 
+            # Add separator before first sound category
+            if not added_separator and category in SOUND_CATEGORIES:
+                self.separator_row = self.category_list.count()
+                separator_item = QListWidgetItem("── SOUNDS ──")
+                separator_item.setSizeHint(QSize(0, 28))
+                separator_item.setFlags(Qt.NoItemFlags)  # Non-selectable
+                separator_item.setTextAlignment(Qt.AlignCenter)
+                # Style the separator item directly
+                separator_item.setForeground(QColor("#888888"))
+                font = separator_item.font()
+                font.setBold(True)
+                font.setPointSize(9)
+                separator_item.setFont(font)
+                self.category_list.addItem(separator_item)
+                added_separator = True
+
             # Create list item with custom widget
             item = QListWidgetItem()
-            item.setSizeHint(QSize(0, 44))
+            item.setSizeHint(QSize(0, 50))
             self.category_list.addItem(item)
 
             # Create and set custom widget for this item
@@ -3183,16 +3236,12 @@ engines:
 
     def _setup_tab_shortcuts(self) -> None:
         """Setup tab navigation and per-tab button shortcuts."""
-        # Tab navigation: Ctrl+PgUp/PgDn
+        # Tab navigation: Ctrl+PgUp/PgDn (skip separator)
         next_tab = QShortcut(QKeySequence("Ctrl+PgDown"), self)
-        next_tab.activated.connect(lambda: self.category_list.setCurrentRow(
-            (self.category_list.currentRow() + 1) % self.category_list.count()
-        ))
+        next_tab.activated.connect(self._navigate_next_tab)
 
         prev_tab = QShortcut(QKeySequence("Ctrl+PgUp"), self)
-        prev_tab.activated.connect(lambda: self.category_list.setCurrentRow(
-            (self.category_list.currentRow() - 1) % self.category_list.count()
-        ))
+        prev_tab.activated.connect(self._navigate_prev_tab)
 
         # Spacebar to stop sounds
         stop_sound_shortcut = QShortcut(QKeySequence(Qt.Key_Space), self)
@@ -3209,9 +3258,36 @@ engines:
         # Setup initial shortcuts for first tab
         self._update_shortcuts_for_tab(0)
 
+    def _navigate_next_tab(self) -> None:
+        """Navigate to next tab, skipping the separator."""
+        current = self.category_list.currentRow()
+        next_row = (current + 1) % self.category_list.count()
+        # Skip separator
+        if next_row == self.separator_row:
+            next_row = (next_row + 1) % self.category_list.count()
+        self.category_list.setCurrentRow(next_row)
+
+    def _navigate_prev_tab(self) -> None:
+        """Navigate to previous tab, skipping the separator."""
+        current = self.category_list.currentRow()
+        prev_row = (current - 1) % self.category_list.count()
+        # Skip separator
+        if prev_row == self.separator_row:
+            prev_row = (prev_row - 1) % self.category_list.count()
+        self.category_list.setCurrentRow(prev_row)
+
     def _on_tab_changed(self, index: int) -> None:
         """Handle tab change - remap keyboard shortcuts."""
-        self._update_shortcuts_for_tab(index)
+        # Skip if this is the separator row
+        if index == self.separator_row:
+            return
+
+        # Compute tab_config index by subtracting 1 if past the separator
+        tab_index = index
+        if self.separator_row >= 0 and index > self.separator_row:
+            tab_index = index - 1
+
+        self._update_shortcuts_for_tab(tab_index)
 
     def _switch_to_category_at_row(self, row: int) -> None:
         """Switch the stack widget to show the category at the given list row."""

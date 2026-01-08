@@ -29,21 +29,56 @@ from urllib.parse import urlparse
 import requests
 
 
-def select_category_from_tags(tags: List[str], existing_categories: List[str] = None, default_category: str = "freesound") -> str:
-    """
-    Select a category based on sound tags.
+# Keyword mappings for sound-only configs (no lights/atmosphere)
+# Maps category name -> list of keywords that should map to it
+SOUND_CATEGORY_MAPPINGS = {
+    "nature": ["birds", "bird", "insects", "insect", "frogs", "frog", "cicadas", "wildlife", "animal", "cricket", "owl", "songbird", "chirp", "chirping"],
+    "water": ["water", "river", "stream", "rain", "drip", "splash", "waves", "brook", "waterfall", "pond", "lake", "ocean", "sea"],
+    "fire": ["fire", "fireplace", "campfire", "crackling", "flames", "burning", "bonfire", "hearth", "ember"],
+    "wind": ["wind", "breeze", "gust", "howling", "rustling", "leaves", "windy", "blowing"],
+    "crowd": ["crowd", "people", "chatter", "murmur", "applause", "laughter", "talking", "voices", "audience", "bar", "pub", "tavern"],
+    "footsteps": ["footsteps", "walking", "steps", "gravel", "floor", "boots", "running", "feet"],
+    "reactions": ["gasp", "scream", "groan", "sigh", "cough", "sneeze", "bruh", "shock", "surprise", "yell", "shout"],
+    "combat_sfx": ["sword", "weapon", "impact", "hit", "slash", "clang", "bone", "metal", "punch", "stab", "fight", "battle"],
+    "ambient": ["ambient", "room", "tone", "hum", "drone", "atmosphere", "background", "loop", "ambience", "ambiance"],
+    "creatures": ["monster", "creature", "growl", "howl", "roar", "beast", "wolf", "dragon", "demonic", "demon"],
+}
 
-    Uses EXACT case-insensitive matching against existing categories.
-    If a tag exactly matches an existing category, use that category.
-    If no match, use the first reasonable tag as a new category name.
+# Environment category mappings (for configs with lights/atmosphere enabled)
+# Currently not used for freesound downloads since they're sound-only
+ENVIRONMENT_CATEGORY_MAPPINGS = {
+    "tavern": ["tavern", "inn", "pub", "bar", "drinking", "medieval_interior", "ale", "mead"],
+    "town": ["town", "city", "village", "market", "street", "urban", "festival", "square", "plaza"],
+    "travel": ["travel", "journey", "path", "road", "walking", "hiking", "exploration", "adventure"],
+    "forest": ["forest", "woods", "woodland", "grove", "jungle", "trees", "canopy", "thicket"],
+    "coastal": ["beach", "ocean", "sea", "shore", "waves", "boat", "ship", "sailing", "coastal", "maritime"],
+    "desert": ["desert", "sand", "dunes", "arid", "canyon", "mesa", "oasis", "sahara"],
+    "mountain": ["mountain", "alpine", "peak", "cliff", "cave", "underground", "cavern", "heights"],
+    "dungeon": ["dungeon", "crypt", "tomb", "ruins", "catacomb", "prison", "cell", "torture"],
+    "combat": ["battle", "combat", "fight", "war", "clash", "skirmish", "siege", "attack"],
+    "spooky": ["spooky", "creepy", "haunted", "eerie", "horror", "dark", "scary", "nightmare"],
+    "weather": ["storm", "rain", "thunder", "snow", "wind", "blizzard", "lightning", "tempest"],
+    "relaxation": ["chill", "calm", "peaceful", "meditation", "zen", "ambient", "lofi", "relax"],
+    "celestial": ["heaven", "hell", "divine", "infernal", "otherworldly", "ethereal", "magical", "angelic", "demonic"],
+}
+
+
+def select_category_from_tags(tags: List[str], existing_categories: List[str] = None, default_category: str = "misc") -> str:
+    """
+    Select a category based on sound tags using keyword mappings.
+
+    Priority:
+    1. Exact match with existing categories
+    2. Match via SOUND_CATEGORY_MAPPINGS keywords
+    3. Fallback to default_category
 
     Args:
         tags: List of tags from the freesound page
         existing_categories: List of existing category names from loaded YAML configs
-        default_category: Category to use if no tags available (default: "freesound")
+        default_category: Category to use if no match found (default: "misc")
 
     Returns:
-        Category name - either an existing category or a new one from tags
+        Category name from predefined mappings or existing categories
     """
     if not tags:
         return default_category
@@ -59,17 +94,13 @@ def select_category_from_tags(tags: List[str], existing_categories: List[str] = 
         if tag in normalized_existing:
             return normalized_existing[tag]  # Return original casing
 
-    # No match with existing categories - use first reasonable tag as new category
+    # Second: Check keyword mappings (for sound-only configs)
     for tag in normalized_tags:
-        # Skip very short or very long tags
-        if 2 <= len(tag) <= 30:
-            # Clean up for use as category name (replace spaces/hyphens with underscores)
-            clean_tag = tag.replace(" ", "_").replace("-", "_")
-            # Only alphanumeric and underscores
-            if clean_tag.replace("_", "").isalnum():
-                return clean_tag
+        for category, keywords in SOUND_CATEGORY_MAPPINGS.items():
+            if tag in keywords:
+                return category
 
-    # Fallback if no reasonable tags found
+    # Fallback
     return default_category
 
 

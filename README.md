@@ -15,7 +15,7 @@ Perfect for tabletop gaming (D&D, Pathfinder), ambient workspaces, or just setti
 
 ## Features
 
-### 90+ Pre-Built Environments
+### 100+ Pre-Built Environments
 
 Most environments include **morning/afternoon/night variants** with different lighting and sounds!
 
@@ -52,6 +52,11 @@ Most environments include **morning/afternoon/night variants** with different li
 **Special**
 - Win Dungeon, Celebration, Clowny, Hell
 
+**Fantasy Locations** - Common tabletop gaming environments
+- Mine (⛏️), Wizard's Tower (🧙), Castle Courtyard (🏰), Arena (🏟️)
+- Docks (⚓), Crypt (💀), Fey Wild (🧚), Thieves' Guild (🗡️)
+- War Camp (⚔️), Dragon's Lair (🐉), Haunted Manor (👻), Monastery (🔔)
+
 ### GUI Launcher
 
 - **File menu** (Alt+F) with Settings and Quit options
@@ -66,7 +71,9 @@ Most environments include **morning/afternoon/night variants** with different li
   - Step-by-step setup instructions for new users
 - **Left sidebar navigation** - categories listed vertically (15% width)
 - **Dark mode support** - choose Light, Dark, or auto-detect from GNOME/KDE system theme
-- **Search bar** (Ctrl+L) - fuzzy search across all environments by name, description, and tags
+- **Search bar** (Ctrl+L) - search across ALL environment metadata:
+  - Searches: name, description, category, icon (emoji), intensity, tags, suitable_for
+  - Example searches: "boss fights", "🐉", "high intensity", "dungeon", "undead encounters"
   - Only focuses on click or Ctrl+L (keyboard shortcuts work immediately)
   - Selected environment's button pulses green and gets focus
   - Press Enter twice: once to select search result, again to activate

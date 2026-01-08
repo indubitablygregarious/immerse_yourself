@@ -242,6 +242,25 @@ Common freesound.org URLs used for time-variant environments:
 | Tavern crowd | `https://freesound.org/people/Robinhood76/sounds/700022/` | Social indoor |
 | Torch crackling | `https://freesound.org/people/LordStirling/sounds/483692/` | Night torch ambience |
 
+### Fantasy Location Sounds
+| Sound | URL | Use For |
+|-------|-----|---------|
+| Pickaxe mining | `https://freesound.org/people/qubodup/sounds/187592/` | Mine, quarry |
+| Magical humming | `https://freesound.org/people/quetzalcontla/sounds/612813/` | Wizard tower, arcane |
+| Bubbling potion | `https://freesound.org/people/Breviceps/sounds/456826/` | Alchemy, wizard |
+| Armor clanking | `https://freesound.org/people/CaCtUs2003/sounds/117885/` | Guards, military |
+| Fountain water | `https://freesound.org/people/sss_samples/sounds/612682/` | Courtyard, plaza |
+| Seagulls | `https://freesound.org/people/Benboncan/sounds/64765/` | Docks, coastal |
+| Ship creaking | `https://freesound.org/people/WolfOWI/sounds/588310/` | Ships, docks |
+| Bone rattling | `https://freesound.org/people/spookymodem/sounds/202091/` | Crypt, undead |
+| Ghostly whispers | `https://freesound.org/people/Matio888/sounds/796514/` | Haunted, spooky |
+| Fairy bells/chimes | `https://freesound.org/people/bone666138/sounds/198877/` | Fey wild, magical |
+| Coins clinking | `https://freesound.org/people/Ridiculously_Decent_Audio/sounds/743389/` | Thieves, treasure |
+| War drums | `https://freesound.org/people/Zott820/sounds/209984/` | War camp, battle |
+| Crowd cheering | `https://freesound.org/people/Breviceps/sounds/445958/` | Arena, tournament |
+| Monk chanting | `https://freesound.org/people/Sonic_Salad/sounds/398687/` | Monastery, temple |
+| Clock ticking | `https://freesound.org/people/InspectorJ/sounds/343130/` | Manor, library |
+
 ## Reference Files
 
 - `sound_conf/squeaky_door.yaml` - Example door sound collection

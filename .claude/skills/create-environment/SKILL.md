@@ -106,6 +106,7 @@ icon: "emoji"
 metadata:
   tags: ["tag1", "tag2", "atmosphere"]
   intensity: "low|medium|high"
+  suitable_for: ["boss fights", "exploration", "social encounters"]  # Searchable scenarios
 
 engines:
   sound:
@@ -236,11 +237,34 @@ If user asks for "forest environment", create all three:
 ## Reference Files
 
 Read existing environments for patterns:
+
+### Basic Examples
 - `env_conf/tavern.yaml` - Indoor social example
 - `env_conf/forest.yaml` - Nature example (base)
+- `env_conf/dungeon.yaml` - Dark/enclosed example
+- `env_conf/travel_storm.yaml` - Weather example
+
+### Time Variants
 - `env_conf/forest_morning.yaml` - Morning variant example
 - `env_conf/forest_afternoon.yaml` - Afternoon variant example
 - `env_conf/forest_night.yaml` - Night variant example
-- `env_conf/dungeon.yaml` - Dark/enclosed example
-- `env_conf/travel_storm.yaml` - Weather example
 - `env_conf/graveyard_night.yaml` - Spooky night example
+
+### Fantasy Gaming Locations
+- `env_conf/mine.yaml` - Underground tunnels with pickaxe sounds
+- `env_conf/wizard_tower.yaml` - Arcane lab with magical effects
+- `env_conf/castle_courtyard.yaml` - Noble outdoor space
+- `env_conf/arena.yaml` - Gladiatorial combat with crowds
+- `env_conf/docks.yaml` - Harbor with ships and seagulls
+- `env_conf/crypt.yaml` - Burial chambers with undead atmosphere
+- `env_conf/fey_wild.yaml` - Enchanted forest with fairy bells
+- `env_conf/thieves_guild.yaml` - Criminal hideout with shadows
+- `env_conf/war_camp.yaml` - Military encampment with drums
+- `env_conf/dragons_lair.yaml` - Boss cave with treasure
+- `env_conf/haunted_manor.yaml` - Ghost-filled mansion
+- `env_conf/monastery.yaml` - Peaceful retreat with chanting
+
+### Combat Examples
+- `env_conf/battle_dungeon.yaml` - Combat with Spotify music
+- `env_conf/battle_forest.yaml` - Forest combat theme
+- `env_conf/arena.yaml` - Tournament/gladiator combat

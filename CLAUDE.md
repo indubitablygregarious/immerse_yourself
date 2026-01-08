@@ -59,8 +59,9 @@ The project has been refactored from individual Python scripts into a modular en
     - `SpotifyConfigManager` class: Reads/writes `.spotify.ini` (Spotify API credentials)
     - `WizBulbConfigManager` class: Reads/writes `.wizbulb.ini` (bulb IP addresses)
   - **Left sidebar navigation**: Categories in QListWidget (15% width), content in QStackedWidget
-  - **Search bar** (Ctrl+L): Fuzzy search across name, description, and metadata tags
-    - `FuzzySearchBar` class with `FuzzyFilterProxyModel` for matching
+  - **Search bar** (Ctrl+L): Fuzzy search across ALL metadata fields
+    - Searches: name, description, category, icon, intensity, tags, suitable_for
+    - `FuzzySearchBar` class with substring matching
     - `ClickFocus` policy - only focuses on click or Ctrl+L (keyboard shortcuts work immediately)
     - Escape clears and unfocuses search
     - Selected button pulses green for 3 seconds (`_pulse_button` method)
@@ -97,6 +98,8 @@ The project has been refactored from individual Python scripts into a modular en
 ### Key Innovation: Background Lighting Persistence
 
 The lighting daemon runs independently, allowing lights to continue animating while you switch between environments. Configuration updates are hot-swapped without turning lights off, resulting in smooth transitions.
+
+**Smooth transitions**: When switching between environments, lights transition directly without flashing to warm white. The `_stop_lights(set_warm_white=False)` parameter prevents jarring flashes. Warm white only activates on explicit stops (STOP LIGHTS button) or app exit.
 
 ### Performance Optimizations
 
@@ -136,6 +139,31 @@ Most environments have morning/afternoon/night variants with different lighting 
 - Town: town (morning/afternoon), marketplace (all three)
 - Indoor: tavern, library, shop, blacksmith, temple, throne_room, prison
 - Semi-outdoor: camping, travel_boat
+
+### Common Fantasy Environments
+
+Beyond travel and social scenes, these environments cover typical tabletop gaming locations:
+
+| Environment | Icon | Category | Use For |
+|-------------|------|----------|---------|
+| Mine | ⛏️ | dungeon | Kobold encounters, rescue missions, resource quests |
+| Wizard's Tower | 🧙 | celestial | Arcane research, wizard NPCs, magical discoveries |
+| Castle Courtyard | 🏰 | town | Noble encounters, political intrigue, guard interactions |
+| Arena | 🏟️ | combat | Gladiator fights, tournaments, public executions |
+| Docks | ⚓ | town | Ship boarding, smugglers, coastal adventures |
+| Crypt | 💀 | dungeon | Undead encounters, tomb raiding, necromancer lairs |
+| Fey Wild | 🧚 | celestial | Fairy courts, enchanted locations, magical quests |
+| Thieves' Guild | 🗡️ | dungeon | Criminal contacts, black market, heist planning |
+| War Camp | ⚔️ | combat | Military briefings, mercenary camps, siege prep |
+| Dragon's Lair | 🐉 | combat | Boss fights, treasure discovery, epic confrontations |
+| Haunted Manor | 👻 | spooky | Ghost encounters, horror sessions, mystery investigations |
+| Monastery | 🔔 | relaxation | Monk NPCs, healing rest, training montages |
+
+### Battle Environments
+
+Battle environments use Spotify playlists for music instead of atmosphere mixes. The atmosphere configurations are preserved as comments for future reference.
+
+Available battle themes: `battle_dungeon`, `battle_desert`, `battle_forest`, `battle_water`, `battle_environment`
 
 ### Sound Variation System (sound_conf)
 

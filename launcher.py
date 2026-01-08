@@ -3745,28 +3745,33 @@ engines:
         self.search_bar.clearFocus()
         self.setFocus()
 
-    def _on_search_selected(self, config_name: str, category_index: int) -> None:
+    def _on_search_selected(self, config_name: str, stack_index: int) -> None:
         """Handle environment selection from search bar."""
+        # Search stores stack indices (no separator). Convert to list row (has separator).
+        list_row = stack_index
+        if self.separator_row >= 0 and stack_index >= self.separator_row:
+            list_row = stack_index + 1
+
         # Switch to the correct category
-        if category_index < self.category_list.count():
-            self.category_list.setCurrentRow(category_index)
-            self.category_stack.setCurrentIndex(category_index)
+        if list_row < self.category_list.count():
+            self.category_list.setCurrentRow(list_row)
+            self.category_stack.setCurrentIndex(stack_index)
 
         # Find and pulse the button
         if config_name in self.buttons:
             btn = self.buttons[config_name]
             # Scroll to make button visible
-            self._scroll_to_button(btn, category_index)
+            self._scroll_to_button(btn, stack_index)
             self._pulse_button(btn)
             # Store pending button so Enter key can trigger it
             # Delay activation to avoid Enter from search selection also triggering the button
             self._pending_search_button = None  # Clear first
             QTimer.singleShot(300, lambda: self._set_pending_button(btn, config_name))
 
-    def _scroll_to_button(self, btn: QPushButton, category_index: int) -> None:
+    def _scroll_to_button(self, btn: QPushButton, stack_index: int) -> None:
         """Scroll the category's scroll area to make a button visible."""
-        # Get the scroll area for this category
-        scroll_area = self.category_stack.widget(category_index)
+        # Get the scroll area for this category (stack_index accounts for separator)
+        scroll_area = self.category_stack.widget(stack_index)
         if not isinstance(scroll_area, QScrollArea):
             return
 
@@ -3795,12 +3800,16 @@ engines:
 
         # Switch to that category
         self.category_list.setCurrentRow(category_index)
-        self.category_stack.setCurrentIndex(category_index)
+        # Stack index needs to account for separator (list has separator, stack doesn't)
+        stack_index = category_index
+        if self.separator_row >= 0 and category_index > self.separator_row:
+            stack_index = category_index - 1
+        self.category_stack.setCurrentIndex(stack_index)
 
         # Scroll to and pulse the lights button
         if self.lights_config_name in self.buttons:
             btn = self.buttons[self.lights_config_name]
-            self._scroll_to_button(btn, category_index)
+            self._scroll_to_button(btn, stack_index)
             self._pulse_button(btn)
 
     def _on_lights_badge_clicked(self, category: str) -> None:
@@ -3815,12 +3824,16 @@ engines:
 
         # Switch to that category
         self.category_list.setCurrentRow(category_index)
-        self.category_stack.setCurrentIndex(category_index)
+        # Stack index needs to account for separator (list has separator, stack doesn't)
+        stack_index = category_index
+        if self.separator_row >= 0 and category_index > self.separator_row:
+            stack_index = category_index - 1
+        self.category_stack.setCurrentIndex(stack_index)
 
         # Scroll to and pulse the lights button
         if self.lights_config_name in self.buttons:
             btn = self.buttons[self.lights_config_name]
-            self._scroll_to_button(btn, category_index)
+            self._scroll_to_button(btn, stack_index)
             self._pulse_button(btn)
 
     def _on_atmosphere_badge_clicked(self, category: str) -> None:
@@ -3845,11 +3858,15 @@ engines:
 
         # Switch to that category
         self.category_list.setCurrentRow(category_index)
-        self.category_stack.setCurrentIndex(category_index)
+        # Stack index needs to account for separator (list has separator, stack doesn't)
+        stack_index = category_index
+        if self.separator_row >= 0 and category_index > self.separator_row:
+            stack_index = category_index - 1
+        self.category_stack.setCurrentIndex(stack_index)
 
         # Scroll to and pulse the first atmosphere button
         config_name, btn = atmosphere_buttons_in_category[0]
-        self._scroll_to_button(btn, category_index)
+        self._scroll_to_button(btn, stack_index)
         self._pulse_button(btn)
 
     def _get_category_index(self, category: str) -> int:

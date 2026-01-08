@@ -983,8 +983,10 @@ class NowPlayingWidget(QWidget):
         icon_layout.addWidget(self.status_label)
 
         # Icon display below (visual indicator)
+        # Fixed height prevents size animation from moving the status label above
         self.icon_label = QLabel("⏸")
-        self.icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.icon_label.setFixedHeight(36)
+        self.icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignTop)
         self.icon_label.setStyleSheet("font-size: 24px;")
         icon_layout.addWidget(self.icon_label)
 
@@ -997,7 +999,7 @@ class NowPlayingWidget(QWidget):
         self._atmosphere_icon = ""
         self._atmosphere_name = ""
         self._sound_icon = "🔊"
-        self._download_icon = "⬇️"
+        self._download_icon = "⬇"
         self._idle_icon = "⏸"
 
         # Pulse animation for download (falling effect)
@@ -1006,6 +1008,7 @@ class NowPlayingWidget(QWidget):
         self._pulse_opacity = 1.0
         self._pulse_progress = 0.0  # 0.0 = top/small, 1.0 = bottom/large
         self._download_count = 0  # Track concurrent downloads
+        self._download_names: List[str] = []  # Track download display names for tooltip
 
         self.setStyleSheet("""
             NowPlayingWidget {
@@ -1074,8 +1077,57 @@ class NowPlayingWidget(QWidget):
                 self.icon_label.setText(self._idle_icon)
                 self.status_label.setText("idle")
 
+    def add_download(self, display_name: str) -> None:
+        """Add a download to the queue and show downloading state."""
+        self._download_names.append(display_name)
+        self._download_count = len(self._download_names)
+        if self._download_count == 1:
+            # First download starting - show pulsing icon
+            self._current_state = "downloading"
+            self.icon_label.setText(self._download_icon)
+            self.status_label.setText("downloading")
+            self._start_pulse()
+        self._update_download_tooltip()
+
+    def remove_download(self, display_name: str) -> None:
+        """Remove a completed/failed download from the list."""
+        if display_name in self._download_names:
+            self._download_names.remove(display_name)
+        self._download_count = len(self._download_names)
+        if self._download_count == 0:
+            # All downloads complete - return to lights > atmosphere > idle
+            self._stop_pulse()
+            self.icon_label.setStyleSheet("font-size: 24px;")
+            self.icon_label.setToolTip("")
+            if self._lights_icon:
+                self._current_state = "lights"
+                self.icon_label.setText(self._lights_icon)
+                self.status_label.setText(self._lights_name)
+            elif self._atmosphere_icon:
+                self._current_state = "atmosphere"
+                self.icon_label.setText(self._atmosphere_icon)
+                self.status_label.setText(self._atmosphere_name)
+            else:
+                self._current_state = "idle"
+                self.icon_label.setText(self._idle_icon)
+                self.status_label.setText("idle")
+        else:
+            self._update_download_tooltip()
+
+    def _update_download_tooltip(self) -> None:
+        """Update the tooltip to show queued downloads."""
+        if self._download_names:
+            tooltip = "Downloads:\n" + "\n".join(f"  • {name}" for name in self._download_names)
+            self.icon_label.setToolTip(tooltip)
+        else:
+            self.icon_label.setToolTip("")
+
     def set_downloading(self, active: bool = True) -> None:
-        """Show downloading state with pulsing icon. Uses counter for concurrent downloads."""
+        """Show downloading state with pulsing icon. Uses counter for concurrent downloads.
+
+        Note: Prefer add_download()/remove_download() for tracking individual downloads.
+        This method is kept for backward compatibility.
+        """
         if active:
             self._download_count += 1
             if self._download_count == 1:
@@ -1090,6 +1142,7 @@ class NowPlayingWidget(QWidget):
                 # All downloads complete - return to lights > atmosphere > idle
                 self._stop_pulse()
                 self.icon_label.setStyleSheet("font-size: 24px;")
+                self.icon_label.setToolTip("")
                 if self._lights_icon:
                     self._current_state = "lights"
                     self.icon_label.setText(self._lights_icon)
@@ -1111,9 +1164,11 @@ class NowPlayingWidget(QWidget):
         self._atmosphere_icon = ""
         self._atmosphere_name = ""
         self._download_count = 0
+        self._download_names.clear()
         self._stop_pulse()
         self.icon_label.setStyleSheet("font-size: 24px;")
         self.icon_label.setText(self._idle_icon)
+        self.icon_label.setToolTip("")
         self.status_label.setText("idle")
         self._update_cursor()
 
@@ -1144,34 +1199,27 @@ class NowPlayingWidget(QWidget):
         self._pulse_progress = 0.0
 
     def _pulse_download(self) -> None:
-        """Animate the download icon with rising motion and shrinking size."""
+        """Animate the download icon with size pulse (label stays in place due to fixed height)."""
         # Progress from 0.0 to 1.0, then reset
         self._pulse_progress += 0.04  # Speed of animation
         if self._pulse_progress >= 1.0:
             self._pulse_progress = 0.0  # Reset for continuous effect
 
-        # Invert progress for opposite direction
-        inv_progress = 1.0 - self._pulse_progress
+        # Font size: shrinks from large (28px) to small (16px) then resets
+        min_size = 16
+        max_size = 28
+        font_size = int(max_size - (max_size - min_size) * self._pulse_progress)
 
-        # Font size: starts large (32px) and shrinks to small (18px)
-        min_size = 18
-        max_size = 32
-        font_size = int(min_size + (max_size - min_size) * inv_progress)
-
-        # Vertical offset: starts at bottom and rises up
-        max_offset = 8  # Maximum pixels
-        offset = int(max_offset * inv_progress)
-
-        # Opacity: starts visible and fades out as it rises
-        min_opacity = 0.4
+        # Opacity: fades as it shrinks (simulates falling away)
+        min_opacity = 0.3
         max_opacity = 1.0
-        opacity = min_opacity + (max_opacity - min_opacity) * inv_progress
+        opacity = max_opacity - (max_opacity - min_opacity) * self._pulse_progress
         opacity_int = int(opacity * 255)
 
+        # Keep tooltip styling fixed while animating the icon
         self.icon_label.setStyleSheet(
-            f"font-size: {font_size}px; "
-            f"color: rgba(0, 150, 255, {opacity_int}); "
-            f"padding-top: {offset}px;"
+            f"QLabel {{ font-size: {font_size}px; color: rgba(0, 150, 255, {opacity_int}); }}"
+            f"QToolTip {{ font-size: 11px; color: black; background-color: #ffffdc; border: 1px solid #767676; padding: 2px; }}"
         )
 
 
@@ -2534,7 +2582,11 @@ class EnvironmentLauncher(QMainWindow):
     # Download queue callbacks
     def _on_queue_download_started(self, url: str, display_name: str) -> None:
         """Called when a download starts from the queue."""
-        self.now_playing.set_downloading(True)
+        # Track URL->display_name for later removal
+        if not hasattr(self, '_download_url_names'):
+            self._download_url_names: Dict[str, str] = {}
+        self._download_url_names[url] = display_name
+        self.now_playing.add_download(display_name)
         self.immersive_status.set_message(f"Downloading: {display_name}", timeout_ms=0)
 
     def _on_queue_download_complete(self, url: str, local_path: str, metadata: dict) -> None:
@@ -2542,17 +2594,23 @@ class EnvironmentLauncher(QMainWindow):
         # Auto-create config for this freesound using tag-based category
         self._auto_create_freesound_config_from_metadata(url, metadata)
 
-        # Update status
-        display_name = metadata.get("display_name", "sound")
+        # Remove from download list using tracked name
+        display_name = getattr(self, '_download_url_names', {}).pop(url, metadata.get("display_name", "sound"))
+        self.now_playing.remove_download(display_name)
         self.immersive_status.set_message(f"Downloaded: {display_name}", timeout_ms=2000)
 
     def _on_queue_download_error(self, url: str, error_msg: str) -> None:
         """Called when a download fails."""
+        # Remove from download list using tracked name
+        display_name = getattr(self, '_download_url_names', {}).pop(url, "sound")
+        self.now_playing.remove_download(display_name)
         self.immersive_status.set_message(f"Download failed: {error_msg}", timeout_ms=5000)
 
     def _on_queue_empty(self) -> None:
         """Called when all queued downloads are complete."""
-        self.now_playing.set_downloading(False)
+        # Clear any remaining download state (safety cleanup)
+        if hasattr(self, '_download_url_names'):
+            self._download_url_names.clear()
 
         # If we were waiting to start atmosphere, do it now
         if self._pending_atmosphere_start:
@@ -4188,6 +4246,12 @@ engines:
         # Stop atmosphere sounds
         try:
             stop_all_atmosphere(fade_out=False)  # No fade on exit, just stop
+        except:
+            pass
+
+        # Stop all playing sound effects
+        try:
+            stop_all_sounds()
         except:
             pass
 

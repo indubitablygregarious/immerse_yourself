@@ -29,6 +29,7 @@ from config_loader import ConfigLoader
 from status_bar import ImmersiveStatusBar
 from freesound_manager import FreesoundManager, is_freesound_url, select_category_from_tags
 from download_queue import get_download_queue, DownloadQueue
+from sound_conf_resolver import is_sound_conf_reference, resolve_sound_conf, get_sound_conf_info
 import configparser
 
 
@@ -1426,6 +1427,18 @@ class EngineRunner(QThread):
     def _play_sound_async(self, sound_file: str, sound_enabled: bool) -> None:
         """Handle sound download and playback in a separate thread."""
         try:
+            # Check if this is a sound_conf reference (e.g., "sound_conf:squeaky_door")
+            # and resolve it to a randomly selected sound
+            if is_sound_conf_reference(sound_file):
+                conf_info = get_sound_conf_info(sound_file)
+                if conf_info:
+                    self.status_update.emit(f"Selecting from {conf_info['name']} ({conf_info['count']} sounds)...")
+                resolved = resolve_sound_conf(sound_file)
+                if not resolved:
+                    self.error_occurred.emit(f"Could not resolve sound_conf: {sound_file}")
+                    return
+                sound_file = resolved
+
             # Check if this is a freesound.org URL
             if is_freesound_url(sound_file):
                 try:

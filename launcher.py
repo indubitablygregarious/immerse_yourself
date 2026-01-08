@@ -2512,7 +2512,8 @@ class EnvironmentLauncher(QMainWindow):
         if self._lights_disabled_this_session:
             has_lights = False
         if has_lights and self.lights_runner is not None:
-            self._stop_lights()
+            # Don't set warm white during transitions - new lights will take over
+            self._stop_lights(set_warm_white=False)
 
         # Extract atmosphere mix and ensure configs exist
         atmosphere_mix = config.get("engines", {}).get("atmosphere", {}).get("mix", [])
@@ -3551,7 +3552,8 @@ engines:
 
         # Now safe to stop lights/sounds (no downloads pending)
         if has_lights and self.lights_runner is not None:
-            self._stop_lights()
+            # Don't set warm white during transitions - new lights will take over
+            self._stop_lights(set_warm_white=False)
 
         if has_lights:
             stop_all_sounds()
@@ -3637,8 +3639,14 @@ engines:
             )
             self.immersive_status.set_message("Error starting environment", timeout_ms=5000)
 
-    def _stop_lights(self) -> None:
-        """Stop the currently running lights and set bulbs to warm white."""
+    def _stop_lights(self, set_warm_white: bool = True) -> None:
+        """Stop the currently running lights.
+
+        Args:
+            set_warm_white: If True, set bulbs to warm white after stopping.
+                           Set to False when transitioning between environments
+                           to avoid jarring flash. Default True for explicit stops.
+        """
         if self.lights_runner is not None:
             old_runner = self.lights_runner
             old_runner.stop()
@@ -3651,8 +3659,9 @@ engines:
             self.now_playing.clear()
             self._update_category_badges()
 
-        # Set all lights to warm white
-        self._set_lights_warm_white()
+        # Only set warm white on explicit stops, not transitions
+        if set_warm_white:
+            self._set_lights_warm_white()
 
     def _set_lights_warm_white(self) -> None:
         """Set all configured lights to soft warm white at full brightness."""

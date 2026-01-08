@@ -11,7 +11,7 @@ metadata:
 engines:
   sound:
     enabled: true
-    file: "sounds/danger.opus"
+    file: "sound_conf:battle_intro"
 
   spotify:
     enabled: false

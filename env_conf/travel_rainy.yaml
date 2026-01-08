@@ -11,7 +11,7 @@ metadata:
 engines:
   sound:
     enabled: true
-    file: "https://freesound.org/people/DJT4NN3R/sounds/449994/"
+    file: "sound_conf:transition"
 
   spotify:
     enabled: false

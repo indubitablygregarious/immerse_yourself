@@ -1138,11 +1138,24 @@ class FuzzySearchBar(QLineEdit):
             for config in config_list:
                 name = config["name"]
                 description = config.get("description", "")
-                tags = config.get("metadata", {}).get("tags", [])
-                intensity = config.get("metadata", {}).get("intensity", "")
+                icon = config.get("icon", "")
+                metadata = config.get("metadata", {})
+                tags = metadata.get("tags", [])
+                intensity = metadata.get("intensity", "")
+                suitable_for = metadata.get("suitable_for", [])
 
                 display_text = f"{name} - {description}"
-                search_text = f"{name} {description} {intensity} {' '.join(tags)}".lower()
+                # Include all searchable fields: name, description, category, icon,
+                # tags, intensity, and suitable_for scenarios
+                search_text = " ".join([
+                    name,
+                    description,
+                    category,
+                    icon,
+                    intensity,
+                    " ".join(tags),
+                    " ".join(suitable_for),
+                ]).lower()
 
                 self.items.append((display_text, search_text, name, category_index))
             category_index += 1

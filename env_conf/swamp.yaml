@@ -22,7 +22,10 @@ engines:
     max_sounds: 4
     mix:
       # Frogs at night
-      - url: "https://freesound.org/people/felix.blume/sounds/673259/"
+      - url: "https://freesound.org/people/felix.blume/sounds/135561/"
+      - url: "https://freesound.org/people/KrystianPawlowski/sounds/586936/"
+        optional: true
+        probability: 0.5
         volume: 80
 
       # More frogs
@@ -36,8 +39,8 @@ engines:
         probability: 0.6
 
       # Crickets/insects
-      - url: "https://freesound.org/people/mesaiosound/sounds/594779/"
-        volume: 45
+      - url: "https://freesound.org/people/kyles/sounds/450995/"
+      - url: "https://freesound.org/people/kyles/sounds/453860/"
         optional: true
         probability: 0.5
 

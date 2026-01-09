@@ -26,14 +26,20 @@ engines:
         volume: 55
 
       # Mystical forest birds
-      - url: "https://freesound.org/people/kvgarlic/sounds/429067/"
+      - url: "https://freesound.org/people/nlux/sounds/620967/"
+        optional: true
+        probability: 0.5
+        volume: 50
+      - url: "https://freesound.org/people/BristolStories/sounds/51704/"
+        optional: true
+        probability: 0.5
         volume: 50
 
       # Fairy giggles/whispers
-      - url: "https://freesound.org/people/Zabuhailo/sounds/178945/"
-        volume: 40
+      - url: "https://freesound.org/people/petebuchwald/sounds/271355/"
         optional: true
         probability: 0.5
+        volume: 40
 
       # Magical sparkle sounds
       - url: "https://freesound.org/people/suntemple/sounds/253172/"
@@ -42,9 +48,9 @@ engines:
         probability: 0.5
 
       # Gentle stream
-      - url: "https://freesound.org/people/juskiddink/sounds/60009/"
-        volume: 40
+      - url: "https://freesound.org/people/designerschoice/sounds/809022/"
         optional: true
+        volume: 40
         probability: 0.4
 
   lights:

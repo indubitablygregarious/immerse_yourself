@@ -22,11 +22,17 @@ engines:
     max_sounds: 4
     mix:
       # Hot afternoon insects/cicadas
-      - url: "https://freesound.org/people/kvv_audio_joosthogervorst/sounds/717893/"
+      - url: "https://freesound.org/people/harryScary/sounds/268958/"
+      - url: "https://freesound.org/people/TRP/sounds/715693/"
+        optional: true
+        probability: 0.5
         volume: 70
 
       # Swamp birds
-      - url: "https://freesound.org/people/klankbeeld/sounds/414907/"
+      - url: "https://freesound.org/people/klankbeeld/sounds/625003/"
+      - url: "https://freesound.org/people/forestfjord/sounds/816089/"
+        optional: true
+        probability: 0.5
         volume: 50
 
       # Water pond sounds

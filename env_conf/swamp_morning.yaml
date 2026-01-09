@@ -30,8 +30,11 @@ engines:
         volume: 50
 
       # Distant frogs (fewer in morning)
-      - url: "https://freesound.org/people/felix.blume/sounds/673259/"
+      - url: "https://freesound.org/people/felix.blume/sounds/135561/"
+        optional: true
+        probability: 0.5
         volume: 35
+      - url: "https://freesound.org/people/KrystianPawlowski/sounds/586936/"
         optional: true
         probability: 0.4
 

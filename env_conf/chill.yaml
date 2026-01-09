@@ -37,8 +37,11 @@ engines:
         probability: 0.5
 
       # Singing bowl meditation (optional)
-      - url: "https://freesound.org/people/hollandm/sounds/573804/"
+      - url: "https://freesound.org/people/the_very_Real_Horst/sounds/240934/"
+        optional: true
+        probability: 0.5
         volume: 35
+      - url: "https://freesound.org/people/Rimych/sounds/616335/"
         optional: true
         probability: 0.3
 

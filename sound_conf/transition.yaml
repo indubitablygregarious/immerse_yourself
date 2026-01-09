@@ -20,6 +20,8 @@ sounds:
 
   - url: "https://freesound.org/people/RescopicSound/sounds/749404/"
     description: "Cinematic sci-fi whoosh"
+    volume: 60
+    fadeout: 3000
 
   - url: "https://freesound.org/people/anagar/sounds/267951/"
     description: "Simple swoosh transition"
@@ -36,6 +38,7 @@ sounds:
 
   - url: "https://freesound.org/people/SergeQuadrado/sounds/455361/"
     description: "Soft airy fairy glissando"
+    volume: 50
 
   - url: "https://freesound.org/people/Speedenza/sounds/168180/"
     description: "Supernatural action whoosh"

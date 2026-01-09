@@ -27,7 +27,10 @@ engines:
         volume: 65
 
       # Summer afternoon meadow with birds and crickets (required)
-      - url: "https://freesound.org/people/DanGasior/sounds/414907/"
+      - url: "https://freesound.org/people/klankbeeld/sounds/625003/"
+      - url: "https://freesound.org/people/forestfjord/sounds/816089/"
+        optional: true
+        probability: 0.5
         volume: 55
 
       # Hot summer day with wind (optional)
@@ -43,8 +46,11 @@ engines:
         probability: 0.4
 
       # Summer cicadas (optional)
-      - url: "https://freesound.org/people/TRP/sounds/717893/"
+      - url: "https://freesound.org/people/harryScary/sounds/268958/"
+        optional: true
+        probability: 0.5
         volume: 40
+      - url: "https://freesound.org/people/TRP/sounds/715693/"
         optional: true
         probability: 0.5
 

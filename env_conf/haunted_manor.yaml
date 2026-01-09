@@ -22,7 +22,10 @@ engines:
     max_sounds: 5
     mix:
       # Creaking floorboards/doors
-      - url: "https://freesound.org/people/spookymodem/sounds/249935/"
+      - url: "https://freesound.org/people/designerschoice/sounds/824951/"
+      - url: "https://freesound.org/people/spookymodem/sounds/202102/"
+        optional: true
+        probability: 0.5
         volume: 55
 
       # Wind howling through windows
@@ -30,7 +33,10 @@ engines:
         volume: 50
 
       # Ghostly whispers
-      - url: "https://freesound.org/people/Matio888/sounds/796514/"
+      - url: "https://freesound.org/people/newlocknew/sounds/615882/"
+      - url: "https://freesound.org/people/newlocknew/sounds/582489/"
+        optional: true
+        probability: 0.5
         volume: 45
 
       # Clock ticking
@@ -40,8 +46,11 @@ engines:
         probability: 0.5
 
       # Distant piano notes
-      - url: "https://freesound.org/people/Setuniman/sounds/149058/"
+      - url: "https://freesound.org/people/qubodup/sounds/802579/"
+        optional: true
+        probability: 0.5
         volume: 25
+      - url: "https://freesound.org/people/qubodup/sounds/802576/"
         optional: true
         probability: 0.3
 

@@ -22,15 +22,24 @@ engines:
     max_sounds: 5
     mix:
       # Hushed whispers/murmuring
-      - url: "https://freesound.org/people/Matio888/sounds/796514/"
+      - url: "https://freesound.org/people/newlocknew/sounds/615882/"
+      - url: "https://freesound.org/people/newlocknew/sounds/582489/"
+        optional: true
+        probability: 0.5
         volume: 40
 
       # Coins clinking
-      - url: "https://freesound.org/people/Ridiculously_Decent_Audio/sounds/743389/"
+      - url: "https://freesound.org/people/Vrymaa/sounds/756382/"
+      - url: "https://freesound.org/people/husky70/sounds/161315/"
+        optional: true
+        probability: 0.5
         volume: 50
 
       # Creaking floorboards
-      - url: "https://freesound.org/people/spookymodem/sounds/249935/"
+      - url: "https://freesound.org/people/designerschoice/sounds/824951/"
+      - url: "https://freesound.org/people/spookymodem/sounds/202102/"
+        optional: true
+        probability: 0.5
         volume: 45
 
       # Knife sharpening

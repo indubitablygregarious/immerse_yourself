@@ -36,8 +36,11 @@ engines:
         probability: 0.5
 
       # Rustling leaves in ruins
-      - url: "https://freesound.org/people/MaiaSN/sounds/609333/"
+      - url: "https://freesound.org/people/Jessica190091/sounds/491296/"
+        optional: true
+        probability: 0.5
         volume: 40
+      - url: "https://freesound.org/people/Garuda1982/sounds/575645/"
         optional: true
         probability: 0.5
 

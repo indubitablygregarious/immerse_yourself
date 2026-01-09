@@ -22,7 +22,10 @@ engines:
     max_sounds: 5
     mix:
       # Armor clanking/guards walking
-      - url: "https://freesound.org/people/CaCtUs2003/sounds/117885/"
+      - url: "https://freesound.org/people/Vrymaa/sounds/770065/"
+      - url: "https://freesound.org/people/qubodup/sounds/199282/"
+        optional: true
+        probability: 0.5
         volume: 45
 
       # Horses neighing

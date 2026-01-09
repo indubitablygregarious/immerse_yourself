@@ -1544,6 +1544,8 @@ class EngineRunner(QThread):
         try:
             # Check if this is a sound_conf reference (e.g., "sound_conf:squeaky_door")
             # and resolve it to a randomly selected sound
+            sound_volume = None  # Optional volume 1-100
+            sound_fadeout = None  # Optional fadeout in milliseconds
             if is_sound_conf_reference(sound_file):
                 conf_info = get_sound_conf_info(sound_file)
                 if conf_info:
@@ -1552,7 +1554,13 @@ class EngineRunner(QThread):
                 if not resolved:
                     self.error_occurred.emit(f"Could not resolve sound_conf: {sound_file}")
                     return
-                sound_file = resolved
+                # Handle dict result with volume/fadeout properties
+                if isinstance(resolved, dict):
+                    sound_file = resolved["sound"]
+                    sound_volume = resolved.get("volume")
+                    sound_fadeout = resolved.get("fadeout")
+                else:
+                    sound_file = resolved
 
             # Check if this is a freesound.org URL
             if is_freesound_url(sound_file):
@@ -1601,7 +1609,16 @@ class EngineRunner(QThread):
 
             if sound_path.exists():
                 # Try common audio players
-                for player in [["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet"], ["paplay"], ["aplay", "-q"]]:
+                # Build player commands with optional volume
+                players = []
+                if sound_volume is not None:
+                    # ffplay supports -volume 0-100
+                    players.append(["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", "-volume", str(sound_volume)])
+                else:
+                    players.append(["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet"])
+                players.extend([["paplay"], ["aplay", "-q"]])
+
+                for player in players:
                     try:
                         proc = subprocess.Popen(
                             player + [str(sound_path)],
@@ -1610,6 +1627,17 @@ class EngineRunner(QThread):
                         )
                         # Register process so it can be stopped
                         register_sound_process(proc)
+
+                        # Handle fadeout - terminate after specified milliseconds
+                        if sound_fadeout is not None and sound_fadeout > 0:
+                            import threading
+                            def fadeout_terminate():
+                                import time
+                                time.sleep(sound_fadeout / 1000.0)
+                                if proc.poll() is None:  # Still running
+                                    proc.terminate()
+                            threading.Thread(target=fadeout_terminate, daemon=True).start()
+
                         proc.wait()
                         # Unregister when done
                         unregister_sound_process(proc)
@@ -1891,6 +1919,7 @@ class EnvironmentLauncher(QMainWindow):
 
         # Download queue for freesound files
         self._download_queue = get_download_queue()
+        self._download_queue.download_queued.connect(self._on_queue_download_queued)
         self._download_queue.download_started.connect(self._on_queue_download_started)
         self._download_queue.download_complete.connect(self._on_queue_download_complete)
         self._download_queue.download_error.connect(self._on_queue_download_error)
@@ -2580,13 +2609,22 @@ class EnvironmentLauncher(QMainWindow):
                     self.url_to_config[sound_file] = config
 
     # Download queue callbacks
-    def _on_queue_download_started(self, url: str, display_name: str) -> None:
-        """Called when a download starts from the queue."""
-        # Track URL->display_name for later removal
+    def _on_queue_download_queued(self, url: str, display_name: str) -> None:
+        """Called when a download is added to the queue (before processing starts)."""
         if not hasattr(self, '_download_url_names'):
             self._download_url_names: Dict[str, str] = {}
         self._download_url_names[url] = display_name
         self.now_playing.add_download(display_name)
+
+    def _on_queue_download_started(self, url: str, display_name: str) -> None:
+        """Called when a download actually starts processing."""
+        # Update the display name with the real name from metadata
+        if hasattr(self, '_download_url_names') and url in self._download_url_names:
+            old_name = self._download_url_names[url]
+            if old_name != display_name:
+                self.now_playing.remove_download(old_name)
+                self.now_playing.add_download(display_name)
+                self._download_url_names[url] = display_name
         self.immersive_status.set_message(f"Downloading: {display_name}", timeout_ms=0)
 
     def _on_queue_download_complete(self, url: str, local_path: str, metadata: dict) -> None:
@@ -3729,9 +3767,19 @@ engines:
             runner.atmosphere_started.connect(self.immersive_status.on_atmosphere_started)
             runner.atmosphere_urls_selected.connect(self._on_atmosphere_urls_selected)
             runner.lights_started.connect(self.immersive_status.on_lights_started)
-            # Connect to NowPlayingWidget
-            runner.download_started.connect(lambda _: self.now_playing.set_downloading(True))
-            runner.download_finished.connect(lambda: self.now_playing.set_downloading(False))
+            # Connect to NowPlayingWidget - track downloads by runner for proper tooltip
+            runner_id = id(runner)
+            def on_download_started(name, rid=runner_id):
+                if not hasattr(self, '_runner_downloads'):
+                    self._runner_downloads = {}
+                self._runner_downloads[rid] = name
+                self.now_playing.add_download(name)
+            def on_download_finished(rid=runner_id):
+                if hasattr(self, '_runner_downloads') and rid in self._runner_downloads:
+                    name = self._runner_downloads.pop(rid)
+                    self.now_playing.remove_download(name)
+            runner.download_started.connect(on_download_started)
+            runner.download_finished.connect(on_download_finished)
             config_name = config["name"]
             runner.sound_started.connect(lambda _, icon=config_icon, name=config_name: self.now_playing.set_sound(True, icon, name))
             runner.sound_done.connect(lambda: self.now_playing.set_sound(False))

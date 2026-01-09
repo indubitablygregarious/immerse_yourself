@@ -22,7 +22,10 @@ engines:
     max_sounds: 5
     mix:
       # Night crickets (required)
-      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+      - url: "https://freesound.org/people/kyles/sounds/450995/"
+      - url: "https://freesound.org/people/kyles/sounds/453860/"
+        optional: true
+        probability: 0.5
         volume: 65
 
       # Owl hooting (required)
@@ -30,8 +33,11 @@ engines:
         volume: 50
 
       # Night frogs (optional)
-      - url: "https://freesound.org/people/klankbeeld/sounds/673259/"
+      - url: "https://freesound.org/people/felix.blume/sounds/135561/"
+        optional: true
+        probability: 0.5
         volume: 45
+      - url: "https://freesound.org/people/KrystianPawlowski/sounds/586936/"
         optional: true
         probability: 0.6
 

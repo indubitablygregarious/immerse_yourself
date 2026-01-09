@@ -26,18 +26,27 @@ engines:
         volume: 50
 
       # Afternoon birds
-      - url: "https://freesound.org/people/klankbeeld/sounds/414907/"
+      - url: "https://freesound.org/people/klankbeeld/sounds/625003/"
+      - url: "https://freesound.org/people/forestfjord/sounds/816089/"
+        optional: true
+        probability: 0.5
         volume: 45
 
       # Ravens/crows
-      - url: "https://freesound.org/people/SoundsLikeYuk/sounds/723570/"
+      - url: "https://freesound.org/people/dobroide/sounds/126283/"
+        optional: true
+        probability: 0.5
         volume: 40
+      - url: "https://freesound.org/people/Breviceps/sounds/515290/"
         optional: true
         probability: 0.5
 
       # Rustling leaves
-      - url: "https://freesound.org/people/MaiaSN/sounds/609333/"
+      - url: "https://freesound.org/people/Jessica190091/sounds/491296/"
+        optional: true
+        probability: 0.5
         volume: 40
+      - url: "https://freesound.org/people/Garuda1982/sounds/575645/"
         optional: true
         probability: 0.6
 

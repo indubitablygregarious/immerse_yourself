@@ -206,14 +206,14 @@ Most environments should have morning/afternoon/night variants for immersive cam
 - Morning birds: `https://freesound.org/people/klankbeeld/sounds/625333/`
 
 **Afternoon sounds:**
-- Cicadas/insects: `https://freesound.org/people/kvv_audio_joosthogervorst/sounds/717893/`
-- Afternoon birds: `https://freesound.org/people/klankbeeld/sounds/414907/`
+- Cicadas/insects: `https://freesound.org/people/harryScary/sounds/268958/`
+- Afternoon birds: `https://freesound.org/people/klankbeeld/sounds/625003/`
 
 **Night sounds:**
-- Crickets: `https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/`
+- Crickets: `https://freesound.org/people/kyles/sounds/450995/`
 - Owl: `https://freesound.org/people/Anthousai/sounds/398734/`
 - Wolf howl: `https://freesound.org/people/Taure/sounds/380156/`
-- Night frogs: `https://freesound.org/people/felix.blume/sounds/673259/`
+- Night frogs: `https://freesound.org/people/felix.blume/sounds/135561/`
 
 ### Night-specific lighting effects
 

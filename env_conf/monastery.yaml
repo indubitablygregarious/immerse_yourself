@@ -22,7 +22,10 @@ engines:
     max_sounds: 4
     mix:
       # Monk chanting
-      - url: "https://freesound.org/people/Sonic_Salad/sounds/398687/"
+      - url: "https://freesound.org/people/Robinhood76/sounds/66285/"
+      - url: "https://freesound.org/people/cormi/sounds/105197/"
+        optional: true
+        probability: 0.5
         volume: 55
 
       # Temple bells

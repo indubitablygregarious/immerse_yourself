@@ -236,8 +236,9 @@ class DownloadQueue(QObject):
         queue_size_changed(size): The queue size changed
     """
 
-    # Forwarded signals from worker
-    download_started = pyqtSignal(str, str)  # url, display_name
+    # Signals
+    download_queued = pyqtSignal(str, str)  # url, display_name (fires immediately on enqueue)
+    download_started = pyqtSignal(str, str)  # url, display_name (fires when processing begins)
     download_complete = pyqtSignal(str, str, dict)  # url, local_path, metadata
     download_error = pyqtSignal(str, str)  # url, error_message
     queue_empty = pyqtSignal()
@@ -302,6 +303,12 @@ class DownloadQueue(QObject):
             self._pending_urls.add(url)
             self.queue_size_changed.emit(len(self._pending_urls))
 
+        # Extract a simple display name from URL (e.g., "Sound 12345")
+        display_name = "Sound"
+        match = re.search(r'/sounds/(\d+)', url)
+        if match:
+            display_name = f"Sound {match.group(1)}"
+
         request = DownloadRequest(
             url=url,
             on_complete=on_complete,
@@ -309,6 +316,9 @@ class DownloadQueue(QObject):
         )
         self._queue.put(request)
         self._ensure_worker()
+
+        # Emit queued signal immediately so tooltip shows all pending downloads
+        self.download_queued.emit(url, display_name)
         return True
 
     def enqueue_many(

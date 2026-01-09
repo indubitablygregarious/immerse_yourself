@@ -22,22 +22,37 @@ engines:
     max_sounds: 5
     mix:
       # Magical humming energy
-      - url: "https://freesound.org/people/quetzalcontla/sounds/612813/"
+      - url: "https://freesound.org/people/Artninja/sounds/825284/"
+      - url: "https://freesound.org/people/qubodup/sounds/817466/"
+        optional: true
+        probability: 0.5
         volume: 50
 
       # Bubbling cauldron/potions
-      - url: "https://freesound.org/people/Breviceps/sounds/456826/"
+      - url: "https://freesound.org/people/Nomfundo_k/sounds/408540/"
+        optional: true
+        probability: 0.5
+        volume: 55
+      - url: "https://freesound.org/people/katzlbt/sounds/361540/"
+        optional: true
+        probability: 0.5
         volume: 55
 
       # Crackling magical energy
-      - url: "https://freesound.org/people/Mrthenoronha/sounds/521839/"
+      - url: "https://freesound.org/people/Artninja/sounds/825284/"
+        optional: true
+        probability: 0.5
         volume: 40
+      - url: "https://freesound.org/people/qubodup/sounds/817466/"
         optional: true
         probability: 0.5
 
       # Page turning/books
-      - url: "https://freesound.org/people/InspectorJ/sounds/416153/"
+      - url: "https://freesound.org/people/urbaneguerilla/sounds/161443/"
+        optional: true
+        probability: 0.5
         volume: 30
+      - url: "https://freesound.org/people/daveincamas/sounds/27077/"
         optional: true
         probability: 0.4
 

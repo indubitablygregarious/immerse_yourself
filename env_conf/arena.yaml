@@ -29,23 +29,15 @@ engines:
       - url: "https://freesound.org/people/courter/sounds/658736/"
         volume: 50
 
-      # Crowd chanting
-      - url: "https://freesound.org/people/deleted_user_2104797/sounds/164399/"
-        volume: 45
-        optional: true
-        probability: 0.6
-
       # War drums
-      - url: "https://freesound.org/people/Zott820/sounds/209984/"
+      - url: "https://freesound.org/people/Mark_Murray/sounds/648393/"
+        optional: true
+        probability: 0.5
         volume: 40
+      - url: "https://freesound.org/people/Mark_Murray/sounds/723202/"
         optional: true
         probability: 0.5
 
-      # Metal on metal impact
-      - url: "https://freesound.org/people/qubodup/sounds/182986/"
-        volume: 35
-        optional: true
-        probability: 0.4
 
   lights:
     enabled: true

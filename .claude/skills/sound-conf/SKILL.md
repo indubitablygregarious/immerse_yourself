@@ -34,9 +34,11 @@ sounds:
   - url: "https://freesound.org/people/CREATOR/sounds/ID/"
     description: "Brief description of this variation"
 
-  # More variations...
+  # With optional volume and fadeout
   - url: "https://freesound.org/people/CREATOR/sounds/ID/"
-    description: "Another variation"
+    description: "Sound with custom volume and fadeout"
+    volume: 80       # Optional: 1-100 (default: system volume)
+    fadeout: 2000    # Optional: milliseconds after which sound stops
 ```
 
 ## How Sound Confs Are Used
@@ -213,23 +215,23 @@ Common freesound.org URLs used for time-variant environments:
 | Sound | URL | Use For |
 |-------|-----|---------|
 | Dawn chorus | `https://freesound.org/people/klankbeeld/sounds/625333/` | Morning bird sounds |
-| Rooster/morning | `https://freesound.org/people/Nightwatcher98/sounds/818470/` | Rural morning |
+| Rooster/morning | `https://freesound.org/people/InspectorJ/sounds/439472/` | Rural morning |
 | Forest spring morning | `https://freesound.org/people/klankbeeld/sounds/273162/` | Forest mornings |
 
 ### Afternoon Sounds
 | Sound | URL | Use For |
 |-------|-----|---------|
-| Cicadas/insects | `https://freesound.org/people/kvv_audio_joosthogervorst/sounds/717893/` | Hot afternoon |
-| Afternoon birds | `https://freesound.org/people/klankbeeld/sounds/414907/` | Daytime outdoor |
+| Cicadas/insects | `https://freesound.org/people/harryScary/sounds/268958/` | Hot afternoon |
+| Afternoon birds | `https://freesound.org/people/klankbeeld/sounds/625003/` | Daytime outdoor |
 | Summer meadow | `https://freesound.org/people/brunoacaleto/sounds/810412/` | Peaceful afternoon |
 
 ### Night Sounds
 | Sound | URL | Use For |
 |-------|-----|---------|
-| Night crickets | `https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/` | General night |
+| Night crickets | `https://freesound.org/people/kyles/sounds/450995/` | General night |
 | Owl hooting | `https://freesound.org/people/Anthousai/sounds/398734/` | Spooky/forest night |
 | Wolf howl | `https://freesound.org/people/Taure/sounds/380156/` | Wilderness night |
-| Night frogs | `https://freesound.org/people/felix.blume/sounds/673259/` | Swamp/pond night |
+| Night frogs | `https://freesound.org/people/felix.blume/sounds/135561/` | Swamp/pond night |
 | Night fields | `https://freesound.org/people/klankbeeld/sounds/583866/` | Open night areas |
 
 ### Universal Sounds (work at any time)
@@ -245,21 +247,21 @@ Common freesound.org URLs used for time-variant environments:
 ### Fantasy Location Sounds
 | Sound | URL | Use For |
 |-------|-----|---------|
-| Pickaxe mining | `https://freesound.org/people/qubodup/sounds/187592/` | Mine, quarry |
-| Magical humming | `https://freesound.org/people/quetzalcontla/sounds/612813/` | Wizard tower, arcane |
-| Bubbling potion | `https://freesound.org/people/Breviceps/sounds/456826/` | Alchemy, wizard |
-| Armor clanking | `https://freesound.org/people/CaCtUs2003/sounds/117885/` | Guards, military |
+| Pickaxe mining | `https://freesound.org/people/NoisyRedFox/sounds/760566/` | Mine, quarry |
+| Magical humming | `https://freesound.org/people/Artninja/sounds/825284/` | Wizard tower, arcane |
+| Bubbling potion | `https://freesound.org/people/Nomfundo_k/sounds/408540/` | Alchemy, wizard |
+| Armor clanking | `https://freesound.org/people/Vrymaa/sounds/770065/` | Guards, military |
 | Fountain water | `https://freesound.org/people/sss_samples/sounds/612682/` | Courtyard, plaza |
 | Seagulls | `https://freesound.org/people/bruno.auzet/sounds/690332/` | Docks, coastal |
-| Ship creaking | `https://freesound.org/people/WolfOWI/sounds/588310/` | Ships, docks |
-| Bone rattling | `https://freesound.org/people/spookymodem/sounds/202091/` | Crypt, undead |
-| Ghostly whispers | `https://freesound.org/people/Matio888/sounds/796514/` | Haunted, spooky |
-| Fairy bells/chimes | `https://freesound.org/people/bone666138/sounds/198877/` | Fey wild, magical |
-| Coins clinking | `https://freesound.org/people/Ridiculously_Decent_Audio/sounds/743389/` | Thieves, treasure |
-| War drums | `https://freesound.org/people/Zott820/sounds/209984/` | War camp, battle |
+| Ship creaking | `https://freesound.org/people/designerschoice/sounds/818587/` | Ships, docks |
+| Bone rattling | `https://freesound.org/people/designerschoice/sounds/824951/` | Crypt, undead |
+| Ghostly whispers | `https://freesound.org/people/newlocknew/sounds/615882/` | Haunted, spooky |
+| Fairy bells/chimes | `https://freesound.org/people/nlux/sounds/620967/` | Fey wild, magical |
+| Coins clinking | `https://freesound.org/people/Vrymaa/sounds/756382/` | Thieves, treasure |
+| War drums | `https://freesound.org/people/Mark_Murray/sounds/648393/` | War camp, battle |
 | Crowd cheering | `https://freesound.org/people/Breviceps/sounds/445958/` | Arena, tournament |
-| Monk chanting | `https://freesound.org/people/Sonic_Salad/sounds/398687/` | Monastery, temple |
-| Clock ticking | `https://freesound.org/people/InspectorJ/sounds/343130/` | Manor, library |
+| Monk chanting | `https://freesound.org/people/Robinhood76/sounds/66285/` | Monastery, temple |
+| Clock ticking | `https://freesound.org/people/urbaneguerilla/sounds/161443/` | Manor, library |
 
 ## Reference Files
 

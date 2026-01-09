@@ -26,12 +26,17 @@ engines:
         volume: 70
 
       # Whispering shadows atmosphere
-      - url: "https://freesound.org/people/matiogames/sounds/796514/"
+      - url: "https://freesound.org/people/newlocknew/sounds/582489/"
+        optional: true
+        probability: 0.5
         volume: 60
 
       # Night crickets
-      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+      - url: "https://freesound.org/people/kyles/sounds/450995/"
+        optional: true
+        probability: 0.5
         volume: 45
+      - url: "https://freesound.org/people/kyles/sounds/453860/"
         optional: true
         probability: 0.6
 

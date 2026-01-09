@@ -34,7 +34,10 @@ engines:
         probability: 0.4
 
       # Ship creaking (more prominent at night)
-      - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
+      - url: "https://freesound.org/people/designerschoice/sounds/818587/"
+      - url: "https://freesound.org/people/Breviceps/sounds/456814/"
+        optional: true
+        probability: 0.5
         volume: 55
 
       # Rope/rigging in wind
@@ -56,7 +59,10 @@ engines:
         probability: 0.4
 
       # Night crickets (from shore)
-      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+      - url: "https://freesound.org/people/kyles/sounds/450995/"
+      - url: "https://freesound.org/people/kyles/sounds/453860/"
+        optional: true
+        probability: 0.5
         volume: 25
         optional: true
         probability: 0.5

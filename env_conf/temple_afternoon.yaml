@@ -30,8 +30,11 @@ engines:
         volume: 55
 
       # Singing bowl tones
-      - url: "https://freesound.org/people/hollajackz/sounds/573804/"
+      - url: "https://freesound.org/people/the_very_Real_Horst/sounds/240934/"
+        optional: true
+        probability: 0.5
         volume: 45
+      - url: "https://freesound.org/people/Rimych/sounds/616335/"
         optional: true
         probability: 0.6
 

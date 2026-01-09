@@ -22,11 +22,17 @@ engines:
     max_sounds: 5
     mix:
       # War drums
-      - url: "https://freesound.org/people/Zott820/sounds/209984/"
+      - url: "https://freesound.org/people/Mark_Murray/sounds/648393/"
+      - url: "https://freesound.org/people/Mark_Murray/sounds/723202/"
+        optional: true
+        probability: 0.5
         volume: 50
 
       # Armor clanking/soldiers marching
-      - url: "https://freesound.org/people/CaCtUs2003/sounds/117885/"
+      - url: "https://freesound.org/people/Vrymaa/sounds/770065/"
+      - url: "https://freesound.org/people/qubodup/sounds/199282/"
+        optional: true
+        probability: 0.5
         volume: 55
 
       # Campfire crackling

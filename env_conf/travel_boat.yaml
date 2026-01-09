@@ -27,7 +27,10 @@ engines:
         volume: 65
 
       # Ship creaking and tension (required)
-      - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
+      - url: "https://freesound.org/people/designerschoice/sounds/818587/"
+      - url: "https://freesound.org/people/Breviceps/sounds/456814/"
+        optional: true
+        probability: 0.5
         volume: 50
 
       # Seagulls on beach (optional)

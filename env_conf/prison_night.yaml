@@ -34,7 +34,10 @@ engines:
         volume: 70
 
       # Distant groans (more frequent at night)
-      - url: "https://freesound.org/people/mo-o/sounds/22262/"
+      - url: "https://freesound.org/people/michaelnoise86/sounds/746491/"
+      - url: "https://freesound.org/people/Vrymaa/sounds/794214/"
+        optional: true
+        probability: 0.5
         volume: 35
         optional: true
         probability: 0.5

@@ -26,7 +26,13 @@ engines:
         volume: 55
 
       # Coins/treasure shifting
-      - url: "https://freesound.org/people/Ridiculously_Decent_Audio/sounds/743389/"
+      - url: "https://freesound.org/people/Vrymaa/sounds/756382/"
+        optional: true
+        probability: 0.5
+        volume: 50
+      - url: "https://freesound.org/people/husky70/sounds/161315/"
+        optional: true
+        probability: 0.5
         volume: 50
 
       # Fire crackling/roaring

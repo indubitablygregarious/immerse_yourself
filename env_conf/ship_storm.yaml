@@ -26,7 +26,10 @@ engines:
         volume: 80
 
       # Ship creaking
-      - url: "https://freesound.org/people/WolfMagicMedia/sounds/588310/"
+      - url: "https://freesound.org/people/designerschoice/sounds/818587/"
+      - url: "https://freesound.org/people/Breviceps/sounds/456814/"
+        optional: true
+        probability: 0.5
         volume: 70
 
       # Storm wind
@@ -40,8 +43,8 @@ engines:
         probability: 0.7
 
       # Rain
-      - url: "https://freesound.org/people/newtone/sounds/836410/"
-        volume: 50
+      - url: "https://freesound.org/people/newlocknew/sounds/748693/"
+      - url: "https://freesound.org/people/florianreichelt/sounds/459983/"
         optional: true
         probability: 0.6
 

@@ -22,7 +22,10 @@ engines:
     max_sounds: 5
     mix:
       # Morning rooster/birds
-      - url: "https://freesound.org/people/Nightwatcher98/sounds/818470/"
+      - url: "https://freesound.org/people/InspectorJ/sounds/439472/"
+      - url: "https://freesound.org/people/Garuda1982/sounds/627335/"
+        optional: true
+        probability: 0.5
         volume: 55
 
       # Dawn chorus

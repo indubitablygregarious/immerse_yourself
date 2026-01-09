@@ -26,12 +26,18 @@ engines:
         volume: 65
 
       # Singing bowl tones
-      - url: "https://freesound.org/people/hollajackz/sounds/573804/"
+      - url: "https://freesound.org/people/the_very_Real_Horst/sounds/240934/"
+      - url: "https://freesound.org/people/Rimych/sounds/616335/"
+        optional: true
+        probability: 0.5
         volume: 50
 
       # Distant night crickets through walls
-      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+      - url: "https://freesound.org/people/kyles/sounds/450995/"
+        optional: true
+        probability: 0.5
         volume: 15
+      - url: "https://freesound.org/people/kyles/sounds/453860/"
         optional: true
         probability: 0.3
 

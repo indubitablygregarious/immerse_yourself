@@ -22,7 +22,10 @@ engines:
     max_sounds: 5
     mix:
       # Pickaxe mining sounds
-      - url: "https://freesound.org/people/qubodup/sounds/187592/"
+      - url: "https://freesound.org/people/NoisyRedFox/sounds/760566/"
+      - url: "https://freesound.org/people/ryanconway/sounds/240801/"
+        optional: true
+        probability: 0.5
         volume: 45
 
       # Dripping water in cave
@@ -30,7 +33,10 @@ engines:
         volume: 55
 
       # Creaking wood supports
-      - url: "https://freesound.org/people/spookymodem/sounds/249935/"
+      - url: "https://freesound.org/people/designerschoice/sounds/824951/"
+      - url: "https://freesound.org/people/spookymodem/sounds/202102/"
+        optional: true
+        probability: 0.5
         volume: 40
         optional: true
         probability: 0.5

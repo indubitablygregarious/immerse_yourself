@@ -31,8 +31,11 @@ engines:
         volume: 55
 
       # Night crickets (optional)
-      - url: "https://freesound.org/people/MessyAcousticApocalypse666/sounds/594779/"
+      - url: "https://freesound.org/people/kyles/sounds/450995/"
+        optional: true
+        probability: 0.5
         volume: 40
+      - url: "https://freesound.org/people/kyles/sounds/453860/"
         optional: true
         probability: 0.5
 

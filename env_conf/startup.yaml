@@ -47,8 +47,11 @@ engines:
         probability: 0.4
 
       # Summer cicadas (optional)
-      - url: "https://freesound.org/people/TRP/sounds/717893/"
+      - url: "https://freesound.org/people/harryScary/sounds/268958/"
+        optional: true
+        probability: 0.5
         volume: 35
+      - url: "https://freesound.org/people/TRP/sounds/715693/"
         optional: true
         probability: 0.5
 

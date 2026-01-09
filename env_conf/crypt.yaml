@@ -22,7 +22,10 @@ engines:
     max_sounds: 5
     mix:
       # Eerie whispers/ghostly
-      - url: "https://freesound.org/people/Matio888/sounds/796514/"
+      - url: "https://freesound.org/people/newlocknew/sounds/615882/"
+      - url: "https://freesound.org/people/newlocknew/sounds/582489/"
+        optional: true
+        probability: 0.5
         volume: 50
 
       # Bone rattling/skeletal

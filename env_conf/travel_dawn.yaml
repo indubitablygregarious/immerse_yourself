@@ -37,8 +37,11 @@ engines:
         probability: 0.5
 
       # Rooster with morning birds (optional)
-      - url: "https://freesound.org/people/soundandmelodies/sounds/818470/"
+      - url: "https://freesound.org/people/InspectorJ/sounds/439472/"
+        optional: true
+        probability: 0.5
         volume: 35
+      - url: "https://freesound.org/people/Garuda1982/sounds/627335/"
         optional: true
         probability: 0.3
 

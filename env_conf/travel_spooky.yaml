@@ -31,20 +31,29 @@ engines:
         volume: 50
 
       # Distant raven cawing (optional)
-      - url: "https://freesound.org/people/SoundsLikeYukon/sounds/723570/"
+      - url: "https://freesound.org/people/dobroide/sounds/126283/"
+        optional: true
+        probability: 0.5
         volume: 40
+      - url: "https://freesound.org/people/Breviceps/sounds/515290/"
         optional: true
         probability: 0.6
 
       # Dead leaves rustling (optional)
-      - url: "https://freesound.org/people/maiasnowdrop/sounds/609333/"
+      - url: "https://freesound.org/people/Jessica190091/sounds/491296/"
+        optional: true
+        probability: 0.5
         volume: 35
+      - url: "https://freesound.org/people/Garuda1982/sounds/575645/"
         optional: true
         probability: 0.5
 
       # Eerie whispers and ghostly atmosphere (optional)
-      - url: "https://freesound.org/people/Matio888/sounds/796514/"
+      - url: "https://freesound.org/people/newlocknew/sounds/615882/"
+        optional: true
+        probability: 0.5
         volume: 30
+      - url: "https://freesound.org/people/newlocknew/sounds/582489/"
         optional: true
         probability: 0.3
 

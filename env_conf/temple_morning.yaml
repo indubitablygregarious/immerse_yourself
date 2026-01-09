@@ -22,7 +22,10 @@ engines:
     max_sounds: 3
     mix:
       # Singing bowl morning meditation
-      - url: "https://freesound.org/people/hollajackz/sounds/573804/"
+      - url: "https://freesound.org/people/the_very_Real_Horst/sounds/240934/"
+      - url: "https://freesound.org/people/Rimych/sounds/616335/"
+        optional: true
+        probability: 0.5
         volume: 60
 
       # Morning birds outside temple

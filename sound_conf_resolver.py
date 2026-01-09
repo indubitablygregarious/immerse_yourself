@@ -37,7 +37,7 @@ def is_sound_conf_reference(sound_file: str) -> bool:
     return sound_file.startswith(SOUND_CONF_PREFIX)
 
 
-def resolve_sound_conf(sound_ref: str, project_root: Optional[Path] = None) -> Optional[str]:
+def resolve_sound_conf(sound_ref: str, project_root: Optional[Path] = None) -> Optional[Union[str, Dict[str, Any]]]:
     """
     Resolve a sound_conf reference to a randomly selected sound.
 
@@ -46,8 +46,10 @@ def resolve_sound_conf(sound_ref: str, project_root: Optional[Path] = None) -> O
         project_root: Optional project root path (defaults to cwd)
 
     Returns:
-        Either a local file path (e.g., "sounds/dooropen.wav") or
-        freesound URL, or None if resolution fails
+        If the selected sound has volume/fadeout properties, returns a dict:
+            {"sound": "path/or/url", "volume": 100, "fadeout": 2000}
+        Otherwise returns just the string path/URL for backward compatibility.
+        Returns None if resolution fails.
     """
     if not is_sound_conf_reference(sound_ref):
         return sound_ref
@@ -82,14 +84,31 @@ def resolve_sound_conf(sound_ref: str, project_root: Optional[Path] = None) -> O
     # Randomly select one sound
     selected = random.choice(sounds)
 
-    # Return either the file or URL
+    # Get the sound path/URL
+    sound = None
     if "file" in selected:
-        return selected["file"]
+        sound = selected["file"]
     elif "url" in selected:
-        return selected["url"]
+        sound = selected["url"]
     else:
         print(f"WARNING: Sound entry has neither 'file' nor 'url': {selected}")
         return None
+
+    # Check for optional volume and fadeout properties
+    volume = selected.get("volume")  # 1-100
+    fadeout = selected.get("fadeout")  # milliseconds
+
+    # If we have extra properties, return a dict
+    if volume is not None or fadeout is not None:
+        result = {"sound": sound}
+        if volume is not None:
+            result["volume"] = volume
+        if fadeout is not None:
+            result["fadeout"] = fadeout
+        return result
+
+    # Otherwise return just the string for backward compatibility
+    return sound
 
 
 def get_sound_conf_info(sound_ref: str, project_root: Optional[Path] = None) -> Optional[Dict[str, Any]]:

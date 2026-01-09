@@ -26,7 +26,13 @@ engines:
         volume: 70
 
       # Whispering atmosphere
-      - url: "https://freesound.org/people/matiogames/sounds/796514/"
+      - url: "https://freesound.org/people/newlocknew/sounds/615882/"
+        optional: true
+        probability: 0.5
+        volume: 55
+      - url: "https://freesound.org/people/newlocknew/sounds/582489/"
+        optional: true
+        probability: 0.5
         volume: 55
 
       # Stone grinding

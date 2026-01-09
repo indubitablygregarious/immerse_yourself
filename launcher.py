@@ -826,7 +826,7 @@ class VolumeSlider(QWidget):
             # Account for icon at top
             icon_height = 16 + 2
             h = self.height()
-            y = event.y()
+            y = int(event.position().y())
 
             # Ignore clicks on the icon area
             if y < icon_height:

@@ -22,8 +22,16 @@ engines:
     max_sounds: 4
     mix:
       # Light crowd gathering
-      - url: "https://freesound.org/people/KEVOY/sounds/752092/"
+      - url: "https://freesound.org/people/kyles/sounds/405308/"
         volume: 50
+      - url: "https://freesound.org/people/kyles/sounds/455694/"
+        volume: 45
+        optional: true
+        probability: 0.5
+      - url: "https://freesound.org/people/timothyd4y/sounds/472606/"
+        volume: 40
+        optional: true
+        probability: 0.4
 
       # Cart wheels/setup sounds
       - url: "https://freesound.org/people/craigsmith/sounds/437078/"

@@ -22,12 +22,28 @@ engines:
     max_sounds: 5
     mix:
       # Waves lapping against dock
-      - url: "https://freesound.org/people/j1987/sounds/106427/"
+      - url: "https://freesound.org/people/kyles/sounds/451531/"
         volume: 55
+      - url: "https://freesound.org/people/SamsterBirdies/sounds/578524/"
+        volume: 50
+        optional: true
+        probability: 0.5
+      - url: "https://freesound.org/people/tec_studio/sounds/232186/"
+        volume: 45
+        optional: true
+        probability: 0.4
 
       # Morning seagulls (fewer, calmer)
-      - url: "https://freesound.org/people/Benboncan/sounds/64765/"
+      - url: "https://freesound.org/people/bruno.auzet/sounds/690332/"
         volume: 40
+      - url: "https://freesound.org/people/jemtman/sounds/192766/"
+        volume: 35
+        optional: true
+        probability: 0.5
+      - url: "https://freesound.org/people/alessandro.gargiulo/sounds/420154/"
+        volume: 30
+        optional: true
+        probability: 0.4
 
       # Ship creaking
       - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
@@ -40,10 +56,18 @@ engines:
         probability: 0.5
 
       # Rope/rigging sounds
-      - url: "https://freesound.org/people/martinimeniscus/sounds/182249/"
+      - url: "https://freesound.org/people/acclivity/sounds/67242/"
         volume: 30
         optional: true
         probability: 0.4
+      - url: "https://freesound.org/people/theplax/sounds/613857/"
+        volume: 25
+        optional: true
+        probability: 0.3
+      - url: "https://freesound.org/people/phonoflora/sounds/500143/"
+        volume: 25
+        optional: true
+        probability: 0.3
 
   lights:
     enabled: true

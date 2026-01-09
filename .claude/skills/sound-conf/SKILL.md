@@ -250,7 +250,7 @@ Common freesound.org URLs used for time-variant environments:
 | Bubbling potion | `https://freesound.org/people/Breviceps/sounds/456826/` | Alchemy, wizard |
 | Armor clanking | `https://freesound.org/people/CaCtUs2003/sounds/117885/` | Guards, military |
 | Fountain water | `https://freesound.org/people/sss_samples/sounds/612682/` | Courtyard, plaza |
-| Seagulls | `https://freesound.org/people/Benboncan/sounds/64765/` | Docks, coastal |
+| Seagulls | `https://freesound.org/people/bruno.auzet/sounds/690332/` | Docks, coastal |
 | Ship creaking | `https://freesound.org/people/WolfOWI/sounds/588310/` | Ships, docks |
 | Bone rattling | `https://freesound.org/people/spookymodem/sounds/202091/` | Crypt, undead |
 | Ghostly whispers | `https://freesound.org/people/Matio888/sounds/796514/` | Haunted, spooky |

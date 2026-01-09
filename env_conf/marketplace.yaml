@@ -22,12 +22,28 @@ engines:
     max_sounds: 4
     mix:
       # Medieval market crowd
-      - url: "https://freesound.org/people/BigGiantCircles/sounds/424790/"
+      - url: "https://freesound.org/people/Metzik/sounds/371222/"
         volume: 80
+      - url: "https://freesound.org/people/Metzik/sounds/244623/"
+        volume: 75
+        optional: true
+        probability: 0.6
+      - url: "https://freesound.org/people/klankbeeld/sounds/622893/"
+        volume: 70
+        optional: true
+        probability: 0.5
 
       # Outdoor crowd
-      - url: "https://freesound.org/people/KEVOY/sounds/752092/"
+      - url: "https://freesound.org/people/kyles/sounds/405308/"
         volume: 65
+      - url: "https://freesound.org/people/kyles/sounds/455694/"
+        volume: 60
+        optional: true
+        probability: 0.5
+      - url: "https://freesound.org/people/timothyd4y/sounds/472606/"
+        volume: 55
+        optional: true
+        probability: 0.4
 
       # Cart/wheels
       - url: "https://freesound.org/people/craigsmith/sounds/437078/"

@@ -22,16 +22,32 @@ engines:
     max_sounds: 5
     mix:
       # Waves lapping against dock
-      - url: "https://freesound.org/people/j1987/sounds/106427/"
+      - url: "https://freesound.org/people/kyles/sounds/451531/"
         volume: 60
+      - url: "https://freesound.org/people/SamsterBirdies/sounds/578524/"
+        volume: 55
+        optional: true
+        probability: 0.5
+      - url: "https://freesound.org/people/tec_studio/sounds/232186/"
+        volume: 50
+        optional: true
+        probability: 0.4
 
       # Ship creaking (more prominent at night)
       - url: "https://freesound.org/people/WolfOWI/sounds/588310/"
         volume: 55
 
       # Rope/rigging in wind
-      - url: "https://freesound.org/people/martinimeniscus/sounds/182249/"
+      - url: "https://freesound.org/people/acclivity/sounds/67242/"
         volume: 45
+      - url: "https://freesound.org/people/theplax/sounds/613857/"
+        volume: 40
+        optional: true
+        probability: 0.5
+      - url: "https://freesound.org/people/phonoflora/sounds/500143/"
+        volume: 40
+        optional: true
+        probability: 0.5
 
       # Distant bell (ship or buoy)
       - url: "https://freesound.org/people/bone666138/sounds/198877/"
